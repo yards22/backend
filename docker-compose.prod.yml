@@ -1,0 +1,22 @@
+version: "3"
+services:
+  nginx:
+    deploy:
+      restart_policy:
+        condition: any
+  node-app:
+    deploy:
+      replicas: 4
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+        delay: 15s
+        failure_action: rollback
+    build:
+      context: .
+      args:
+        NODE_ENV: production
+    environment:
+      - NODE_ENV=production
+    command: npm run build && npm start
