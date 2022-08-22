@@ -9,10 +9,10 @@ Content-Type: application/json
 }
 
 ### Get All Todos
-GET http://localhost:4000/
+GET http://localhost:4000?id=3
 
 ### Delete Todo
-DELETE http://localhost:3000/todo/
+DELETE http://localhost:3000/todo?id=3
 Content-Type: application/json
 
 {
