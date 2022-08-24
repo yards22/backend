@@ -1,15 +1,14 @@
 import { Router } from "express";
-import { HandleCreateTodo, HandleGetTodo } from "./todo";
+import { HandleGetNotification } from "./notification";
 import { App } from "./types";
 
-function TodoRoutes(app: App): Router {
+function NotificationRoutes(app: App): Router {
   const router = Router();
-  router.get("/", app.InHandler(HandleGetTodo));
-  router.post("/", app.InHandler(HandleCreateTodo));
+  router.get("/", app.InHandler(HandleGetNotification));
   return router;
 }
 
 function HandleRoutesFor(app: App) {
-  app.srv.use("/", TodoRoutes(app));
+  app.srv.use("/", NotificationRoutes(app));
 }
 export default HandleRoutesFor;
