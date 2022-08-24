@@ -30,9 +30,9 @@ export default class NotificationManager {
   // Returns notifications for a user
   GetManyByForID(
     forId: bigint,
+    status: ENotificationStatus | "All",
     limit: number = 10,
-    offset: number = 0,
-    status: ENotificationStatus | "All"
+    offset: number = 0
   ): Promise<ENotification[]> {
     return this.store.notifications.findMany({
       take: limit,
@@ -47,42 +47,16 @@ export default class NotificationManager {
   }
 
   // Marks array of notifications for a user as "Read"
-  async MarkAsRead(forId: bigint, ids: bigint[]): Promise<void> {
+  async UpdateStatus(
+    forId: bigint,
+    ids: bigint[],
+    status: ENotificationStatus
+  ): Promise<void> {
     try {
       await this.store.notifications.updateMany({
         where: { AND: [{ for_id: forId }, { id: { in: ids } }] },
         data: {
-          status: "Read",
-        },
-      });
-      return;
-    } catch (err) {
-      throw err;
-    }
-  }
-
-  // Marks array of notifications for a user as "Seen"
-  async MarkAsSeen(forId: bigint, ids: bigint[]): Promise<void> {
-    try {
-      await this.store.notifications.updateMany({
-        where: { AND: [{ for_id: forId }, { id: { in: ids } }] },
-        data: {
-          status: "Seen",
-        },
-      });
-      return;
-    } catch (err) {
-      throw err;
-    }
-  }
-
-  // Marks array of notifications for a user as "Unseen"
-  async MarkAsUnseen(forId: bigint, ids: bigint[]): Promise<void> {
-    try {
-      await this.store.notifications.updateMany({
-        where: { AND: [{ for_id: forId }, { id: { in: ids } }] },
-        data: {
-          status: "Unseen",
+          status,
         },
       });
       return;
