@@ -1,4 +1,3 @@
-import { RandomString } from "../util/random";
 import { Prisma, PrismaClient } from "@prisma/client";
 import NotificationManager from "../internal/notification_manager/notification_manager";
 let db: PrismaClient;
@@ -47,7 +46,7 @@ async function createRandomNotification(forId: bigint) {
 
     expect(i.status).toBe("Unseen");
     const metadata = i.metadata as Prisma.JsonObject;
-    console.log(metadata.type);
+    expect(metadata).toStrictEqual({ type: "Like" });
 
     return i;
   } catch (err) {
@@ -61,6 +60,79 @@ test("test create notification", async () => {
     const forId = await createRandomUser();
     const i = await createRandomNotification(forId);
     expect(i).not.toBe(undefined);
+  } catch (err) {
+    expect(err).toBe(null);
+  }
+});
+
+test("test get notification by notification id", async () => {
+  try {
+    const forId = await createRandomUser();
+    const i = await createRandomNotification(forId);
+    expect(i).not.toBe(undefined);
+
+    const fetchedNotification = await nm.GetByID(i.id);
+    expect(i).toStrictEqual(fetchedNotification);
+  } catch (err) {
+    expect(err).toBe(null);
+  }
+});
+
+test("test get notification by notification id and for id", async () => {
+  try {
+    const forId = await createRandomUser();
+    const i = await createRandomNotification(forId);
+    expect(i).not.toBe(undefined);
+
+    const fetchedNotification = await nm.GetByIDAndForID(forId, i.id);
+    expect(i).toStrictEqual(fetchedNotification);
+  } catch (err) {
+    expect(err).toBe(null);
+  }
+});
+
+test("test get many notifications by notification for id and status", async () => {
+  try {
+    const forId = await createRandomUser();
+    const i = await createRandomNotification(forId);
+    expect(i).not.toBe(undefined);
+
+    let fetchedNotification = await nm.GetManyByForID(forId, "All");
+    expect([i]).toStrictEqual(fetchedNotification);
+
+    fetchedNotification = await nm.GetManyByForID(forId, "Unseen");
+    expect([i]).toStrictEqual(fetchedNotification);
+
+    fetchedNotification = await nm.GetManyByForID(forId, "Seen");
+    expect([]).toStrictEqual(fetchedNotification);
+
+    fetchedNotification = await nm.GetManyByForID(forId, "Read");
+    expect([]).toStrictEqual(fetchedNotification);
+  } catch (err) {
+    expect(err).toBe(null);
+  }
+});
+
+test("test update notification status", async () => {
+  try {
+    const forId = await createRandomUser();
+    const i = await createRandomNotification(forId);
+    expect(i).not.toBe(undefined);
+
+    await nm.UpdateStatus(forId, [i.id], "Read");
+    let fetchedNotification = await nm.GetByID(i.id);
+    expect(fetchedNotification).not.toBe(null);
+    expect(fetchedNotification?.status).toBe("Read");
+
+    await nm.UpdateStatus(forId, [i.id], "Seen");
+    fetchedNotification = await nm.GetByID(i.id);
+    expect(fetchedNotification).not.toBe(null);
+    expect(fetchedNotification?.status).toBe("Seen");
+
+    await nm.UpdateStatus(forId, [i.id], "Unseen");
+    fetchedNotification = await nm.GetByID(i.id);
+    expect(fetchedNotification).not.toBe(null);
+    expect(fetchedNotification?.status).toBe("Unseen");
   } catch (err) {
     expect(err).toBe(null);
   }
