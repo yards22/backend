@@ -3,4 +3,5 @@ export interface IKVStore {
   Get: (key: string) => Promise<string | null>;
   Delete: (key: string) => Promise<void>;
   Truncate: () => Promise<void>;
+  Close: () => Promise<void>;
 }

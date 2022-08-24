@@ -58,8 +58,11 @@ class Redis implements IKVStore {
         });
     });
   }
-  Close() {
-    this.store.disconnect();
+  Close(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.store.disconnect();
+      return resolve();
+    });
   }
 }
 

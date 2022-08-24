@@ -32,7 +32,11 @@ class InMKV implements IKVStore {
       return resolve();
     });
   }
-  Close() {}
+  Close(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      return resolve();
+    });
+  }
 }
 
 export default InMKV;
