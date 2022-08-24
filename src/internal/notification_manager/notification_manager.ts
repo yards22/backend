@@ -1,6 +1,6 @@
-import ETodo from "../entities/todo";
 import { PrismaClient } from "@prisma/client";
 import ENotification from "../entities/notification";
+import { ENotificationStatus } from "./types";
 
 export default class NotificationManager {
   private store: PrismaClient;
@@ -31,12 +31,18 @@ export default class NotificationManager {
   GetManyByForID(
     forId: bigint,
     limit: number = 10,
-    offset: number = 0
-  ): Promise<ETodo[]> {
+    offset: number = 0,
+    status: ENotificationStatus | "All"
+  ): Promise<ENotification[]> {
     return this.store.notifications.findMany({
       take: limit,
       skip: offset,
-      where: { for_id: { equals: forId } },
+      where: {
+        AND: [
+          { for_id: { equals: forId } },
+          status !== "All" ? { status: status } : {},
+        ],
+      },
     });
   }
 
