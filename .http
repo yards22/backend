@@ -19,3 +19,22 @@ Content-Type: application/json
     "id":"86df8d55-ed85-41ec-ad32-7c84e497d986"
 }
 
+### signup user
+POST  http://localhost:4000/auth/signup
+Content-Type: application/json
+
+{
+    "mail_id":"rithvikalkanti@gmail.com",
+    "password":"123456"
+}
+
+### login user
+POST http://localhost:4000/auth/login
+Content-Type: application/json
+
+{
+    "mail_id":"rithvikalkanti@gmail.com",
+    "password":"123456"
+}
+
+
