@@ -10,11 +10,25 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Todos {
-    id          BigInt   @id @default(autoincrement()) @db.BigInt
-    title       String
-    description String?
-    created_at  DateTime @default(now())
+ // Users table should be modified accn.
 
-    @@map("todos")
+model Users {
+    user_id           BigInt          @id @default(autoincrement()) @db.BigInt
+    mail_id      String
+    password     String
+    created_at   DateTime        @default(now())
+    identity_provider String     @default("self")
+    subject_id String?
 }
+
+model Token {
+   id BigInt   @id @default(autoincrement()) @db.BigInt
+   user_id   BigInt   @unique
+   token_id  String
+    @@map("token")
+}
+
+
+
+
+
