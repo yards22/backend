@@ -1,11 +1,15 @@
 import { PrismaClient } from "@prisma/client";
 import { NextFunction, Response, Request } from "express";
 import { Express } from "express";
-import TodoManager from "../../internal/todo_manager/todo_manager";
+import NotificationManager from "../../internal/notification_manager/notification_manager";
 import { ToJson } from "../../util/json";
 
+interface CustomRequest extends Request {
+  context: any;
+}
+
 type RouteHandler = (
-  req: Request,
+  req: CustomRequest,
   res: Response,
   next: NextFunction,
   app: App
@@ -13,11 +17,11 @@ type RouteHandler = (
 
 export class App {
   srv: Express;
-  todoManager: TodoManager;
+  notificationManager: NotificationManager;
   db: PrismaClient;
-  constructor(srv: Express, todoManager: TodoManager, db: any) {
+  constructor(srv: Express, notificationManager: NotificationManager, db: any) {
     this.srv = srv;
-    this.todoManager = todoManager;
+    this.notificationManager = notificationManager;
     this.db = db;
   }
   InHandler(handler: RouteHandler) {
