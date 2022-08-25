@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { NextFunction, Response, Request } from "express";
 import { Express } from "express";
-import TodoManager from "../../internal/todo_manager/todo_manager";
+import AuthManager from "../../internal/auth_manager/auth_manager";
 import { ToJson } from "../../util/json";
 
 type RouteHandler = (
@@ -13,11 +13,11 @@ type RouteHandler = (
 
 export class App {
   srv: Express;
-  todoManager: TodoManager;
+  authManager: AuthManager;
   db: PrismaClient;
-  constructor(srv: Express, todoManager: TodoManager, db: any) {
+  constructor(srv: Express,  authManager: AuthManager,db: any) {
     this.srv = srv;
-    this.todoManager = todoManager;
+    this.authManager = authManager;
     this.db = db;
   }
   InHandler(handler: RouteHandler) {
@@ -35,7 +35,7 @@ export class App {
   ) {
     res
       .status(resData.status)
-      .send(ToJson({ data: resData.data, is_error: false }));
+      .send(ToJson({ data: resData.data,message:resData.message, is_error: false }));
   }
   ShutDown() {}
 }
