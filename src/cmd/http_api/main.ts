@@ -6,8 +6,8 @@ import { App } from "./types";
 async function Init() {
   const srv = ServerInit();
   const db = await DBInit();
-  const todoManager = new NotificationManager(db);
-  const app = new App(srv, todoManager, db);
+  const notificationManager = new NotificationManager(db);
+  const app = new App(srv, notificationManager, db);
   HandleRoutesFor(app);
   SinkInit(app);
   return app;
