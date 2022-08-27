@@ -2,11 +2,8 @@ import { IKVStore } from "./kv_store";
 import { createClient, RedisClientType } from "redis";
 class Redis implements IKVStore {
   store: RedisClientType;
-  constructor(host: string, port: number, password: string) {
-    this.store = createClient({
-      url: `redis://${host}:${port}`,
-      password,
-    });
+  constructor(store: RedisClientType) {
+    this.store = store;
   }
   Set(key: string, value: string, expiryTime?: number): Promise<void> {
     return new Promise((resolve, reject) => {
