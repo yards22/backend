@@ -1,4 +1,6 @@
 import NotificationManager from "../../internal/notification_manager/notification_manager";
+import { Client } from "pg";
+import AuthManager from "../../internal/auth_manager/auth_manager";
 import HandleRoutesFor from "./handler";
 import { DBInit, ServerInit, SinkInit } from "./init";
 import { App } from "./types";
@@ -7,7 +9,8 @@ async function Init() {
   const srv = ServerInit();
   const db = await DBInit();
   const notificationManager = new NotificationManager(db);
-  const app = new App(srv, notificationManager, db);
+  const authManager = new AuthManager(db);
+  const app = new App(srv, authManager,notificationManager, db);
   HandleRoutesFor(app);
   SinkInit(app);
   return app;

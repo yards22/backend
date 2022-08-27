@@ -11,9 +11,14 @@ datasource db {
 }
 
 // TODO: Modify Users accordingly
+
 model Users {
-    id           BigInt          @id @default(autoincrement()) @db.BigInt
+    user_id           BigInt          @id @default(autoincrement()) @db.BigInt
+    mail_id      String
+    password     String
     created_at   DateTime        @default(now())
+    identity_provider String     @default("self")
+    subject_id String?
     Notification Notifications[]
 
     @@map("users")
@@ -22,7 +27,7 @@ model Users {
 model Notifications {
     id BigInt @id @default(autoincrement()) @db.BigInt
 
-    for      Users              @relation(fields: [for_id], references: [id])
+    for      Users              @relation(fields: [for_id], references: [user_id])
     for_id   BigInt
     status   NotificationStatus
     metadata Json
@@ -32,8 +37,24 @@ model Notifications {
     @@map("notifications")
 }
 
+model Token {
+   id BigInt   @id @default(autoincrement()) @db.BigInt
+   user_id   BigInt   @unique
+   token_id  String
+    @@map("token")
+}
+
 enum NotificationStatus {
     Unseen
     Seen
     Read
+ // Users table should be modified accn.
 }
+
+
+
+
+
+
+
+
