@@ -1,4 +1,6 @@
 import RouteHandler from "./types";
+import Redis from "../../pkg/kv_store/redis"
+import { createClient,RedisClientType  } from "redis";
 
 const HandleSignUp : RouteHandler = async (req,res,next,app) =>{
     const mail_id = req.body.mail_id;
@@ -29,6 +31,14 @@ const HandleLogin : RouteHandler = async (req,res,next,app)=>{
     try{
        const user = await app.authManager.getUser(mail_id);
        if(password===user?.password){
+        const store: RedisClientType = createClient({
+            url: `redis://localhost:6379`,
+          });
+          await store.connect();
+           const redis = new Redis(store);
+           const id:number = 10;
+           const userId:string = id.toString(); 
+           const key = await redis.Set("first_key",userId,60);
            app.SendRes(res,{status:200,message:"Successful Login"});
        }
        else{

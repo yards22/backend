@@ -5,7 +5,11 @@ import { createClient,RedisClientType } from "redis";
 import Redis from "../pkg/kv_store/redis";
 let kv: IKVStore;
 beforeAll(async () => {
-  kv = new InMKV();
+  const store: RedisClientType = createClient({
+    url: `redis://localhost:6379`,
+  });
+  await store.connect();
+  kv = new Redis(store);
 });
 
 afterAll(async () => {

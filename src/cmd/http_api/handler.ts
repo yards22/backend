@@ -11,5 +11,6 @@ function AuthRoutes(app:App): Router{
 
 function HandleRoutesFor(app: App) {
   app.srv.use("/auth", AuthRoutes(app));
+  
 }
 export default HandleRoutesFor;
