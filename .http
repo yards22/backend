@@ -24,8 +24,8 @@ POST  http://localhost:4000/auth/signup
 Content-Type: application/json
 
 {
-    "mail_id":"rithvikalkanti@gmail.com",
-    "password":"123456"
+    "mail_id":"reddy_821912@student.nitw.ac.in",
+    "password":"821912"
 }
 
 ### login user
@@ -33,8 +33,11 @@ POST http://localhost:4000/auth/login
 Content-Type: application/json
 
 {
-    "mail_id":"rithvikalkanti@gmail.com",
-    "password":"123456"
+    "mail_id":"reddy_821912@student.nitw.ac.in",
+    "password":"821912"
 }
+
+###
+GET http://localhost:4000/auth/api/me
 
 
