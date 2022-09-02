@@ -43,7 +43,7 @@ model Interests {
 model Profile {
   user              Users    @relation(fields: [user_id], references: [id])
   user_id           BigInt   @unique
-  username          String
+  username          String   @unique
   email_id          String?
   profile_image_uri String?
   bio               String?
