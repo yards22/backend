@@ -1,5 +1,3 @@
-import { Profile } from '@prisma/client';
+import { Profile } from "@prisma/client";
 
-export default interface EProfile extends Profile {
-        metadata: any
-}
+export default interface EProfile extends Profile {}
