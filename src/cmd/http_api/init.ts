@@ -3,6 +3,8 @@ import { App } from "./types";
 import { PrismaClient } from "@prisma/client";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 import { Herror } from "../../pkg/herror/herror";
+import config from "config";
+import cors from "cors";
 
 // server init
 export function ServerInit(): Express {
