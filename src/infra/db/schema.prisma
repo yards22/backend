@@ -2,38 +2,59 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "mysql"
-    url      = env("DATABASE_URL")
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
-// TODO: Modify Users accordingly
 model Users {
-    id           BigInt          @id @default(autoincrement()) @db.BigInt
-    created_at   DateTime        @default(now())
-    Notification Notifications[]
+  id           BigInt          @id @default(autoincrement()) @db.BigInt
+  created_at   DateTime        @default(now())
+  Notification Notifications[]
+  Interests    Interests[]
+  Profile      Profile?
 
-    @@map("users")
+  @@map("users")
 }
 
 model Notifications {
-    id BigInt @id @default(autoincrement()) @db.BigInt
+  id         BigInt             @id @default(autoincrement()) @db.BigInt
+  for        Users              @relation(fields: [for_id], references: [id])
+  for_id     BigInt
+  status     NotificationStatus
+  metadata   Json
+  created_at DateTime           @default(now())
 
-    for      Users              @relation(fields: [for_id], references: [id])
-    for_id   BigInt
-    status   NotificationStatus
-    metadata Json
+  @@map("notifications")
+}
 
-    created_at DateTime @default(now())
+model Interests {
+  user     Users  @relation(fields: [user_id], references: [id])
+  user_id  BigInt
+  interest String
 
-    @@map("notifications")
+  @@unique([user_id, interest])
+  @@map("interests")
+}
+
+model Profile {
+  user              Users    @relation(fields: [user_id], references: [id])
+  user_id           BigInt   @unique
+  username          String   @unique
+  email_id          String?
+  profile_image_uri String?
+  bio               String?
+  cric_index        Int      @default(0)
+  updated_at        DateTime @updatedAt
+
+  @@map("profiles")
 }
 
 enum NotificationStatus {
-    Unseen
-    Seen
-    Read
+  Unseen
+  Seen
+  Read
 }
