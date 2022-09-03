@@ -32,9 +32,6 @@ export default class AuthManager{
         return this.store.users.create({ data:{mail_id,password,subject_id,identity_provider}});
     }
 
-    CreateUserToken(user_id:bigint,token_id:string){
-        return this.store.token.create({data:{user_id,token_id}})
-    }
 
     getUser(mail_id: string): Promise<EAuth|null>{
         return this.store.users.findFirst({
@@ -44,15 +41,32 @@ export default class AuthManager{
         });
    }
 
+   getUserById(user_id : bigint):Promise<EAuth|null>{
+    return this.store.users.findFirst({
+      where:{
+          user_id
+      }
+     });
+   }  
+    UpdatePassword(user_id:bigint,password:string){
+        return this.store.users.update({
+          where:{
+            user_id
+          },
+          data:{
+            password
+          }
+        })
+    }
+
     LoginUser(mail_id: string,password : string, token:string){
       return new Promise(async (resolve,reject)=>{
        try{
             const user = await this.getUser(mail_id);
             const validPassword = await bcrypt.compare(password,user?.password as string);
             if(validPassword){
-                const id:bigint = user?.user_id as bigint;
-                await this.cache.Set(token,id,60);
-                this.CreateUserToken(id,token)
+                const id:BigInt = user?.user_id as BigInt;
+                this.cache.Set(token,id,600);
                 resolve("Login Successful");
             }
             else{
@@ -66,29 +80,45 @@ export default class AuthManager{
       });
     }
 
+    UpdateUserPassword(user_id:bigint,password:string){
+        return new Promise(async (resolve,reject)=>{
+          try{
+              const enc_password : string = await this.HashPassword(password) as string;
+              await this.UpdatePassword(user_id,enc_password);
+              resolve("Registered Successfully");
+          }
+          catch(err){
+              reject("Internal server error");
+          }
+      })
+    }
+
     RegisterUser(mail_id: string, password:string){
       return new Promise(async (resolve,reject)=>{
          try{
-           const user = await this.getUser(mail_id);
-           if(!user){
-              try{
-                const salt = await bcrypt.genSalt(10);
-                const enc_password: string =  await bcrypt.hash(password, salt);
-                await this.CreateUser(mail_id,enc_password);
-                resolve("Registered Successfully");
-              }
-              catch(err){
-                reject("Internal server error");
-              }
-           }
-           else{
-              resolve("User Already exists");
-           }
+              const enc_password : string = await this.HashPassword(password) as string;
+              await this.CreateUser(mail_id,enc_password);
+              resolve("Registered Successfully");
          }
          catch(err){
              reject("Internal server error");
          }
       })
+    }
+
+    HashPassword(password:string){
+      return new Promise(async (resolve,reject)=>{
+          try{
+            const salt = await bcrypt.genSalt(10);
+            const enc_password: string =  await bcrypt.hash(password, salt);
+            resolve(enc_password);
+          }
+          catch(err){
+            reject(err);
+          }
+      })
+
+
     }
 
     Upsert(mail_id:string, sub_id:string,identity_provider:string){
@@ -105,7 +135,6 @@ export default class AuthManager{
               }
             }
             else{
-              
               resolve(user);
             }
           }
@@ -115,7 +144,7 @@ export default class AuthManager{
       })
     }
 
-    CreateToken(n:number,id:bigint){
+    CreateToken(n:number,id:BigInt){
       return new Promise(async (resolve,reject)=>{
            try{
             let token: string = RandomString(n);
@@ -124,8 +153,7 @@ export default class AuthManager{
                 isExists = await this.cache.Get(token)
                 token = RandomString(n);
             }
-            
-          await this.cache.Set(token,id.toString(),120); 
+          this.cache.Set(token,id,600);
           resolve(token);
            }
            catch(err){
@@ -147,7 +175,7 @@ export default class AuthManager{
        })
     }
 
-    CheckForSession(mail_id :string){
+    CheckForOTPSession(mail_id :string){
       return new Promise(async (resolve,reject)=>{
           try{
             const otp:any = await this.cache.Get(mail_id);
@@ -157,6 +185,36 @@ export default class AuthManager{
              reject(err);
           }
       })
+    }
+
+    CheckForSession(token : string){
+      return new Promise(async (resolve,reject)=>{
+        try{
+          const id :bigint = await this.cache.Get(token);
+          if(id){
+             let user = await this.getUserById(id);
+             resolve(user);
+          }
+          else{
+            reject("unauthorised user, please login");
+          }
+        }
+        catch(err){
+          reject(err);
+        }
+      })
+    }
+
+    LogoutUser(token:string){
+        return new Promise(async (resolve,reject)=>{
+          try{
+            this.cache.Delete(token);
+            resolve("Logged out");
+          }
+          catch(err){
+             reject(err);
+          }
+        })
     }
      
 }
