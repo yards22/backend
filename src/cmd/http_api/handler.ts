@@ -9,7 +9,10 @@ import {
   HandleGoogleOauth,
   HandleOTPGeneration,
   HandleOTPVerification,
-  // HandleLogout
+  HandleLogout,
+  HandleOTPGenerationForForgot,
+  HandlePasswordUpdate,
+  CheckAllowance
 } from "./auth";
 import { App } from "./types";
 
@@ -22,15 +25,14 @@ function NotificationRoutes(app: App): Router {
 
 function AuthRoutes(app:App): Router{
   const router = Router();
-  //TODO: FORGOT PASSWORD ROUTE
-  //TODO: LOGOUT ROUTE
-  //TODO: FORCEFUL LOGOUT
   router.post("/signup", app.InHandler(HandleSignUp));
-  router.post("/login", app.InHandler(HandleLogin));
+  router.post("/login",app.InHandler(HandleLogin));
   router.post("/oauth",app.InHandler(HandleGoogleOauth));
   router.post("/sendOTP",app.InHandler(HandleOTPGeneration));
   router.post("/verifyOTP",app.InHandler(HandleOTPVerification));
-  // router.post("/logout",app.InHandler(HandleLogout));
+  router.post("/logout",app.InHandler(HandleLogout));
+  router.post("/sendOTPforgot",app.InHandler(HandleOTPGenerationForForgot));
+  router.post("/updpassword",app.InHandler(HandlePasswordUpdate));
   return router;
 }
 
