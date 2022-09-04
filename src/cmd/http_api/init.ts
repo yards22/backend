@@ -5,6 +5,8 @@ import { HerrorStatus } from "../../pkg/herror/status_codes";
 import { Herror } from "../../pkg/herror/herror";
 import config from "config";
 import cors from "cors";
+import { RedisClientType } from "@redis/client";
+import { createClient } from "redis";
 
 // server init
 export function ServerInit(): Express {
@@ -34,6 +36,19 @@ export async function DBInit(): Promise<PrismaClient> {
     await client.$connect();
     console.log("connected to db...");
     return client;
+  } catch (err) {
+    throw err;
+  }
+}
+
+// Redis init
+export async function RedisInit(): Promise<RedisClientType> {
+  try {
+    const store: RedisClientType = createClient({
+      url: `redis://localhost:6379`,
+    });
+    await store.connect();
+    return store;
   } catch (err) {
     throw err;
   }
