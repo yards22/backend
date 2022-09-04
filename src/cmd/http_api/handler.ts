@@ -15,6 +15,7 @@ import {
   CheckAllowance
 } from "./auth";
 import { App } from "./types";
+import { HandleCreateProfile, HandleGetUserDetails, HandleUpdateProfile } from "./profile";
 
 function NotificationRoutes(app: App): Router {
   const router = Router();
@@ -36,8 +37,18 @@ function AuthRoutes(app:App): Router{
   return router;
 }
 
-function HandleRoutesFor(app: App) {
-  app.srv.use("/notification", NotificationRoutes(app));
-  app.srv.use("/auth", AuthRoutes(app));
+function ProfileRoutes(app: App): Router {
+  const router = Router();
+  router.get("/",app.InHandler(HandleGetUserDetails));
+  router.post("/",app.InHandler(HandleCreateProfile));
+  router.put("/",app.InHandler(HandleUpdateProfile));
+  return router;
 }
+
+function HandleRoutesFor(app: App) {
+   app.srv.use("/notification", NotificationRoutes(app));
+   app.srv.use("/profile",ProfileRoutes(app));
+   app.srv.use("/auth", AuthRoutes(app));
+ }
+ 
 export default HandleRoutesFor;
