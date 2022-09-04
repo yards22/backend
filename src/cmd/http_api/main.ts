@@ -12,7 +12,6 @@ import { RedisClientType, createClient } from "redis";
 async function Init() {
   const srv = ServerInit();
   const db = await DBInit();
-  const inMemKv = new InMKV();
   const r = (await RedisInit()) as any;
   const redis = new Redis(r);
   const notificationManager = new NotificationManager(db);
@@ -23,6 +22,7 @@ async function Init() {
     authManager,
     notificationManager,
     profileManager,
+    redis,
     db
   );
   HandleRoutesFor(app);

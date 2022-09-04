@@ -17,7 +17,7 @@ export default class AuthManager {
     password?: string,
     subject_id?: string,
     identity_provider?: string
-  ): Promise<EAuth | null> {
+  ): Promise<EAuth> {
     return this.store.users.create({
       data: { mail_id, password, subject_id, identity_provider },
     });
@@ -50,8 +50,16 @@ export default class AuthManager {
     });
   }
 
-  LoginUser(mail_id: string, password: string, token: string) {
+  LoginUser(
+    credentials: { mail_id: string; password: string } | string
+  ): Promise<{ userData: EAuth; accessToken: string }> {
     return new Promise(async (resolve, reject) => {
+      if (typeof credentials == "string") {
+        // we have id_token
+        // implement google login
+      } else {
+        // we have mail id and password
+      }
       try {
         const user = await this.GetUserByMail(mail_id);
         const validPassword = await bcrypt.compare(
@@ -85,16 +93,16 @@ export default class AuthManager {
     });
   }
 
-  RegisterUser(mail_id: string, password: string) {
+  RegisterUser(mail_id: string, password: string): Promise<EAuth> {
     return new Promise(async (resolve, reject) => {
       try {
         const enc_password: string = (await this.HashPassword(
           password
         )) as string;
-        await this.CreateUser(mail_id, enc_password);
-        resolve("Registered Successfully");
+        const user = await this.CreateUser(mail_id, enc_password);
+        return resolve(user);
       } catch (err) {
-        reject("Internal server error");
+        reject(err);
       }
     });
   }
