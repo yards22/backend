@@ -23,12 +23,10 @@ CREATE TABLE `notifications` (
 
 -- CreateTable
 CREATE TABLE `token` (
-    `id` BIGINT NOT NULL AUTO_INCREMENT,
-    `user_id` BIGINT NOT NULL,
+    `user_id` VARCHAR(191) NOT NULL,
     `token_id` VARCHAR(191) NOT NULL,
 
-    UNIQUE INDEX `token_user_id_key`(`user_id`),
-    PRIMARY KEY (`id`)
+    UNIQUE INDEX `token_user_id_key`(`user_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey

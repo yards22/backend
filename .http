@@ -22,13 +22,16 @@ Content-Type: application/json
 GET http://localhost:4000/profile/?id=1
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> f4c23889d85aeb28818e90cdb3224ee4de0df0b8
 ### signup user
 POST  http://localhost:4000/auth/signup
 Content-Type: application/json
 
 {
-    "mail_id":"rithvikalkanti@gmail.com",
-    "password":"123456"
+    "mail_id":"reddy_821912@student.nitw.ac.in",
+    "password":"821912"
 }
 
 ### login user
@@ -36,12 +39,17 @@ POST http://localhost:4000/auth/login
 Content-Type: application/json
 
 {
-    "mail_id":"rithvikalkanti@gmail.com",
-    "password":"123456"
+    "mail_id":"reddy_821912@student.nitw.ac.in",
+    "password":"821912"
 }
 
+###
+GET http://localhost:4000/auth/api/me
 
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> f4c23889d85aeb28818e90cdb3224ee4de0df0b8
 ### Put User Profile
 
 PUT http://localhost:4000/profile
@@ -65,4 +73,7 @@ content-type: application/json
     "username": "hadarsh",
     "cric_index": 1
 }
+<<<<<<< HEAD
 >>>>>>> 1ec14ccb6b9ae0bda376a603f3bdd358e73535b6
+=======
+>>>>>>> f4c23889d85aeb28818e90cdb3224ee4de0df0b8
