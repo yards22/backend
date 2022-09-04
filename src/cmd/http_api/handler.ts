@@ -3,7 +3,7 @@ import {
   HandleGetNotification,
   HandleUpdateNotificationStatus,
 } from "./notification";
-import { HandleCreateProfile, HandleGetUserDetails, HandleUpdateProfile } from "./profile";
+import { HandleCreateProfile, HandleGetUserProfile, HandleUpdateProfile } from "./profile";
 import RouteHandler, { App } from "./types";
 
 function NotificationRoutes(app: App): Router {
@@ -14,7 +14,7 @@ function NotificationRoutes(app: App): Router {
 }
 function ProfileRoutes(app: App): Router {
   const router = Router();
-  router.get("/",app.InHandler(HandleGetUserDetails));
+  router.get("/",app.InHandler(HandleGetUserProfile));
   router.post("/",app.InHandler(HandleCreateProfile));
   router.put("/",app.InHandler(HandleUpdateProfile));
   return router;
