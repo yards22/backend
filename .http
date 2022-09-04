@@ -18,7 +18,10 @@ Content-Type: application/json
 {
     "id":"86df8d55-ed85-41ec-ad32-7c84e497d986"
 }
+### Get User Data
+GET http://localhost:4000/profile/?id=1
 
+<<<<<<< HEAD
 ### signup user
 POST  http://localhost:4000/auth/signup
 Content-Type: application/json
@@ -38,3 +41,28 @@ Content-Type: application/json
 }
 
 
+=======
+### Put User Profile
+
+PUT http://localhost:4000/profile
+Content-Type: application/json
+
+{
+    "id": 1,
+    "profile_image": "https://www.facebook.com",
+    "bio": "I love India"
+}
+
+### Post User Profile
+POST http://localhost:4000/profile 
+content-type: application/json 
+
+{
+    "id":2,
+    "profile_image": "https://www.gitub.com",
+    "email_id": "adarshYo@gmail.com",
+    "bio": "Iam sharukan fan",
+    "username": "hadarsh",
+    "cric_index": 1
+}
+>>>>>>> 1ec14ccb6b9ae0bda376a603f3bdd358e73535b6
