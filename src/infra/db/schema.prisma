@@ -6,28 +6,27 @@ generator client {
 }
 
 datasource db {
-provider = "mysql"
-    url      = env("DATABASE_URL")
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
-
 model Users {
-    user_id           BigInt          @id @default(autoincrement()) @db.BigInt
-    mail_id      String
-    password     String
-    created_at   DateTime        @default(now())
-    identity_provider String     @default("self")
-    subject_id String?
-    Notification Notifications[]
-    Interests    Interests[]
-    Profile      Profile?
-    
-      @@map("users")
+  user_id           BigInt          @id @default(autoincrement()) @db.BigInt
+  mail_id           String
+  password          String?
+  created_at        DateTime        @default(now())
+  identity_provider String          @default("self")
+  subject_id        String?
+  Notification      Notifications[]
+  Interests         Interests[]
+  Profile           Profile?
+
+  @@map("users")
 }
 
 model Notifications {
   id         BigInt             @id @default(autoincrement()) @db.BigInt
-  for        Users              @relation(fields: [for_id], references: [id])
+  for        Users              @relation(fields: [for_id], references: [user_id])
   for_id     BigInt
   status     NotificationStatus
   metadata   Json
@@ -36,9 +35,8 @@ model Notifications {
   @@map("notifications")
 }
 
-
 model Interests {
-  user     Users  @relation(fields: [user_id], references: [id])
+  user     Users  @relation(fields: [user_id], references: [user_id])
   user_id  BigInt
   interest String
 
@@ -47,7 +45,7 @@ model Interests {
 }
 
 model Profile {
-  user              Users    @relation(fields: [user_id], references: [id])
+  user              Users    @relation(fields: [user_id], references: [user_id])
   user_id           BigInt   @unique
   username          String   @unique
   email_id          String?
@@ -60,9 +58,10 @@ model Profile {
 }
 
 model Token {
-   user_id  String @unique
-   token_id  String
-    @@map("token")
+  user_id  String @unique
+  token_id String
+
+  @@map("token")
 }
 
 enum NotificationStatus {
@@ -70,11 +69,3 @@ enum NotificationStatus {
   Seen
   Read
 }
-
-
-
-
-
-
-
-
