@@ -8,6 +8,9 @@ export const CheckAllowance: RouteHandler = async (req, res, next, app) => {
     return next(new Herror("unauthorized", HerrorStatus.StatusUnauthorized));
   }
   const userDataStr = app.kvStore.Get(accessToken);
+  
+  // convert user_id back to bigint.
+
   if (!userDataStr)
     return next(new Herror("unauthorized", HerrorStatus.StatusUnauthorized));
 

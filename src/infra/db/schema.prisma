@@ -11,11 +11,11 @@ datasource db {
 }
 
 model Users {
-  user_id           BigInt          @id @default(autoincrement()) @db.BigInt
-  mail_id           String
+  user_id           Int          @id @default(autoincrement()) @db.Int
+  mail_id           String          @unique
   password          String?
   created_at        DateTime        @default(now())
-  identity_provider String          @default("self")
+  identity_provider String?        
   subject_id        String?
   Notification      Notifications[]
   Interests         Interests[]
@@ -27,7 +27,7 @@ model Users {
 model Notifications {
   id         BigInt             @id @default(autoincrement()) @db.BigInt
   for        Users              @relation(fields: [for_id], references: [user_id])
-  for_id     BigInt
+  for_id     Int
   status     NotificationStatus
   metadata   Json
   created_at DateTime           @default(now())
@@ -37,7 +37,7 @@ model Notifications {
 
 model Interests {
   user     Users  @relation(fields: [user_id], references: [user_id])
-  user_id  BigInt
+  user_id  Int
   interest String
 
   @@unique([user_id, interest])
@@ -46,7 +46,7 @@ model Interests {
 
 model Profile {
   user              Users    @relation(fields: [user_id], references: [user_id])
-  user_id           BigInt   @unique
+  user_id           Int   @unique
   username          String   @unique
   email_id          String?
   profile_image_uri String?

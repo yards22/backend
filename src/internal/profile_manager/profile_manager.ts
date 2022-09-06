@@ -20,7 +20,7 @@ export default class ProfileManager {
     return false;
   }
 
-  GetUserById(userId: bigint): Promise<EProfile | null> {
+  GetUserById(userId: number): Promise<EProfile | null> {
     return this.store.profile.findUnique({
       where: {
         user_id: userId,
@@ -35,7 +35,7 @@ export default class ProfileManager {
 
   // accepting profileImageUri or bio as optional so as any one can also be updated at once
   UpdateProfile(
-    userId: bigint,
+    userId: number,
     profileImageUri?: string,
     bio?: string
   ): Promise<EProfile> {
@@ -52,7 +52,7 @@ export default class ProfileManager {
 
   // TODO: Handle image upload and then take profile image uri
   CreateProfile(
-    userId: bigint,
+    userId: number,
     userName: string,
     bio?: string,
     profileImageUri?: string,
