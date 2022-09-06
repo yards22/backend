@@ -36,14 +36,22 @@ function AuthRoutes(app: App): Router {
   router.post("/oauth", app.InHandler(HandleGoogleOauth));
   router.post("/sendOTP", app.InHandler(HandleOTPGenerationForSignUp));
   router.post("/verifyOTP", app.InHandler(HandleOTPVerificationForSignUp));
-  router.post("/logout", app.InHandler(HandleLogout));
+  router.delete(
+    "/logout",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleLogout)
+  );
   router.post("/sendOTPforgot", app.InHandler(HandleOTPGenerationForForgot));
-  router.post("/verifyOTPforgot",app.InHandler(HandleOTPVerificationForForgot))
-  router.post("/updpassword", app.InHandler(HandlePasswordUpdate));
+  router.post(
+    "/verifyOTPforgot",
+    app.InHandler(HandleOTPVerificationForForgot)
+  );
+  router.put("/updPassword", app.InHandler(HandlePasswordUpdate));
   return router;
 }
 
-function ProfileRoutes(app: App): Router {HandleOTPVerificationForSignUp
+function ProfileRoutes(app: App): Router {
+  HandleOTPVerificationForSignUp;
   const router = Router();
   router.get("/", app.InHandler(HandleGetUserProfile));
   router.post("/", app.InHandler(HandleCreateProfile));
