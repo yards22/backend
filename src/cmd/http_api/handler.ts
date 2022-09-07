@@ -10,9 +10,10 @@ import {
   HandleOTPGenerationForSignUp,
   HandleOTPVerificationForSignUp,
   HandleLogout,
-  HandleOTPGenerationForForgot,
-  HandleOTPVerificationForForgot,
+  HandleOTPGeneration,
+  HandleOTPVerification,
   HandlePasswordUpdate,
+  HandleLogoutAllScreen
 } from "./auth";
 import { App } from "./types";
 import {
@@ -41,12 +42,13 @@ function AuthRoutes(app: App): Router {
     app.InHandler(CheckAllowance),
     app.InHandler(HandleLogout)
   );
-  router.post("/sendOTPforgot", app.InHandler(HandleOTPGenerationForForgot));
+  router.post("/sendOTPforgot", app.InHandler(HandleOTPGeneration));
   router.post(
     "/verifyOTPforgot",
-    app.InHandler(HandleOTPVerificationForForgot)
+    app.InHandler(HandleOTPVerification)
   );
   router.put("/updPassword", app.InHandler(HandlePasswordUpdate));
+  router.post("/logoutAllScreens",app.InHandler(HandleLogoutAllScreen));
   return router;
 }
 

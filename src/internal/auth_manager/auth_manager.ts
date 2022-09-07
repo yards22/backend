@@ -6,8 +6,10 @@ import { IKVStore } from "../../pkg/kv_store/kv_store";
 import verifyGoogleIdTokenAndGetUserData from "../../cmd/http_api/helper";
 import { SendMail } from "../../util/mail_dependencies";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
+import { nextTick } from "process";
 
 const SEC_IN_YEAR = 31536000;
+const Token_Length = 64;
 
 interface IResponse {
   statusCode: number;
@@ -58,6 +60,41 @@ export default class AuthManager {
     });
   }
 
+//TODO: not able to delete screen which logged out because of their token expiry.
+
+  DeleteScreen(user_id:number,accessToken:string){
+    return this.store.token.delete({
+      where:{
+        user_id_token_id:{user_id,token_id:accessToken}
+      }
+    })
+  }
+
+  DeleteAllScreens(user_id:number){
+     return this.store.token.deleteMany({
+       where:{
+        user_id
+       }      
+     })
+  }
+
+  GetAllScreens(user_id:number){
+    return this.store.token.findMany({
+      where:{
+        user_id
+      }
+    })
+  }
+
+  CreateScreen(user_id:number,accessToken:string){
+    return this.store.token.create({
+      data:({
+        user_id,
+        token_id:accessToken
+      })
+    })
+  }
+
   UpdatePassword(user_id: number, password: string): Promise<EAuth> {
     return this.store.users.update({
       where: {
@@ -83,7 +120,6 @@ export default class AuthManager {
         const user = await this.GetUserByMail(mail_id);
         if (!user) {
           const valid_otp: string = await this.CheckForOTPSession(mail_id);
-          console.log(valid_otp, otp);
           if (valid_otp === otp) {
             const enc_password: string = await this.HashPassword(password);
             const username: string = GenerateUsername(mail_id);
@@ -92,7 +128,8 @@ export default class AuthManager {
               username,
               enc_password
             );
-            const accessToken = await this.CreateSession(64, user);
+            const accessToken = await this.CreateSession(Token_Length, user);
+            await this.CreateScreen(user.user_id,accessToken);
             resolve({
               responseStatus: {
                 statusCode: HerrorStatus.StatusCreated,
@@ -122,6 +159,7 @@ export default class AuthManager {
     });
   }
 
+
   //TODO: change update and insert into a single step inbuilt upsert.
 
   GoogleLogin(id_token: string): Promise<{
@@ -133,7 +171,8 @@ export default class AuthManager {
       try {
         const payload: any = await verifyGoogleIdTokenAndGetUserData(id_token);
         const user: EAuth = await this.UpsertUser(payload.email, payload.sub);
-        const accessToken: string = await this.CreateSession(64, user);
+        const accessToken: string = await this.CreateSession(Token_Length, user);
+        await this.CreateScreen(user.user_id,accessToken);
         resolve({
           responseStatus: {
             statusCode: HerrorStatus.StatusOK,
@@ -181,15 +220,16 @@ export default class AuthManager {
           );
           if (validPassword) {
             const id: number = user?.user_id;
-            const accessToken: string = await this.CreateSession(64, user);
-            resolve({
-              responseStatus: {
-                statusCode: HerrorStatus.StatusOK,
-                message: "successful_login",
-              },
-              userData: user,
-              accessToken,
-            });
+            const accessToken: string = await this.CreateSession(Token_Length, user);
+              await this.CreateScreen(user.user_id,accessToken);
+              resolve({
+                responseStatus: {
+                  statusCode: HerrorStatus.StatusOK,
+                  message: "successful_login",
+                },
+                userData: user,
+                accessToken,
+              });
           } else {
             resolve({
               responseStatus: {
@@ -349,6 +389,57 @@ export default class AuthManager {
     });
   }
 
+  LogoutAllScreens(
+    mail_id:string,
+    otp:string
+    ):Promise<{
+      responseStatus: IResponse
+    }>
+    {
+    return new Promise(async (resolve,reject)=>{
+      try{
+        const user = await this.GetUserByMail(mail_id);
+        if(user){
+          const valid_otp: string = await this.CheckForOTPSession(mail_id);
+          if(otp === valid_otp){
+            const screens = await this.GetAllScreens(user.user_id);
+            // Clear all the sessions
+            for(let i=0;i<screens.length;i++){
+                const accessToken = screens[i].token_id;
+                await this.cache.Delete(accessToken);
+            }
+
+            resolve({
+              responseStatus: {
+                statusCode: HerrorStatus.StatusOK,
+                message: "logged out of all accounts",
+              },
+            })
+          }
+          else{
+            resolve({
+              responseStatus: {
+                statusCode: HerrorStatus.StatusUnauthorized,
+                message: "otp_invalid",
+              },
+            });
+          }
+        }
+        else{
+          resolve({
+            responseStatus: {
+              statusCode: HerrorStatus.StatusForbidden,
+              message: "user_doesnot_exists_in_db",
+            },
+          });
+        }
+      }
+      catch(err){
+        reject(err);
+      }
+    })
+  }
+
   UpdateUserPassword(
     mail_id: string,
     otp: string,
@@ -369,7 +460,7 @@ export default class AuthManager {
               user.user_id,
               enc_password
             );
-            const accessToken = await this.CreateSession(64, user);
+            const accessToken = await this.CreateSession(Token_Length, user);
             resolve({
               responseStatus: {
                 statusCode: HerrorStatus.StatusCreated,
@@ -430,9 +521,6 @@ export default class AuthManager {
           isExists = await this.cache.Get(token);
           token = RandomString(n);
         }
-        console.log(user);
-        // let modified_user :any = user;
-        // modified_user.user_id = modified_user.user_id.toString();
         const userStringified: string = JSON.stringify(user);
         this.cache.Set("token_" + token, userStringified, SEC_IN_YEAR);
         resolve(token);
@@ -442,10 +530,11 @@ export default class AuthManager {
     });
   }
 
-  LogoutUser(token: string): Promise<{ responseStatus: IResponse }> {
+  LogoutUser(user_id:number,token: string): Promise<{ responseStatus: IResponse }> {
     return new Promise(async (resolve, reject) => {
       try {
         this.cache.Delete(token);
+        this.DeleteScreen(user_id,token);
         resolve({
           responseStatus: {
             statusCode: HerrorStatus.StatusOK,

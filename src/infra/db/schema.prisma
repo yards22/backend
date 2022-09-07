@@ -20,7 +20,7 @@ model Users {
   Notification      Notifications[]
   Interests         Interests[]
   Profile           Profile?
-
+  
   @@map("users")
 }
 
@@ -58,9 +58,11 @@ model Profile {
 }
 
 model Token {
-  user_id  String @unique
+  screen_id BigInt @id @default(autoincrement()) @db.BigInt
+  user_id  Int 
   token_id String
-
+  
+  @@unique([user_id,token_id])
   @@map("token")
 }
 

@@ -2,7 +2,7 @@ import RouteHandler from "./types";
 import { Herror } from "../../pkg/herror/herror";
 import { MailValidator, SendMail } from "../../util/mail_dependencies";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
-import { Router } from "express";
+import { response, Router } from "express";
 
 
 
@@ -99,9 +99,7 @@ const HandleOTPGenerationForSignUp: RouteHandler = async (req, res, next, app) =
 const HandleOTPVerificationForSignUp: RouteHandler = async (req, res, next, app) => {
   const mail_id: string = req.body.mail_id;
   const OTP: string = req.body.OTP;
-  console.log(mail_id,OTP);
   const valid: boolean = MailValidator(mail_id);
-  console.log(valid,mail_id,OTP);
   if (valid) {
       try {
         const {responseStatus} = await app.authManager.OTPVerificationForSignup(mail_id,OTP);
@@ -119,7 +117,7 @@ const HandleOTPVerificationForSignUp: RouteHandler = async (req, res, next, app)
   }
 };
 
-const HandleOTPVerificationForForgot: RouteHandler = async (req, res, next, app) => {
+const HandleOTPVerification: RouteHandler = async (req, res, next, app) => {
   const mail_id: string = req.body.mail_id;
   const OTP: string = req.body.OTP;
   const valid: boolean = MailValidator(mail_id);
@@ -143,8 +141,9 @@ const HandleOTPVerificationForForgot: RouteHandler = async (req, res, next, app)
 
 const HandleLogout: RouteHandler = async (req, res, next, app) => {
   const token = req.context.token;
+  const user_id = req.context.user_id;
   try {
-    const {responseStatus} = await app.authManager.LogoutUser(token);
+    const {responseStatus} = await app.authManager.LogoutUser(user_id,token);
     app.SendRes
     (res, {
        status: responseStatus.statusCode,
@@ -156,7 +155,7 @@ const HandleLogout: RouteHandler = async (req, res, next, app) => {
   }
 };
 
-const HandleOTPGenerationForForgot: RouteHandler = async (req,res,next,app) => {
+const HandleOTPGeneration: RouteHandler = async (req,res,next,app) => {
   const mail_id = req.body.mail_id;
   const valid: boolean = MailValidator(mail_id);
   if (valid) {
@@ -180,14 +179,40 @@ const HandleOTPGenerationForForgot: RouteHandler = async (req,res,next,app) => {
 const HandlePasswordUpdate: RouteHandler = async (req, res, next, app) => {
   const password = req.body.password;
   const mail_id = req.body.mail_id;
-  const otp = req.body.otp;
+  const OTP = req.body.OTP;
   try {
-    const {responseStatus,userData,accessToken} = await app.authManager.UpdateUserPassword(mail_id,otp, password);
-    app.SendRes(res,{status:200})
+    const {responseStatus,userData,accessToken} = await app.authManager.UpdateUserPassword(mail_id,OTP, password);
+    app.SendRes
+    (res,{
+      status:responseStatus.statusCode,
+      data:{userData,accessToken},
+      message:responseStatus.message
+    })
   } catch (err) {
     next(err);
   }
 };
+
+
+// have otp generation and verification here instead of username and password check as google login may not contain password.
+const HandleLogoutAllScreen :RouteHandler = async(req,res,next,app)=>{
+    const mail_id:string =req.body.mail_id;
+    const OTP:string = req.body.OTP;
+    
+    try {
+      const {responseStatus} = await app.authManager.LogoutAllScreens(mail_id,OTP);
+      app.SendRes
+      (res,{
+        status:responseStatus.statusCode,
+        message:responseStatus.message
+      });
+    }
+    catch(err){
+      next(err);
+    }
+
+    
+}
 
 export {
   HandleSignUp,
@@ -196,7 +221,8 @@ export {
   HandleOTPGenerationForSignUp,
   HandleOTPVerificationForSignUp,
   HandleLogout,
-  HandleOTPGenerationForForgot,
+  HandleOTPGeneration,
   HandlePasswordUpdate,
-  HandleOTPVerificationForForgot
+  HandleOTPVerification,
+  HandleLogoutAllScreen
 };
