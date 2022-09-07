@@ -61,8 +61,9 @@ content-type: application/json
 ### generate otp
 post http://localhost:4000/auth/sendOTP
 Content-type: application/json 
+
 {
-    "mail_id":"innovation6178@gmail.com"
+    "mail_id":"rithvikalkanti@gmail.com"
 }
 
 ### verify otp
@@ -70,8 +71,8 @@ post http://localhost:4000/auth/verifyOTP
 Content-type: application/json 
 
 {
-    "mail_id":"innovation6178@gmail.com",
-    "OTP":"",
+    "mail_id":"rithvikalkanti@gmail.com",
+    "OTP":"3740"
 }
 
 ### signup user
@@ -79,7 +80,7 @@ POST  http://localhost:4000/auth/signup
 Content-Type: application/json
 
 {   
-    "mail_id":"innovation6178@gmail.com",
-    "password":"821978",
-    "OTP":"",
+    "mail_id":"rithvikalkanti@gmail.com",
+    "password":"wgl123",
+    "OTP":"3740"
 }
