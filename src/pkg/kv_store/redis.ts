@@ -5,12 +5,13 @@ class Redis implements IKVStore {
   constructor(store: RedisClientType) {
     this.store = store;
   }
-  Set(key: string, value: any, expiryTime?: number): Promise<void> {
+  Set(key: string, value: string, expiryTime?: number): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.store.set( key, value, {
-        EX: expiryTime,
-      })
-      .then(() => {
+      this.store
+        .set(key, value, {
+          EX: expiryTime,
+        })
+        .then(() => {
           return resolve();
         })
         .catch((err) => {

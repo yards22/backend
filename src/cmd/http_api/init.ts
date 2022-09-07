@@ -5,6 +5,8 @@ import { HerrorStatus } from "../../pkg/herror/status_codes";
 import { Herror } from "../../pkg/herror/herror";
 import config from "config";
 import cors from "cors";
+import { RedisClientType } from "@redis/client";
+import { createClient } from "redis";
 
 // server init
 export function ServerInit(): Express {
@@ -39,11 +41,25 @@ export async function DBInit(): Promise<PrismaClient> {
   }
 }
 
+// Redis init
+export async function RedisInit() {
+  try {
+    const store= createClient({
+      url: `redis://localhost:6379`,
+    });
+    await store.connect();
+    return store;
+  } catch (err) {
+    throw err;
+  }
+}
+
 // Sink init
 export function SinkInit(app: App) {
-  app.srv.use((req, res, next) => {
-    next(new Herror("not found", HerrorStatus.StatusNotFound));
-  });
+  // app.srv.use((req, res, next) => {
+  //   console.log("not found");
+  //   next(new Herror("not found", HerrorStatus.StatusNotFound));
+  // });
 
   app.srv.use((err: any, req: any, res: any, next: any) => {
     res.status(err.status || 500);

@@ -3,7 +3,7 @@ import { HerrorStatus } from "../../pkg/herror/status_codes";
 import RouteHandler from "./types";
 
 export const HandleCreateProfile: RouteHandler = (req, res, next, app) => {
-  const userId = BigInt(req.context.userId);
+  const userId = Number(req.context.userId);
 
   const userName: string = req.body.username;
   const emailId: string = req.body.email_id;
@@ -47,7 +47,7 @@ export const HandleCheckIfUsernameExists: RouteHandler = (
 };
 
 export const HandleGetUserProfile: RouteHandler = (req, res, next, app) => {
-  const userId = BigInt(req.context.userId);
+  const userId = Number(req.context.userId);
   app.profileManager
     .GetUserById(userId)
     .then((profile) => {
@@ -60,7 +60,7 @@ export const HandleGetUserProfile: RouteHandler = (req, res, next, app) => {
 };
 
 export const HandleUpdateProfile: RouteHandler = (req, res, next, app) => {
-  const userId = BigInt(req.context.userId);
+  const userId = Number(req.context.userId);
   const bio: string = req.body.bio as string;
   app.profileManager
     .UpdateProfile(userId, undefined, bio)
@@ -75,7 +75,7 @@ export const HandleUpdateProfile: RouteHandler = (req, res, next, app) => {
 };
 
 export const HandleUpdateProfileImage: RouteHandler = (req, res, next, app) => {
-  const userId = BigInt(req.context.userId);
+  const userId = Number(req.context.userId);
   const bio: string = req.body.bio as string;
   app.profileManager
     .UpdateProfile(userId, undefined, bio)

@@ -1,8 +1,7 @@
 import { RandomString } from "../util/random";
-import InMKV from "../pkg/kv_store/kv_store_";
 import { IKVStore } from "../pkg/kv_store/kv_store";
-import { createClient,RedisClientType } from "redis";
 import Redis from "../pkg/kv_store/redis";
+import { createClient, RedisClientType } from "redis";
 let kv: IKVStore;
 beforeAll(async () => {
   const store: RedisClientType = createClient({
@@ -23,7 +22,7 @@ async function setRandomItem() {
       key: RandomString(10),
       value: RandomString(15),
     };
-    const i = await kv.Set(arg.key, arg.value);
+    const i = await kv.Set(arg.key, arg.value, 20);
 
     return arg;
   } catch (err) {

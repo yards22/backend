@@ -9,7 +9,7 @@ export default class NotificationManager {
   }
 
   // TODO: Do not accept any metadata, need to accept different types according to Notification Type
-  async Create(forId: bigint, metadata: any): Promise<ENotification> {
+  async Create(forId: number, metadata: any): Promise<ENotification> {
     return this.store.notifications.create({
       data: { for_id: forId, status: "Unseen", metadata: metadata },
     });
@@ -21,7 +21,7 @@ export default class NotificationManager {
   }
 
   // Returns notification by notification_id and for_id
-  GetByIDAndForID(forId: bigint, id: bigint): Promise<ENotification | null> {
+  GetByIDAndForID(forId: number, id: bigint): Promise<ENotification | null> {
     return this.store.notifications.findFirst({
       where: { AND: [{ for_id: forId, id: id }] },
     });
@@ -29,7 +29,7 @@ export default class NotificationManager {
 
   // Returns notifications for a user
   GetManyByForID(
-    forId: bigint,
+    forId: number,
     status: ENotificationStatus | "All",
     limit: number = 10,
     offset: number = 0
@@ -48,7 +48,7 @@ export default class NotificationManager {
 
   // Marks array of notifications for a user as "Read"
   async UpdateStatus(
-    forId: bigint,
+    forId: number,
     ids: bigint[],
     status: ENotificationStatus
   ): Promise<void> {

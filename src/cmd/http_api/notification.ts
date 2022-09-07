@@ -3,7 +3,7 @@ import { HerrorStatus } from "../../pkg/herror/status_codes";
 import RouteHandler from "./types";
 
 export const HandleGetNotification: RouteHandler = (req, res, next, app) => {
-  const forId = BigInt(req.context.userId);
+  const forId = Number(req.context.userId);
   const id = req.query.id ? BigInt(Number(req.query.id ?? -1)) : -1;
 
   // looking for many notifications
@@ -44,7 +44,7 @@ export const HandleUpdateNotificationStatus: RouteHandler = (
   next,
   app
 ) => {
-  const forId = BigInt(req.context.userId);
+  const forId = Number(req.context.userId);
 
   const _ids = req.body.ids as string[];
   const ids = _ids.map((item) => {

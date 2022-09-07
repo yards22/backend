@@ -7,15 +7,21 @@ import {
   HandleSignUp,
   HandleLogin,
   HandleGoogleOauth,
+  HandleOTPGenerationForSignUp,
+  HandleOTPVerificationForSignUp,
+  HandleLogout,
   HandleOTPGeneration,
   HandleOTPVerification,
-  HandleLogout,
-  HandleOTPGenerationForForgot,
   HandlePasswordUpdate,
-  CheckAllowance
+  HandleLogoutAllScreen
 } from "./auth";
 import { App } from "./types";
-import { HandleCreateProfile, HandleGetUserDetails, HandleUpdateProfile } from "./profile";
+import {
+  HandleCreateProfile,
+  HandleGetUserProfile,
+  HandleUpdateProfile,
+} from "./profile";
+import { CheckAllowance } from "./middlewares";
 
 function NotificationRoutes(app: App): Router {
   const router = Router();
@@ -24,31 +30,41 @@ function NotificationRoutes(app: App): Router {
   return router;
 }
 
-function AuthRoutes(app:App): Router{
+function AuthRoutes(app: App): Router {
   const router = Router();
   router.post("/signup", app.InHandler(HandleSignUp));
-  router.post("/login",app.InHandler(HandleLogin));
-  router.post("/oauth",app.InHandler(HandleGoogleOauth));
-  router.post("/sendOTP",app.InHandler(HandleOTPGeneration));
-  router.post("/verifyOTP",app.InHandler(HandleOTPVerification));
-  router.post("/logout",app.InHandler(HandleLogout));
-  router.post("/sendOTPforgot",app.InHandler(HandleOTPGenerationForForgot));
-  router.post("/updpassword",app.InHandler(HandlePasswordUpdate));
+  router.post("/login", app.InHandler(HandleLogin));
+  router.post("/oauth", app.InHandler(HandleGoogleOauth));
+  router.post("/sendOTP", app.InHandler(HandleOTPGenerationForSignUp));
+  router.post("/verifyOTP", app.InHandler(HandleOTPVerificationForSignUp));
+  router.delete(
+    "/logout",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleLogout)
+  );
+  router.post("/sendOTPforgot", app.InHandler(HandleOTPGeneration));
+  router.post(
+    "/verifyOTPforgot",
+    app.InHandler(HandleOTPVerification)
+  );
+  router.put("/updPassword", app.InHandler(HandlePasswordUpdate));
+  router.post("/logoutAllScreens",app.InHandler(HandleLogoutAllScreen));
   return router;
 }
 
 function ProfileRoutes(app: App): Router {
+  HandleOTPVerificationForSignUp;
   const router = Router();
-  router.get("/",app.InHandler(HandleGetUserDetails));
-  router.post("/",app.InHandler(HandleCreateProfile));
-  router.put("/",app.InHandler(HandleUpdateProfile));
+  router.get("/", app.InHandler(HandleGetUserProfile));
+  router.post("/", app.InHandler(HandleCreateProfile));
+  router.put("/", app.InHandler(HandleUpdateProfile));
   return router;
 }
 
 function HandleRoutesFor(app: App) {
-   app.srv.use("/notification", NotificationRoutes(app));
-   app.srv.use("/profile",ProfileRoutes(app));
-   app.srv.use("/auth", AuthRoutes(app));
- }
- 
+  app.srv.use("/notification", NotificationRoutes(app));
+  app.srv.use("/profile", ProfileRoutes(app));
+  app.srv.use("/auth", AuthRoutes(app));
+}
+
 export default HandleRoutesFor;

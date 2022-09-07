@@ -6,29 +6,28 @@ generator client {
 }
 
 datasource db {
-provider = "mysql"
-    url      = env("DATABASE_URL")
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
-
 model Users {
-    user_id           BigInt          @id @default(autoincrement()) @db.BigInt
-    mail_id      String
-    password     String
-    created_at   DateTime        @default(now())
-    identity_provider String     @default("self")
-    subject_id String?
-    Notification Notifications[]
-    Interests    Interests[]
-    Profile      Profile?
-    
-      @@map("users")
+  user_id           Int          @id @default(autoincrement()) @db.Int
+  mail_id           String          @unique
+  password          String?
+  created_at        DateTime        @default(now())
+  identity_provider String?        
+  subject_id        String?
+  Notification      Notifications[]
+  Interests         Interests[]
+  Profile           Profile?
+  
+  @@map("users")
 }
 
 model Notifications {
   id         BigInt             @id @default(autoincrement()) @db.BigInt
-  for        Users              @relation(fields: [for_id], references: [id])
-  for_id     BigInt
+  for        Users              @relation(fields: [for_id], references: [user_id])
+  for_id     Int
   status     NotificationStatus
   metadata   Json
   created_at DateTime           @default(now())
@@ -36,10 +35,9 @@ model Notifications {
   @@map("notifications")
 }
 
-
 model Interests {
-  user     Users  @relation(fields: [user_id], references: [id])
-  user_id  BigInt
+  user     Users  @relation(fields: [user_id], references: [user_id])
+  user_id  Int
   interest String
 
   @@unique([user_id, interest])
@@ -47,8 +45,8 @@ model Interests {
 }
 
 model Profile {
-  user              Users    @relation(fields: [user_id], references: [id])
-  user_id           BigInt   @unique
+  user              Users    @relation(fields: [user_id], references: [user_id])
+  user_id           Int   @unique
   username          String   @unique
   email_id          String?
   profile_image_uri String?
@@ -60,9 +58,12 @@ model Profile {
 }
 
 model Token {
-   user_id  String @unique
-   token_id  String
-    @@map("token")
+  screen_id BigInt @id @default(autoincrement()) @db.BigInt
+  user_id  Int 
+  token_id String
+  
+  @@unique([user_id,token_id])
+  @@map("token")
 }
 
 enum NotificationStatus {
@@ -70,11 +71,3 @@ enum NotificationStatus {
   Seen
   Read
 }
-
-
-
-
-
-
-
-
