@@ -7,13 +7,19 @@ export const CheckAllowance: RouteHandler = async (req, res, next, app) => {
   if (accessToken == "" || accessToken == undefined) {
     return next(new Herror("unauthorized", HerrorStatus.StatusUnauthorized));
   }
-  const userDataStr = app.kvStore.Get(accessToken);
-  
-  // convert user_id back to bigint.
+  try {
+    const userDataStr = await app.kvStore.Get("token_" + accessToken);
 
-  if (!userDataStr)
-    return next(new Herror("unauthorized", HerrorStatus.StatusUnauthorized));
+    // convert user_id back to bigint.
 
-  // the user is authorized
-  req.context.userData = JSON.parse((userDataStr || "") as any);
+    if (!userDataStr)
+      return next(new Herror("unauthorized", HerrorStatus.StatusUnauthorized));
+
+    // the user is authorized
+    req.context = JSON.parse((userDataStr || "") as any);
+    req.context.token = accessToken;
+    next();
+  } catch (err) {
+    next(err);
+  }
 };
