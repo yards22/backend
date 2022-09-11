@@ -20,7 +20,7 @@ type RouteHandler = (
 
 export class App {
   srv: Express;
-  authManager:AuthManager;
+  authManager: AuthManager;
   notificationManager: NotificationManager;
   profileManager: ProfileManager;
   db: PrismaClient;
@@ -53,6 +53,7 @@ export class App {
       message?: string;
     }
   ) {
+    res.setHeader("Content-Type", "application/json");
     res.status(resData.status).send(
       ToJson({
         data: resData.data,
