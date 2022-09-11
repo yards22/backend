@@ -60,39 +60,39 @@ export default class AuthManager {
     });
   }
 
-//TODO: not able to delete screen which logged out because of their token expiry.
+  //TODO: not able to delete screen which logged out because of their token expiry.
 
-  DeleteScreen(user_id:number,accessToken:string){
-    return this.store.token.delete({
-      where:{
-        user_id_token_id:{user_id,token_id:accessToken}
-      }
-    })
+  DeleteScreen(user_id: number, accessToken: string) {
+    return this.store.token.deleteMany({
+      where: {
+        AND: [{ user_id: user_id }, { token_id: accessToken }],
+      },
+    });
   }
 
-  DeleteAllScreens(user_id:number){
-     return this.store.token.deleteMany({
-       where:{
-        user_id
-       }      
-     })
-  }
-
-  GetAllScreens(user_id:number){
-    return this.store.token.findMany({
-      where:{
-        user_id
-      }
-    })
-  }
-
-  CreateScreen(user_id:number,accessToken:string){
-    return this.store.token.create({
-      data:({
+  DeleteAllScreens(user_id: number) {
+    return this.store.token.deleteMany({
+      where: {
         user_id,
-        token_id:accessToken
-      })
-    })
+      },
+    });
+  }
+
+  GetAllScreens(user_id: number) {
+    return this.store.token.findMany({
+      where: {
+        user_id,
+      },
+    });
+  }
+
+  CreateScreen(user_id: number, accessToken: string) {
+    return this.store.token.create({
+      data: {
+        user_id,
+        token_id: accessToken,
+      },
+    });
   }
 
   UpdatePassword(user_id: number, password: string): Promise<EAuth> {
@@ -129,7 +129,7 @@ export default class AuthManager {
               enc_password
             );
             const accessToken = await this.CreateSession(Token_Length, user);
-            await this.CreateScreen(user.user_id,accessToken);
+            await this.CreateScreen(user.user_id, accessToken);
             resolve({
               responseStatus: {
                 statusCode: HerrorStatus.StatusCreated,
@@ -159,7 +159,6 @@ export default class AuthManager {
     });
   }
 
-
   //TODO: change update and insert into a single step inbuilt upsert.
 
   GoogleLogin(id_token: string): Promise<{
@@ -171,8 +170,11 @@ export default class AuthManager {
       try {
         const payload: any = await verifyGoogleIdTokenAndGetUserData(id_token);
         const user: EAuth = await this.UpsertUser(payload.email, payload.sub);
-        const accessToken: string = await this.CreateSession(Token_Length, user);
-        await this.CreateScreen(user.user_id,accessToken);
+        const accessToken: string = await this.CreateSession(
+          Token_Length,
+          user
+        );
+        await this.CreateScreen(user.user_id, accessToken);
         resolve({
           responseStatus: {
             statusCode: HerrorStatus.StatusOK,
@@ -220,16 +222,19 @@ export default class AuthManager {
           );
           if (validPassword) {
             const id: number = user?.user_id;
-            const accessToken: string = await this.CreateSession(Token_Length, user);
-              await this.CreateScreen(user.user_id,accessToken);
-              resolve({
-                responseStatus: {
-                  statusCode: HerrorStatus.StatusOK,
-                  message: "successful_login",
-                },
-                userData: user,
-                accessToken,
-              });
+            const accessToken: string = await this.CreateSession(
+              Token_Length,
+              user
+            );
+            await this.CreateScreen(user.user_id, accessToken);
+            resolve({
+              responseStatus: {
+                statusCode: HerrorStatus.StatusOK,
+                message: "successful_login",
+              },
+              userData: user,
+              accessToken,
+            });
           } else {
             resolve({
               responseStatus: {
@@ -321,7 +326,6 @@ export default class AuthManager {
     return new Promise(async (resolve, reject) => {
       try {
         const user = await this.GetUserByMail(mail_id);
-        console.log(user);
         if (!user) {
           const valid_otp: string = await this.CheckForOTPSession(mail_id);
           if (valid_otp == otp)
@@ -390,23 +394,22 @@ export default class AuthManager {
   }
 
   LogoutAllScreens(
-    mail_id:string,
-    otp:string
-    ):Promise<{
-      responseStatus: IResponse
-    }>
-    {
-    return new Promise(async (resolve,reject)=>{
-      try{
+    mail_id: string,
+    otp: string
+  ): Promise<{
+    responseStatus: IResponse;
+  }> {
+    return new Promise(async (resolve, reject) => {
+      try {
         const user = await this.GetUserByMail(mail_id);
-        if(user){
+        if (user) {
           const valid_otp: string = await this.CheckForOTPSession(mail_id);
-          if(otp === valid_otp){
+          if (otp === valid_otp) {
             const screens = await this.GetAllScreens(user.user_id);
             // Clear all the sessions
-            for(let i=0;i<screens.length;i++){
-                const accessToken = screens[i].token_id;
-                await this.cache.Delete(accessToken);
+            for (let i = 0; i < screens.length; i++) {
+              const accessToken = screens[i].token_id;
+              await this.cache.Delete("token_" + accessToken);
             }
 
             resolve({
@@ -414,30 +417,27 @@ export default class AuthManager {
                 statusCode: HerrorStatus.StatusOK,
                 message: "logged out of all accounts",
               },
-            })
-          }
-          else{
-            resolve({
+            });
+          } else {
+            reject({
               responseStatus: {
                 statusCode: HerrorStatus.StatusUnauthorized,
                 message: "otp_invalid",
               },
             });
           }
-        }
-        else{
-          resolve({
+        } else {
+          reject({
             responseStatus: {
               statusCode: HerrorStatus.StatusForbidden,
               message: "user_doesnot_exists_in_db",
             },
           });
         }
-      }
-      catch(err){
+      } catch (err) {
         reject(err);
       }
-    })
+    });
   }
 
   UpdateUserPassword(
@@ -504,7 +504,7 @@ export default class AuthManager {
   CheckForOTPSession(mail_id: string): Promise<string> {
     return new Promise(async (resolve, reject) => {
       try {
-        const otp: any = await this.cache.Get(mail_id);
+        const otp: any = await this.cache.Get("otp_" + mail_id);
         resolve(otp);
       } catch (err) {
         reject(err);
@@ -518,7 +518,7 @@ export default class AuthManager {
         let token: string = RandomString(n);
         let isExists: any = true;
         while (isExists) {
-          isExists = await this.cache.Get(token);
+          isExists = await this.cache.Get("token_" + token);
           token = RandomString(n);
         }
         const userStringified: string = JSON.stringify(user);
@@ -530,11 +530,14 @@ export default class AuthManager {
     });
   }
 
-  LogoutUser(user_id:number,token: string): Promise<{ responseStatus: IResponse }> {
+  LogoutUser(
+    user_id: number,
+    token: string
+  ): Promise<{ responseStatus: IResponse }> {
     return new Promise(async (resolve, reject) => {
       try {
-        this.cache.Delete(token);
-        this.DeleteScreen(user_id,token);
+        await this.cache.Delete("token_" + token);
+        await this.DeleteScreen(user_id, token);
         resolve({
           responseStatus: {
             statusCode: HerrorStatus.StatusOK,
