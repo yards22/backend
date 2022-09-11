@@ -62,11 +62,13 @@ export function SinkInit(app: App) {
 
   app.srv.use((err: any, req: any, res: any, next: any) => {
     console.log(err);
-    res.status(err.status || 500);
+    const status = err.status || err.responseStatus.statusCode || 500;
+    const message = err.message || err.responseStatus.message || "error";
+    res.status(status);
     res.send({
       isError: true,
-      status: err.status,
-      message: err.message,
+      status: status,
+      message: message,
     });
   });
 }
