@@ -44,7 +44,7 @@ export async function DBInit(): Promise<PrismaClient> {
 // Redis init
 export async function RedisInit() {
   try {
-    const store= createClient({
+    const store = createClient({
       url: `redis://localhost:6379`,
     });
     await store.connect();
@@ -56,12 +56,12 @@ export async function RedisInit() {
 
 // Sink init
 export function SinkInit(app: App) {
-  // app.srv.use((req, res, next) => {
-  //   console.log("not found");
-  //   next(new Herror("not found", HerrorStatus.StatusNotFound));
-  // });
+  app.srv.use((req, res, next) => {
+    next(new Herror("not found", HerrorStatus.StatusNotFound));
+  });
 
   app.srv.use((err: any, req: any, res: any, next: any) => {
+    console.log(err);
     res.status(err.status || 500);
     res.send({
       isError: true,

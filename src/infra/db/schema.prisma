@@ -11,16 +11,17 @@ datasource db {
 }
 
 model Users {
-  user_id           Int          @id @default(autoincrement()) @db.Int
+  user_id           Int             @id @default(autoincrement()) @db.Int
   mail_id           String          @unique
   password          String?
   created_at        DateTime        @default(now())
-  identity_provider String?        
+  identity_provider String?
   subject_id        String?
   Notification      Notifications[]
   Interests         Interests[]
   Profile           Profile?
-  
+  Token             Token[]
+
   @@map("users")
 }
 
@@ -46,7 +47,7 @@ model Interests {
 
 model Profile {
   user              Users    @relation(fields: [user_id], references: [user_id])
-  user_id           Int   @unique
+  user_id           Int      @unique
   username          String   @unique
   email_id          String?
   profile_image_uri String?
@@ -58,11 +59,13 @@ model Profile {
 }
 
 model Token {
-  screen_id BigInt @id @default(autoincrement()) @db.BigInt
-  user_id  Int 
-  token_id String
-  
-  @@unique([user_id,token_id])
+  screen_id  BigInt   @id @default(autoincrement()) @db.BigInt
+  user       Users    @relation(fields: [user_id], references: [user_id])
+  user_id    Int
+  token_id   String
+  created_at DateTime @default(now())
+
+  @@unique([user_id, token_id])
   @@map("token")
 }
 

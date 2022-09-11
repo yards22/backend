@@ -13,7 +13,8 @@ import {
   HandleOTPGeneration,
   HandleOTPVerification,
   HandlePasswordUpdate,
-  HandleLogoutAllScreen
+  HandleLogoutAllScreen,
+  HandleMe,
 } from "./auth";
 import { App } from "./types";
 import {
@@ -32,6 +33,7 @@ function NotificationRoutes(app: App): Router {
 
 function AuthRoutes(app: App): Router {
   const router = Router();
+  router.get("/", app.InHandler(CheckAllowance), app.InHandler(HandleMe));
   router.post("/signup", app.InHandler(HandleSignUp));
   router.post("/login", app.InHandler(HandleLogin));
   router.post("/oauth", app.InHandler(HandleGoogleOauth));
@@ -43,12 +45,9 @@ function AuthRoutes(app: App): Router {
     app.InHandler(HandleLogout)
   );
   router.post("/sendOTPforgot", app.InHandler(HandleOTPGeneration));
-  router.post(
-    "/verifyOTPforgot",
-    app.InHandler(HandleOTPVerification)
-  );
+  router.post("/verifyOTPforgot", app.InHandler(HandleOTPVerification));
   router.put("/updPassword", app.InHandler(HandlePasswordUpdate));
-  router.post("/logoutAllScreens",app.InHandler(HandleLogoutAllScreen));
+  router.post("/logoutAllScreens", app.InHandler(HandleLogoutAllScreen));
   return router;
 }
 
