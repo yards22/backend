@@ -179,7 +179,7 @@ const HandlePasswordUpdate: RouteHandler = async (req, res, next, app) => {
       await app.authManager.UpdateUserPassword(mail_id, OTP, password);
     app.SendRes(res, {
       status: responseStatus.statusCode,
-      data: { userData, accessToken },
+      data: { user_data: userData, token: accessToken },
       message: responseStatus.message,
     });
   } catch (err) {
