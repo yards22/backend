@@ -1,7 +1,7 @@
-import { FileStorage } from "../pkg/file_storage/file_storage";
+import { IFileStorage } from "../pkg/file_storage/file_storage";
 import { LocalFileStorage } from "../pkg/file_storage/local_file_storage";
 import { RandomString } from "../util/random";
-let fileStorage: FileStorage;
+let fileStorage: IFileStorage;
 beforeAll(async () => {
   fileStorage = new LocalFileStorage();
 });

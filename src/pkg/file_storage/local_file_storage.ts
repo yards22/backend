@@ -1,6 +1,6 @@
-import { FileStorage } from "./file_storage";
+import { IFileStorage } from "./file_storage";
 import { readFile, writeFile, unlink, access } from "fs";
-export class LocalFileStorage implements FileStorage {
+export class LocalFileStorage implements IFileStorage {
   Put(filePath: string, fileData: any): Promise<void> {
     return new Promise((resolve, reject) => {
       writeFile(filePath, fileData, (err) => {
