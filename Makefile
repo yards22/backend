@@ -11,10 +11,10 @@ remove_ms:
 	docker rm -f node_mysql
 
 create_mysql:
-	docker run --name node_mysql -p 3456:3306 -e MYSQL_ROOT_PASSWORD=mypassword -e MYSQL_DATABASE=node_app_db -v ${PWD}/../dbdata:/var/lib/mysql -d mysql:8
+	docker run --name node_mysql -p 3456:3306 -e MYSQL_ROOT_PASSWORD=mypassword -v ${PWD}/../dbdata:/var/lib/mysql -d mysql:8
 
 create_ms_db:
-	docker exec -it node_mysql createdb --username=root --owner=root node_app_db
+	docker exec -i node_mysql mysql -u root -pmypassword <<< 'create database node_app_db'
 
 redis:
 	docker rm -f node_redis
