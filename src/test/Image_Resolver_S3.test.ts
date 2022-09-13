@@ -5,16 +5,7 @@ import { ImageResolver } from "../pkg/image_resolver/image_resolver_";
 require("dotenv").config();
 let imageResolver: IImageResolver;
 beforeAll(async () => {
-  imageResolver = new ImageResolver(
-    new S3FileStorage(
-      (process.env as any).S3_BUCKET,
-      (process.env as any).ACCESS_KEY_ID,
-      (process.env as any).ACCESS_KEY_SECRET,
-      (process.env as any).S3_REGION
-    ),
-    { h: 320, w: 500 },
-    "jpeg"
-  );
+  imageResolver = new ImageResolver({ h: 320, w: 500 }, "jpeg");
 });
 
 afterAll(async () => {});
@@ -22,12 +13,15 @@ jest.setTimeout(20000);
 test("test create notification", async () => {
   try {
     const localFileStorage = new LocalFileStorage();
+    const s3FileStorage = new S3FileStorage(
+      (process.env as any).S3_BUCKET,
+      (process.env as any).ACCESS_KEY_ID,
+      (process.env as any).ACCESS_KEY_SECRET,
+      (process.env as any).S3_REGION
+    );
     const image = await localFileStorage.Get("./test_image.webp");
     const convertedImage = await imageResolver.Convert(image);
-    await imageResolver.fileStorage.Put(
-      "converted_test_image.jpeg",
-      convertedImage
-    );
+    await s3FileStorage.Put("converted_test_image.jpeg", convertedImage);
   } catch (err) {
     expect(err).toBe(null);
   }

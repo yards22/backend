@@ -1,11 +1,11 @@
-import { IImageResolver } from "./image_resolver";
+import { IImageResolver, SupportedImageType } from "./image_resolver";
 import sharp from "sharp";
 
 export class ImageResolver extends IImageResolver {
   Convert(
     imageFile: Buffer,
     size?: { h: number; w: number },
-    format?: "webp" | "png" | "jpg" | "jpeg" | "pdf"
+    format?: SupportedImageType
   ): Promise<Buffer> {
     return new Promise((resolve, reject) => {
       const useSize = size ? size : this.defaultSize;
