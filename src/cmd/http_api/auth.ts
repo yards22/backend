@@ -2,6 +2,7 @@ import RouteHandler from "./types";
 import { Herror } from "../../pkg/herror/herror";
 import { MailValidator } from "../../util/mail_dependencies";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
+import { Console, log } from "console";
 
 const HandleSignUp: RouteHandler = async (req, res, next, app) => {
   const mail_id = req.body.mail_id;
@@ -46,6 +47,7 @@ const HandleLogin: RouteHandler = async (req, res, next, app) => {
 
 const HandleGoogleOauth: RouteHandler = async (req, res, next, app) => {
   const id_token = req.body.id_token;
+  console.log(id_token);
   if (id_token != undefined) {
     try {
       const { responseStatus, userData, accessToken } =
@@ -70,6 +72,10 @@ const HandleOTPGenerationForSignUp: RouteHandler = async (
   app
 ) => {
   const mail_id = req.body.mail_id;
+  console.log("Hello");
+  
+  console.log(mail_id);
+  
   const valid: boolean = MailValidator(mail_id);
   if (valid) {
     try {
@@ -151,6 +157,8 @@ const HandleLogout: RouteHandler = async (req, res, next, app) => {
 };
 
 const HandleOTPGeneration: RouteHandler = async (req, res, next, app) => {
+  console.log("Hello");
+  
   const mail_id = req.body.mail_id;
   const valid: boolean = MailValidator(mail_id);
   if (valid) {
