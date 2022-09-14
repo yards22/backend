@@ -50,6 +50,7 @@ CREATE TABLE `token` (
     `user_id` INTEGER NOT NULL,
     `token_id` VARCHAR(191) NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `expired_at` DATETIME(3) NULL,
 
     UNIQUE INDEX `token_user_id_token_id_key`(`user_id`, `token_id`),
     PRIMARY KEY (`screen_id`)

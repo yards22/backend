@@ -7,6 +7,7 @@ import config from "config";
 import cors from "cors";
 import { RedisClientType } from "@redis/client";
 import { createClient } from "redis";
+import cron from "node-cron"
 
 // server init
 export function ServerInit(): Express {
@@ -54,6 +55,18 @@ export async function RedisInit() {
   }
 }
 
+export async function TimerInit(){
+  try {
+    var cronJob = cron.schedule("0 0 0 * * *", function(){
+      // perform db cleanup periodically.
+      
+      console.info('cron job in background');
+  }); 
+  cronJob.start();
+  } catch (err) {
+    throw err;
+  }
+}
 // Sink init
 export function SinkInit(app: App) {
   app.srv.use((req, res, next) => {

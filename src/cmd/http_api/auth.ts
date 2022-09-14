@@ -187,7 +187,6 @@ const HandlePasswordUpdate: RouteHandler = async (req, res, next, app) => {
   }
 };
 
-// have otp generation and verification here instead of username and password check as google login may not contain password.
 const HandleLogoutAllScreen: RouteHandler = async (req, res, next, app) => {
   const mail_id: string = req.body.mail_id;
   const OTP: string = req.body.OTP;

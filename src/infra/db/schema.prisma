@@ -64,6 +64,7 @@ model Token {
   user_id    Int
   token_id   String
   created_at DateTime @default(now())
+  expired_at DateTime?
 
   @@unique([user_id, token_id])
   @@map("token")

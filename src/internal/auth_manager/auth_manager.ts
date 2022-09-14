@@ -60,7 +60,6 @@ export default class AuthManager {
     });
   }
 
-  //TODO: not able to delete screen which logged out because of their token expiry.
 
   DeleteScreen(user_id: number, accessToken: string) {
     return this.store.token.deleteMany({
@@ -86,11 +85,12 @@ export default class AuthManager {
     });
   }
 
-  CreateScreen(user_id: number, accessToken: string) {
+  CreateScreen(user_id: number, accessToken: string,expiry:Date) {
     return this.store.token.create({
       data: {
         user_id,
         token_id: accessToken,
+        expired_at: expiry
       },
     });
   }
@@ -129,7 +129,9 @@ export default class AuthManager {
               enc_password
             );
             const accessToken = await this.CreateSession(Token_Length, user);
-            await this.CreateScreen(user.user_id, accessToken);
+            const oneYearFromNow = new Date();
+            oneYearFromNow.setMonth(oneYearFromNow.getMonth()+1)
+            await this.CreateScreen(user.user_id, accessToken,oneYearFromNow);
             resolve({
               responseStatus: {
                 statusCode: HerrorStatus.StatusCreated,
@@ -174,7 +176,9 @@ export default class AuthManager {
           Token_Length,
           user
         );
-        await this.CreateScreen(user.user_id, accessToken);
+        const oneYearFromNow = new Date();
+        oneYearFromNow.setMonth(oneYearFromNow.getMonth()+1)
+        await this.CreateScreen(user.user_id, accessToken,oneYearFromNow);
         resolve({
           responseStatus: {
             statusCode: HerrorStatus.StatusOK,
@@ -226,7 +230,9 @@ export default class AuthManager {
               Token_Length,
               user
             );
-            await this.CreateScreen(user.user_id, accessToken);
+            const oneYearFromNow = new Date();
+            oneYearFromNow.setMonth(oneYearFromNow.getMonth()+1)
+            await this.CreateScreen(user.user_id, accessToken,oneYearFromNow);
             resolve({
               responseStatus: {
                 statusCode: HerrorStatus.StatusOK,
