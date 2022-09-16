@@ -17,8 +17,15 @@ import {
   HandleMe,
 } from "./auth";
 import { App } from "./types";
-import { HandleCreateProfile, HandleUpdateProfile } from "./profile";
+import { 
+  HandleUpdateProfile,
+  HandleGetUserPrimaryInfo,
+} from "./profile";
 import { CheckAllowance } from "./middlewares";
+import multer from "multer";
+
+const storage = multer.memoryStorage()
+const upload = multer({ storage: storage })
 
 function NotificationRoutes(app: App): Router {
   const router = Router();
@@ -49,8 +56,8 @@ function AuthRoutes(app:App): Router{
 
 function ProfileRoutes(app: App): Router {
   const router = Router();
-  router.post("/",app.InHandler(HandleCreateProfile));
-  router.put("/",app.InHandler(HandleUpdateProfile));
+  router.put("/",upload.single('image'),app.InHandler(HandleUpdateProfile));
+  router.get("/editProfile",app.InHandler(HandleGetUserPrimaryInfo ));
   return router;
 }
 

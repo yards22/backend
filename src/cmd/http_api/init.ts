@@ -23,6 +23,7 @@ export function ServerInit(): Express {
       credentials: true,
     })
   );
+  
   srv.use(express.json());
   srv.use(express.urlencoded({ extended: true }));
   return srv;

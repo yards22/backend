@@ -20,7 +20,7 @@ export class S3FileStorage implements IFileStorage {
       region,
     });
   }
-  Put(filePath: string, fileData: any, bucket?: string): Promise<void> {
+  Put(filePath: string, fileData: any, bucket?: string): Promise<any> {
     return new Promise((resolve, reject) => {
       this.s3Client.putObject(
         {
@@ -28,9 +28,9 @@ export class S3FileStorage implements IFileStorage {
           Key: filePath,
           Body: fileData,
         },
-        (err) => {
-          if (err != null) return reject(err);
-          return resolve();
+        (err,data) => {
+          if (err) return reject(err);
+          return resolve(data);
         }
       );
     });

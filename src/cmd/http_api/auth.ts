@@ -3,6 +3,8 @@ import { Herror } from "../../pkg/herror/herror";
 import { MailValidator } from "../../util/mail_dependencies";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 import { Console, log } from "console";
+import multer from 'multer'
+
 
 const HandleSignUp: RouteHandler = async (req, res, next, app) => {
   const mail_id = req.body.mail_id;
@@ -219,6 +221,7 @@ const HandleMe: RouteHandler = async (req, res, next, app) => {
   delete data.password;
   app.SendRes(res, { status: HerrorStatus.StatusOK, data });
 };
+
 
 export {
   HandleSignUp,

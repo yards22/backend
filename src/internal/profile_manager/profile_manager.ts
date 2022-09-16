@@ -1,4 +1,7 @@
 import { PrismaClient } from "@prisma/client";
+import { resolve } from "path";
+import { S3FileStorage } from "../../pkg/file_storage/s3_file_storage";
+import { RandomString } from "../../util/random";
 import EProfile from "../entities/profile";
 
 export default class ProfileManager {
@@ -20,10 +23,10 @@ export default class ProfileManager {
     return false;
   }
 
-  GetUserById(userId: number): Promise<EProfile | null> {
+  GetUserPrimaryInfoById(user_id: number): Promise<EProfile | null> {
     return this.store.profile.findUnique({
       where: {
-        user_id: userId,
+        user_id: user_id,
       },
       include: {
         user: {
@@ -33,19 +36,41 @@ export default class ProfileManager {
     });
   }
 
+  GetUserProfileById(user_id: number):Promise<EProfile | null> {
+    return this.store.profile.findUnique({
+      where: {
+        user_id: user_id,
+      },
+      include: {
+        user: {
+          include: { 
+            Interests: true,
+            //TODO: to be added.
+            // Posts: true,
+            // Bookmarked :true.
+          },
+        },
+      },
+    });
+  }
+
   // accepting profileImageUri or bio as optional so as any one can also be updated at once
   UpdateProfile(
-    userId: number,
-    profileImageUri?: string,
+    user_id: number,
+    username:string,
+    updated_at: Date,
+    profile_image_uri?: string,
     bio?: string
   ): Promise<EProfile> {
     return this.store.profile.update({
       where: {
-        user_id: userId,
+        user_id: user_id,
       },
       data: {
-        profile_image_uri: profileImageUri,
+        username:username,
+        profile_image_uri: profile_image_uri,
         bio: bio,
+        updated_at:updated_at
       },
     });
   }
@@ -54,9 +79,9 @@ export default class ProfileManager {
   CreateProfile(
     userId: number,
     userName: string,
+    emailId: string,
     bio?: string,
     profileImageUri?: string,
-    emailId?: string
   ): Promise<EProfile> {
     return this.store.profile.create({
       data: {
@@ -68,4 +93,37 @@ export default class ProfileManager {
       },
     });
   }
+  
+  UpdateProfileDetails(
+    user_id: number,
+    username:string,
+    updated_at: Date,
+    profile_image_buffer:any,
+    bio?: string
+  ) :Promise<EProfile>{
+    return new Promise(async (resolve,reject)=>{
+       // upload image to s3
+      try{
+        const fileStorage = new S3FileStorage(
+          (process.env as any).S3_BUCKET,
+          (process.env as any).ACCESS_KEY_ID,
+          (process.env as any).ACCESS_KEY_SECRET,
+          (process.env as any).S3_REGION
+       );
+       const filePath = username+"_dp.webp";
+       const BucketUrl = "https://22yards-image-bucket.s3.ap-south-1.amazonaws.com/";
+       const ObjUrl = BucketUrl+filePath;
+       await fileStorage.Put(filePath,profile_image_buffer);
+       const UpdatedProfile = await this.UpdateProfile(user_id,username,updated_at,ObjUrl,bio)
+         resolve(UpdatedProfile);
+      }
+      catch(err){
+         reject(err);
+      }
+    })
+  }
+
+
 }
+
+
