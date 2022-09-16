@@ -20,6 +20,8 @@ import { App } from "./types";
 import { 
   HandleUpdateProfile,
   HandleGetUserPrimaryInfo,
+  HandleGetUserProfileInfo,
+  HandleGetCheckUsername
 } from "./profile";
 import { CheckAllowance } from "./middlewares";
 import multer from "multer";
@@ -58,6 +60,8 @@ function ProfileRoutes(app: App): Router {
   const router = Router();
   router.put("/",upload.single('image'),app.InHandler(HandleUpdateProfile));
   router.get("/editProfile",app.InHandler(HandleGetUserPrimaryInfo ));
+  router.get("/",app.InHandler(CheckAllowance),app.InHandler(HandleGetUserProfileInfo));
+  router.post("checkUsername",app.InHandler(HandleGetCheckUsername));
   return router;
 }
 

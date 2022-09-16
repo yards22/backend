@@ -3,6 +3,7 @@ import { resolve } from "path";
 import { S3FileStorage } from "../../pkg/file_storage/s3_file_storage";
 import { Herror } from "../../pkg/herror/herror";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
+import { ImageResolver } from "../../pkg/image_resolver/image_resolver_";
 import { RandomString } from "../../util/random";
 import EProfile from "../entities/profile";
 
@@ -98,7 +99,9 @@ export default class ProfileManager {
        const filePath = username+"_dp.webp";
        const BucketUrl = "https://22yards-image-bucket.s3.ap-south-1.amazonaws.com/";
        const ObjUrl = BucketUrl+filePath;
-       await fileStorage.Put(filePath,profile_image_buffer);
+       const imageResolver = new ImageResolver({ h: 320, w: 500 }, "jpeg");
+       const image = await imageResolver.Convert(profile_image_buffer);
+       await fileStorage.Put(filePath,image);
        const UpdatedProfile = await this.UpdateProfile(user_id,username,updated_at,ObjUrl,bio)
        resolve({
         responseStatus: {

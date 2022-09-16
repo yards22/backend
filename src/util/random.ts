@@ -17,7 +17,8 @@ function GenerateOTP(): string {
 
     let otp:string ="" ;
     while(otp.length<4){
-        otp+=(Math.floor(Math.random()*10).toString());
+      const RandNumber = (Math.floor(Math.random()*10));
+      otp+= RandNumber !==0 ? RandNumber.toString() :(RandNumber+1).toString();
     }
     return otp; 
 }

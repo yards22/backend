@@ -199,7 +199,8 @@ export default class AuthManager {
         let user = await this.GetUserByMail(email);
         if (!user) {
           const username: string = GenerateUsername(email);
-          user = await this.CreateUser(email, username, undefined, sub);
+          console.log("in upsert user about to create user");
+          user = await this.CreateUser(email, username, undefined, sub,"google");
         }
         resolve(user);
       } catch (err) {
@@ -524,6 +525,7 @@ export default class AuthManager {
         let token: string = RandomString(n);
         let isExists: any = true;
         while (isExists) {
+          console.log("into create session ");
           isExists = await this.cache.Get("token_" + token);
           token = RandomString(n);
         }

@@ -49,7 +49,6 @@ const HandleLogin: RouteHandler = async (req, res, next, app) => {
 
 const HandleGoogleOauth: RouteHandler = async (req, res, next, app) => {
   const id_token = req.body.id_token;
-  console.log(id_token);
   if (id_token != undefined) {
     try {
       const { responseStatus, userData, accessToken } =

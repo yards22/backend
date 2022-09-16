@@ -34,8 +34,8 @@ CREATE TABLE `interests` (
 CREATE TABLE `profiles` (
     `user_id` INTEGER NOT NULL,
     `username` VARCHAR(191) NOT NULL,
-    `email_id` VARCHAR(191) NULL,
-    `profile_image_uri` VARCHAR(191) NULL,
+    `email_id` VARCHAR(191) NOT NULL,
+    `profile_image_uri` VARCHAR(191) NULL DEFAULT 'https://22yards-image-bucket.s3.ap-south-1.amazonaws.com/sjFmewfzjI.webp',
     `bio` VARCHAR(191) NULL,
     `cric_index` INTEGER NOT NULL DEFAULT 0,
     `updated_at` DATETIME(3) NOT NULL,
