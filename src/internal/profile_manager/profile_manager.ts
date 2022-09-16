@@ -1,8 +1,16 @@
 import { PrismaClient } from "@prisma/client";
 import { resolve } from "path";
 import { S3FileStorage } from "../../pkg/file_storage/s3_file_storage";
+import { Herror } from "../../pkg/herror/herror";
+import { HerrorStatus } from "../../pkg/herror/status_codes";
 import { RandomString } from "../../util/random";
 import EProfile from "../entities/profile";
+
+interface IResponse {
+  statusCode: number;
+  message?: string;
+}
+
 
 export default class ProfileManager {
   private store: PrismaClient;
@@ -10,17 +18,12 @@ export default class ProfileManager {
     this.store = store;
   }
 
-  async IfUserNameExists(username: string): Promise<boolean> {
-    const profile = await this.store.profile.findFirst({
-      where: {
-        username,
-      },
-    });
-    if (profile !== null && profile.username === username) {
-      // username already exists
-      return true;
-    }
-    return false;
+  GetUserByUsername(username:string):Promise<EProfile | null>{
+    return this.store.profile.findUnique({
+      where:{
+        username
+      }
+    })
   }
 
   GetUserPrimaryInfoById(user_id: number): Promise<EProfile | null> {
@@ -54,7 +57,6 @@ export default class ProfileManager {
     });
   }
 
-  // accepting profileImageUri or bio as optional so as any one can also be updated at once
   UpdateProfile(
     user_id: number,
     username:string,
@@ -74,25 +76,6 @@ export default class ProfileManager {
       },
     });
   }
-
-  // TODO: Handle image upload and then take profile image uri
-  CreateProfile(
-    userId: number,
-    userName: string,
-    emailId: string,
-    bio?: string,
-    profileImageUri?: string,
-  ): Promise<EProfile> {
-    return this.store.profile.create({
-      data: {
-        user_id: userId,
-        username: userName,
-        email_id: emailId,
-        profile_image_uri: profileImageUri,
-        bio: bio,
-      },
-    });
-  }
   
   UpdateProfileDetails(
     user_id: number,
@@ -100,9 +83,11 @@ export default class ProfileManager {
     updated_at: Date,
     profile_image_buffer:any,
     bio?: string
-  ) :Promise<EProfile>{
+  ):Promise<{
+    responseStatus: IResponse;
+    profileData?: EProfile
+  }> {
     return new Promise(async (resolve,reject)=>{
-       // upload image to s3
       try{
         const fileStorage = new S3FileStorage(
           (process.env as any).S3_BUCKET,
@@ -115,11 +100,47 @@ export default class ProfileManager {
        const ObjUrl = BucketUrl+filePath;
        await fileStorage.Put(filePath,profile_image_buffer);
        const UpdatedProfile = await this.UpdateProfile(user_id,username,updated_at,ObjUrl,bio)
-         resolve(UpdatedProfile);
+       resolve({
+        responseStatus: {
+          statusCode: HerrorStatus.StatusOK,
+          message: "successful_Updation",
+        },
+        profileData: UpdatedProfile
+       });
       }
       catch(err){
          reject(err);
       }
+    })
+  }
+
+  CheckUsername(username:string): Promise<{
+    responseStatus: IResponse;
+    userData?: EProfile;
+  }> {
+    return new Promise(async (resolve,reject)=>{
+       try{
+         const user = await this.GetUserByUsername(username);
+         if(user === undefined || user === null){
+            resolve({
+              responseStatus:{
+                statusCode: HerrorStatus.StatusOK,
+                message: "username_exists",
+              }
+            })
+         }
+         else{
+          resolve({
+            responseStatus: {
+              statusCode: HerrorStatus.StatusUnauthorized,
+              message: "username_already_taken",
+            }
+          });
+         }
+       }
+       catch(err){
+         reject(err);
+       }
     })
   }
 
