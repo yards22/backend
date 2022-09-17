@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+prettier --write .
+git add .
+git commit -m 'prettier and husky formatted code'

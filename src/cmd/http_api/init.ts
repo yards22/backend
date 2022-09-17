@@ -7,7 +7,7 @@ import config from "config";
 import cors from "cors";
 import { RedisClientType } from "@redis/client";
 import { createClient } from "redis";
-import cron from "node-cron"
+import cron from "node-cron";
 
 // server init
 export function ServerInit(): Express {
@@ -23,7 +23,7 @@ export function ServerInit(): Express {
       credentials: true,
     })
   );
-  
+
   srv.use(express.json());
   srv.use(express.urlencoded({ extended: true }));
   return srv;
@@ -56,14 +56,14 @@ export async function RedisInit() {
   }
 }
 
-export async function TimerInit(){
+export async function TimerInit() {
   try {
-    var cronJob = cron.schedule("0 0 0 * * *", function(){
+    var cronJob = cron.schedule("0 0 0 * * *", function () {
       // perform db cleanup periodically.
-      
-      console.info('cron job in background');
-  }); 
-  cronJob.start();
+
+      console.info("cron job in background");
+    });
+    cronJob.start();
   } catch (err) {
     throw err;
   }

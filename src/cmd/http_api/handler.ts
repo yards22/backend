@@ -16,16 +16,16 @@ import {
   HandleLogoutAllScreen,
   HandleMe,
 } from "./auth";
-import { 
+import {
   HandleUpdateProfile,
   HandleGetUserPrimaryInfo,
   HandleGetUserProfileInfo,
-  HandleGetCheckUsername
+  HandleGetCheckUsername,
 } from "./profile";
 import { CheckAllowance } from "./middlewares";
 import multer from "multer";
-const storage = multer.memoryStorage()
-const upload = multer({ storage: storage })
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 import RouteHandler, { App } from "./types";
 
 function NotificationRoutes(app: App): Router {
@@ -35,7 +35,7 @@ function NotificationRoutes(app: App): Router {
   return router;
 }
 
-function AuthRoutes(app:App): Router{
+function AuthRoutes(app: App): Router {
   const router = Router();
   router.get("/", app.InHandler(CheckAllowance), app.InHandler(HandleMe));
   router.post("/signup", app.InHandler(HandleSignUp));
@@ -57,17 +57,34 @@ function AuthRoutes(app:App): Router{
 
 function ProfileRoutes(app: App): Router {
   const router = Router();
-  router.put("/",app.InHandler(CheckAllowance),upload.single('image'),app.InHandler(HandleUpdateProfile));
-  router.get("/editProfile",app.InHandler(CheckAllowance),app.InHandler(HandleGetUserPrimaryInfo ));
-  router.get("/",app.InHandler(CheckAllowance),app.InHandler(HandleGetUserProfileInfo));
-  router.post("/checkUsername",app.InHandler(CheckAllowance),app.InHandler(HandleGetCheckUsername));
+  router.put(
+    "/",
+    app.InHandler(CheckAllowance),
+    upload.single("image"),
+    app.InHandler(HandleUpdateProfile)
+  );
+  router.get(
+    "/editProfile",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleGetUserPrimaryInfo)
+  );
+  router.get(
+    "/",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleGetUserProfileInfo)
+  );
+  router.post(
+    "/checkUsername",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleGetCheckUsername)
+  );
   return router;
 }
 
 function HandleRoutesFor(app: App) {
-   app.srv.use("/notification", NotificationRoutes(app));
-   app.srv.use("/profile",ProfileRoutes(app));
-   app.srv.use("/auth", AuthRoutes(app));
- }
- 
+  app.srv.use("/notification", NotificationRoutes(app));
+  app.srv.use("/profile", ProfileRoutes(app));
+  app.srv.use("/auth", AuthRoutes(app));
+}
+
 export default HandleRoutesFor;

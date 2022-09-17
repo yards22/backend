@@ -12,19 +12,18 @@ interface IResponse {
   message?: string;
 }
 
-
 export default class ProfileManager {
   private store: PrismaClient;
   constructor(store: PrismaClient) {
     this.store = store;
   }
 
-  GetUserByUsername(username:string):Promise<EProfile | null>{
+  GetUserByUsername(username: string): Promise<EProfile | null> {
     return this.store.profile.findUnique({
-      where:{
-        username
-      }
-    })
+      where: {
+        username,
+      },
+    });
   }
 
   GetUserPrimaryInfoById(user_id: number): Promise<EProfile | null> {
@@ -35,14 +34,14 @@ export default class ProfileManager {
     });
   }
 
-  GetUserProfileById(user_id: number):Promise<EProfile | null> {
+  GetUserProfileById(user_id: number): Promise<EProfile | null> {
     return this.store.profile.findUnique({
       where: {
         user_id: user_id,
       },
       include: {
         user: {
-          include: { 
+          include: {
             //TODO: to be added.
             // Posts: true,
             // Bookmarked :true.
@@ -54,97 +53,98 @@ export default class ProfileManager {
 
   UpdateProfile(
     user_id: number,
-    username:string,
+    username: string,
     updated_at: Date,
     profile_image_uri?: string,
     bio?: string,
-    interests?:string
+    interests?: string
   ): Promise<EProfile> {
     return this.store.profile.update({
       where: {
         user_id: user_id,
       },
       data: {
-        username:username,
+        username: username,
         profile_image_uri: profile_image_uri,
         bio: bio,
-        updated_at:updated_at,
-        interests
+        updated_at: updated_at,
+        interests,
       },
     });
   }
-  
+
   UpdateProfileDetails(
     user_id: number,
-    username:string,
+    username: string,
     updated_at: Date,
-    profile_image_buffer:any,
+    profile_image_buffer: any,
     bio?: string,
-    interests?:string
-  ):Promise<{
+    interests?: string
+  ): Promise<{
     responseStatus: IResponse;
-    profileData?: EProfile
+    profileData?: EProfile;
   }> {
-    return new Promise(async (resolve,reject)=>{
-      try{
+    return new Promise(async (resolve, reject) => {
+      try {
         const fileStorage = new S3FileStorage(
           (process.env as any).S3_BUCKET,
           (process.env as any).ACCESS_KEY_ID,
           (process.env as any).ACCESS_KEY_SECRET,
           (process.env as any).S3_REGION
-       );
-       const filePath = username+"_dp.webp";
-       const BucketUrl = "https://22yards-image-bucket.s3.ap-south-1.amazonaws.com/";
-       const ObjUrl = BucketUrl+filePath;
-       const imageResolver = new ImageResolver({ h: 320, w: 500 }, "jpeg");
-       const image = await imageResolver.Convert(profile_image_buffer);
-       await fileStorage.Put(filePath,image);
-       const UpdatedProfile = await this.UpdateProfile(user_id,username,updated_at,ObjUrl,bio,interests)
-       resolve({
-        responseStatus: {
-          statusCode: HerrorStatus.StatusOK,
-          message: "successful_Updation",
-        },
-        profileData: UpdatedProfile
-       });
+        );
+        const filePath = username + "_dp.webp";
+        const BucketUrl =
+          "https://22yards-image-bucket.s3.ap-south-1.amazonaws.com/";
+        const ObjUrl = BucketUrl + filePath;
+        const imageResolver = new ImageResolver({ h: 320, w: 500 }, "jpeg");
+        const image = await imageResolver.Convert(profile_image_buffer);
+        await fileStorage.Put(filePath, image);
+        const UpdatedProfile = await this.UpdateProfile(
+          user_id,
+          username,
+          updated_at,
+          ObjUrl,
+          bio,
+          interests
+        );
+        resolve({
+          responseStatus: {
+            statusCode: HerrorStatus.StatusOK,
+            message: "successful_Updation",
+          },
+          profileData: UpdatedProfile,
+        });
+      } catch (err) {
+        reject(err);
       }
-      catch(err){
-         reject(err);
-      }
-    })
+    });
   }
 
-  CheckUsername(username:string): Promise<{
+  CheckUsername(username: string): Promise<{
     responseStatus: IResponse;
     userData?: EProfile;
   }> {
-    return new Promise(async (resolve,reject)=>{
-       try{
-         const user = await this.GetUserByUsername(username);
-         if(user === undefined || user === null){
-            resolve({
-              responseStatus:{
-                statusCode: HerrorStatus.StatusOK,
-                message: "username_exists",
-              }
-            })
-         }
-         else{
+    return new Promise(async (resolve, reject) => {
+      try {
+        const user = await this.GetUserByUsername(username);
+        if (user === undefined || user === null) {
+          resolve({
+            responseStatus: {
+              statusCode: HerrorStatus.StatusOK,
+              message: "username_exists",
+            },
+          });
+        } else {
           resolve({
             responseStatus: {
               statusCode: HerrorStatus.StatusUnauthorized,
               message: "username_already_taken",
-            }
+            },
           });
-         }
-       }
-       catch(err){
-         reject(err);
-       }
-    })
+        }
+      } catch (err) {
+        reject(err);
+      }
+    });
   }
-
-
 }
-
-
