@@ -16,7 +16,6 @@ import {
   HandleLogoutAllScreen,
   HandleMe,
 } from "./auth";
-import { App } from "./types";
 import { 
   HandleUpdateProfile,
   HandleGetUserPrimaryInfo,
@@ -25,9 +24,9 @@ import {
 } from "./profile";
 import { CheckAllowance } from "./middlewares";
 import multer from "multer";
-
 const storage = multer.memoryStorage()
 const upload = multer({ storage: storage })
+import RouteHandler, { App } from "./types";
 
 function NotificationRoutes(app: App): Router {
   const router = Router();
@@ -61,7 +60,7 @@ function ProfileRoutes(app: App): Router {
   router.put("/",app.InHandler(CheckAllowance),upload.single('image'),app.InHandler(HandleUpdateProfile));
   router.get("/editProfile",app.InHandler(CheckAllowance),app.InHandler(HandleGetUserPrimaryInfo ));
   router.get("/",app.InHandler(CheckAllowance),app.InHandler(HandleGetUserProfileInfo));
-  router.post("checkUsername",app.InHandler(CheckAllowance),app.InHandler(HandleGetCheckUsername));
+  router.post("/checkUsername",app.InHandler(CheckAllowance),app.InHandler(HandleGetCheckUsername));
   return router;
 }
 
