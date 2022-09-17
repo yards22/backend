@@ -32,11 +32,6 @@ export default class ProfileManager {
       where: {
         user_id: user_id,
       },
-      include: {
-        user: {
-          include: { Interests: true },
-        },
-      },
     });
   }
 
@@ -48,7 +43,6 @@ export default class ProfileManager {
       include: {
         user: {
           include: { 
-            Interests: true,
             //TODO: to be added.
             // Posts: true,
             // Bookmarked :true.
