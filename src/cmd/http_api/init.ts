@@ -3,6 +3,11 @@ import { App } from "./types";
 import { PrismaClient } from "@prisma/client";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 import { Herror } from "../../pkg/herror/herror";
+import config from "config";
+import cors from "cors";
+import { RedisClientType } from "@redis/client";
+import { createClient } from "redis";
+import cron from "node-cron"
 
 // server init
 export function ServerInit(): Express {
@@ -12,6 +17,13 @@ export function ServerInit(): Express {
     next();
   });
   srv.enable("trust proxy");
+  srv.use(
+    cors({
+      origin: config.get("origin"),
+      credentials: true,
+    })
+  );
+  
   srv.use(express.json());
   srv.use(express.urlencoded({ extended: true }));
   return srv;
@@ -31,6 +43,31 @@ export async function DBInit(): Promise<PrismaClient> {
   }
 }
 
+// Redis init
+export async function RedisInit() {
+  try {
+    const store = createClient({
+      url: `redis://localhost:6379`,
+    });
+    await store.connect();
+    return store;
+  } catch (err) {
+    throw err;
+  }
+}
+
+export async function TimerInit(){
+  try {
+    var cronJob = cron.schedule("0 0 0 * * *", function(){
+      // perform db cleanup periodically.
+      
+      console.info('cron job in background');
+  }); 
+  cronJob.start();
+  } catch (err) {
+    throw err;
+  }
+}
 // Sink init
 export function SinkInit(app: App) {
   app.srv.use((req, res, next) => {
@@ -38,11 +75,14 @@ export function SinkInit(app: App) {
   });
 
   app.srv.use((err: any, req: any, res: any, next: any) => {
-    res.status(err.status || 500);
+    console.log(err);
+    const status = err.status || err.responseStatus.statusCode || 500;
+    const message = err.message || err.responseStatus.message || "error";
+    res.status(status);
     res.send({
       isError: true,
-      status: err.status,
-      message: err.message,
+      status: status,
+      message: message,
     });
   });
 }

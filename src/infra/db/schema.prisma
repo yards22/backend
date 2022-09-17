@@ -11,19 +11,23 @@ datasource db {
 }
 
 model Users {
-  id           BigInt          @id @default(autoincrement()) @db.BigInt
-  created_at   DateTime        @default(now())
-  Notification Notifications[]
-  Interests    Interests[]
-  Profile      Profile?
+  user_id           Int             @id @default(autoincrement()) @db.Int
+  mail_id           String          @unique
+  password          String?
+  created_at        DateTime        @default(now())
+  identity_provider String?
+  subject_id        String?
+  Notification      Notifications[]
+  Profile           Profile?
+  Token             Token[]
 
   @@map("users")
 }
 
 model Notifications {
   id         BigInt             @id @default(autoincrement()) @db.BigInt
-  for        Users              @relation(fields: [for_id], references: [id])
-  for_id     BigInt
+  for        Users              @relation(fields: [for_id], references: [user_id])
+  for_id     Int
   status     NotificationStatus
   metadata   Json
   created_at DateTime           @default(now())
@@ -31,26 +35,39 @@ model Notifications {
   @@map("notifications")
 }
 
-model Interests {
-  user     Users  @relation(fields: [user_id], references: [id])
-  user_id  BigInt
-  interest String
+// model Interests {
+//   user     Users  @relation(fields: [user_id], references: [user_id])
+//   user_id  Int
+//   interest String
 
-  @@unique([user_id, interest])
-  @@map("interests")
-}
+//   @@unique([user_id, interest])
+//   @@map("interests")
+// }
 
 model Profile {
-  user              Users    @relation(fields: [user_id], references: [id])
-  user_id           BigInt   @unique
+  user              Users    @relation(fields: [user_id], references: [user_id])
+  user_id           Int      @unique
   username          String   @unique
-  email_id          String?
-  profile_image_uri String?
-  bio               String?
+  email_id          String  
+  profile_image_uri String?  @default("https://22yards-image-bucket.s3.ap-south-1.amazonaws.com/sjFmewfzjI.webp")
+  bio               String?  
   cric_index        Int      @default(0)
   updated_at        DateTime @updatedAt
+  interests         String?
 
   @@map("profiles")
+}
+
+model Token {
+  screen_id  BigInt   @id @default(autoincrement()) @db.BigInt
+  user       Users    @relation(fields: [user_id], references: [user_id])
+  user_id    Int
+  token_id   String
+  created_at DateTime @default(now())
+  expired_at DateTime?
+
+  @@unique([user_id, token_id])
+  @@map("token")
 }
 
 enum NotificationStatus {

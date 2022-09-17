@@ -21,6 +21,19 @@ Content-Type: application/json
 ### Get User Data
 GET http://localhost:4000/profile/?id=1
 
+
+### login user
+POST http://localhost:4000/auth/login
+Content-Type: application/json
+
+{
+    "mail_id":"reddy_821912@student.nitw.ac.in",
+    "password":"821912"
+}
+
+###
+GET http://localhost:4000/auth/api/me
+
 ### Put User Profile
 
 PUT http://localhost:4000/profile
@@ -43,4 +56,31 @@ content-type: application/json
     "bio": "Iam sharukan fan",
     "username": "hadarsh",
     "cric_index": 1
+}
+
+### generate otp
+post http://localhost:4000/auth/sendOTP
+Content-type: application/json 
+
+{
+    "mail_id":"rithvikalkanti@gmail.com"
+}
+
+### verify otp
+post http://localhost:4000/auth/verifyOTP
+Content-type: application/json 
+
+{
+    "mail_id":"rithvikalkanti@gmail.com",
+    "OTP":"3740"
+}
+
+### signup user
+POST  http://localhost:4000/auth/signup
+Content-Type: application/json
+
+{   
+    "mail_id":"rithvikalkanti@gmail.com",
+    "password":"wgl123",
+    "OTP":"3740"
 }

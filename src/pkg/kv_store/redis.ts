@@ -1,5 +1,5 @@
 import { IKVStore } from "./kv_store";
-import { createClient, RedisClientType } from "redis";
+import { RedisClientType } from "redis";
 class Redis implements IKVStore {
   store: RedisClientType;
   constructor(store: RedisClientType) {
@@ -15,6 +15,7 @@ class Redis implements IKVStore {
           return resolve();
         })
         .catch((err) => {
+          console.log(err);
           return reject(err);
         });
     });

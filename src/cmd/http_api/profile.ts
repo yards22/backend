@@ -2,72 +2,70 @@ import { Herror } from "../../pkg/herror/herror";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 import RouteHandler from "./types";
 
-export const HandleCreateProfile: RouteHandler = (req, res, next, app) => {
-  const userId = BigInt(req.context.userId);
-  const userName: string = req.body.username as string;
-  const emailId: string = req.body.email_id as string;
-  const profileImage: string = req.body.profile_image as string;
+
+export const HandleUpdateProfile: RouteHandler = async (req, res, next, app) => {
+
+  const user_id: number = Number(req.context.user_id);
   const bio: string = req.body.bio as string;
+  const profile_buffer: any = req.file?.buffer;
+  const updated_at: Date = new Date();
+  const username:string = req.body.username;
+  const interests:string =req.body.interests;
 
-  if ( userName == undefined || emailId == undefined ) {
-    app.SendRes(res, { status: HerrorStatus.StatusUnprocessableEntity, data: "invalid credentials" });
+  if(username != undefined && user_id !=undefined){
+     const {responseStatus,profileData} = await app.profileManager.UpdateProfileDetails(user_id, username, updated_at,profile_buffer,bio,interests);
+     app.SendRes(res,{
+       status:responseStatus.statusCode,
+       data:profileData,
+       message:responseStatus.message
+      })
+    }
+  else{
+    next(new Herror("BadRequest", HerrorStatus.StatusBadRequest));
   }
-  app.profileManager
-    .CreateProfile(userId, userName, bio, profileImage, emailId)
-    .then(() => {
-      app.SendRes(res, { status: HerrorStatus.StatusOK, data: "profile created successfully" });
-    })
-    .catch((err) => {
-      next(err);
-    });
-  return;
+  
 };
 
-export const HandleCheckIfUsernameExists: RouteHandler = (
-  req,
-  res,
-  next,
-  app
-) => {
-  const username = req.query.username as string;
-  if (username === "") {
-    return next(new Herror("username missing", HerrorStatus.StatusBadRequest));
+export const HandleGetUserPrimaryInfo: RouteHandler = async (req, res, next, app) => {
+  const user_id = Number(req.context.user_id);
+  if(user_id != undefined){
+     const userProfile = await app.profileManager.GetUserPrimaryInfoById(user_id);
+     app.SendRes(res,{
+       status:HerrorStatus.StatusOK,
+       data:userProfile
+     });
   }
-
-  app.profileManager
-    .IfUserNameExists(username)
-    .then((exists) => {
-      app.SendRes(res, { status: HerrorStatus.StatusOK, data: { exists } });
-    })
-    .catch((err) => {
-      next(err);
-    });
+  else{
+    next(new Herror("BadRequest", HerrorStatus.StatusBadRequest));
+  }
 };
 
-export const HandleGetUserProfile: RouteHandler = (req, res, next, app) => {
-  const userId = BigInt(req.context.userId);
-  app.profileManager
-    .GetUserById(userId)
-    .then((profile) => {
-      app.SendRes(res, { status: HerrorStatus.StatusOK, data: profile });
-    })
-    .catch((err) => {
-      next(err);
-    });
-  return;
-};
+export const HandleGetUserProfileInfo:RouteHandler = async (req, res, next, app)=>{
+  const user_id = Number(req.context.user_id);
+  if(user_id != undefined){
+     const userProfile = await app.profileManager.GetUserProfileById(user_id);
+     app.SendRes(res,{
+       status:HerrorStatus.StatusOK,
+       data:userProfile
+     });
+  }
+  else{
+    next(new Herror("BadRequest", HerrorStatus.StatusBadRequest));
+  }
+}
 
-export const HandleUpdateProfile: RouteHandler = (req, res, next, app) => {
-  const userId = BigInt(req.context.userId);
-  const bio: string = req.body.bio as string;
-  app.profileManager
-    .UpdateProfile(userId, undefined, bio)
-    .then((profile) => {
-      // returning the updated profile
-      app.SendRes(res, { status: HerrorStatus.StatusOK, data: profile });
-    })
-    .catch((err) => {
-      next(err);
-    });
-  return;
-};
+export const HandleGetCheckUsername:RouteHandler = async (req,res,next,app) =>{
+  const username = req.body.username;
+  if(username != undefined){
+     try{
+      const { responseStatus } = await app.profileManager.CheckUsername(username);
+      app.SendRes(res,{status:responseStatus.statusCode,message:responseStatus.message});
+     }
+     catch(err){
+       next(err);
+     }
+  }
+  else{
+     next(new Herror("BadRequest", HerrorStatus.StatusBadRequest));
+  }
+}
