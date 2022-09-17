@@ -2,6 +2,9 @@ import RouteHandler from "./types";
 import { Herror } from "../../pkg/herror/herror";
 import { MailValidator } from "../../util/mail_dependencies";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
+import { Console, log } from "console";
+import multer from 'multer'
+
 
 const HandleSignUp: RouteHandler = async (req, res, next, app) => {
   const mail_id = req.body.mail_id;
@@ -70,6 +73,10 @@ const HandleOTPGenerationForSignUp: RouteHandler = async (
   app
 ) => {
   const mail_id = req.body.mail_id;
+  console.log("Hello");
+  
+  console.log(mail_id);
+  
   const valid: boolean = MailValidator(mail_id);
   if (valid) {
     try {
@@ -151,6 +158,8 @@ const HandleLogout: RouteHandler = async (req, res, next, app) => {
 };
 
 const HandleOTPGeneration: RouteHandler = async (req, res, next, app) => {
+  console.log("Hello");
+  
   const mail_id = req.body.mail_id;
   const valid: boolean = MailValidator(mail_id);
   if (valid) {
@@ -187,7 +196,6 @@ const HandlePasswordUpdate: RouteHandler = async (req, res, next, app) => {
   }
 };
 
-// have otp generation and verification here instead of username and password check as google login may not contain password.
 const HandleLogoutAllScreen: RouteHandler = async (req, res, next, app) => {
   const mail_id: string = req.body.mail_id;
   const OTP: string = req.body.OTP;
@@ -212,6 +220,7 @@ const HandleMe: RouteHandler = async (req, res, next, app) => {
   delete data.password;
   app.SendRes(res, { status: HerrorStatus.StatusOK, data });
 };
+
 
 export {
   HandleSignUp,

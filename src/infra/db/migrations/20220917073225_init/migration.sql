@@ -6,6 +6,7 @@ CREATE TABLE `users` (
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `identity_provider` VARCHAR(191) NULL,
     `subject_id` VARCHAR(191) NULL,
+    `interests` VARCHAR(191) NULL,
 
     UNIQUE INDEX `users_mail_id_key`(`mail_id`),
     PRIMARY KEY (`user_id`)
@@ -23,19 +24,11 @@ CREATE TABLE `notifications` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `interests` (
-    `user_id` INTEGER NOT NULL,
-    `interest` VARCHAR(191) NOT NULL,
-
-    UNIQUE INDEX `interests_user_id_interest_key`(`user_id`, `interest`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
 CREATE TABLE `profiles` (
     `user_id` INTEGER NOT NULL,
     `username` VARCHAR(191) NOT NULL,
-    `email_id` VARCHAR(191) NULL,
-    `profile_image_uri` VARCHAR(191) NULL,
+    `email_id` VARCHAR(191) NOT NULL,
+    `profile_image_uri` VARCHAR(191) NULL DEFAULT 'https://22yards-image-bucket.s3.ap-south-1.amazonaws.com/sjFmewfzjI.webp',
     `bio` VARCHAR(191) NULL,
     `cric_index` INTEGER NOT NULL DEFAULT 0,
     `updated_at` DATETIME(3) NOT NULL,
@@ -50,6 +43,7 @@ CREATE TABLE `token` (
     `user_id` INTEGER NOT NULL,
     `token_id` VARCHAR(191) NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `expired_at` DATETIME(3) NULL,
 
     UNIQUE INDEX `token_user_id_token_id_key`(`user_id`, `token_id`),
     PRIMARY KEY (`screen_id`)
@@ -57,9 +51,6 @@ CREATE TABLE `token` (
 
 -- AddForeignKey
 ALTER TABLE `notifications` ADD CONSTRAINT `notifications_for_id_fkey` FOREIGN KEY (`for_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `interests` ADD CONSTRAINT `interests_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `profiles` ADD CONSTRAINT `profiles_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;

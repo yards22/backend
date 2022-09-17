@@ -1,6 +1,7 @@
 import { Herror } from "../../pkg/herror/herror";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 import RouteHandler from "./types";
+import multer from 'multer'
 
 export const CheckAllowance: RouteHandler = async (req, res, next, app) => {
   const accessToken = req.headers.authorization?.replace("Bearer ", "");
@@ -23,3 +24,4 @@ export const CheckAllowance: RouteHandler = async (req, res, next, app) => {
     next(err);
   }
 };
+ 

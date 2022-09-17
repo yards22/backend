@@ -13,7 +13,6 @@ export default function verifyGoogleIdTokenAndGetUserData(googleIdToken:string) 
       .then((ticket:any) => {
         // the integrity of the google id token has been confirmed and obtained data in payload
         const payload = ticket.getPayload();
-        console.log(payload);
         // returning the user data obtained in the payload
         return resolve(payload);
       })
@@ -25,3 +24,5 @@ export default function verifyGoogleIdTokenAndGetUserData(googleIdToken:string) 
       });
   });
 }
+
+

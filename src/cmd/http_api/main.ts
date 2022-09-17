@@ -2,7 +2,7 @@ import NotificationManager from "../../internal/notification_manager/notificatio
 import AuthManager from "../../internal/auth_manager/auth_manager";
 import ProfileManager from "../../internal/profile_manager/profile_manager";
 import HandleRoutesFor from "./handler";
-import { DBInit, RedisInit, ServerInit, SinkInit } from "./init";
+import { DBInit, RedisInit, ServerInit, SinkInit,TimerInit } from "./init";
 import { App } from "./types";
 import InMKV from "../../pkg/kv_store/kv_store_";
 import Redis from "../../pkg/kv_store/redis";
@@ -16,6 +16,7 @@ async function Init() {
   const notificationManager = new NotificationManager(db);
   const authManager = new AuthManager(db, redis);
   const profileManager = new ProfileManager(db);
+  const timerManager = TimerInit();
   const app = new App(
     srv,
     authManager,
