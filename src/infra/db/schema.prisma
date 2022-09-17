@@ -18,7 +18,6 @@ model Users {
   identity_provider String?
   subject_id        String?
   Notification      Notifications[]
-  Interests         Interests[]
   Profile           Profile?
   Token             Token[]
 
@@ -36,14 +35,14 @@ model Notifications {
   @@map("notifications")
 }
 
-model Interests {
-  user     Users  @relation(fields: [user_id], references: [user_id])
-  user_id  Int
-  interest String
+// model Interests {
+//   user     Users  @relation(fields: [user_id], references: [user_id])
+//   user_id  Int
+//   interest String
 
-  @@unique([user_id, interest])
-  @@map("interests")
-}
+//   @@unique([user_id, interest])
+//   @@map("interests")
+// }
 
 model Profile {
   user              Users    @relation(fields: [user_id], references: [user_id])
@@ -54,6 +53,7 @@ model Profile {
   bio               String?  
   cric_index        Int      @default(0)
   updated_at        DateTime @updatedAt
+  interests         String?
 
   @@map("profiles")
 }

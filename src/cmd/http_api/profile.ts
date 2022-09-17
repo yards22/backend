@@ -10,9 +10,10 @@ export const HandleUpdateProfile: RouteHandler = async (req, res, next, app) => 
   const profile_buffer: any = req.file?.buffer;
   const updated_at: Date = new Date();
   const username:string = req.body.username;
+  const interests:string =req.body.interests;
 
   if(username != undefined && user_id !=undefined){
-     const {responseStatus,profileData} = await app.profileManager.UpdateProfileDetails(user_id, username, updated_at,profile_buffer,bio);
+     const {responseStatus,profileData} = await app.profileManager.UpdateProfileDetails(user_id, username, updated_at,profile_buffer,bio,interests);
      app.SendRes(res,{
        status:responseStatus.statusCode,
        data:profileData,

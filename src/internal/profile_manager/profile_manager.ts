@@ -57,7 +57,8 @@ export default class ProfileManager {
     username:string,
     updated_at: Date,
     profile_image_uri?: string,
-    bio?: string
+    bio?: string,
+    interests?:string
   ): Promise<EProfile> {
     return this.store.profile.update({
       where: {
@@ -67,7 +68,8 @@ export default class ProfileManager {
         username:username,
         profile_image_uri: profile_image_uri,
         bio: bio,
-        updated_at:updated_at
+        updated_at:updated_at,
+        interests
       },
     });
   }
@@ -77,7 +79,8 @@ export default class ProfileManager {
     username:string,
     updated_at: Date,
     profile_image_buffer:any,
-    bio?: string
+    bio?: string,
+    interests?:string
   ):Promise<{
     responseStatus: IResponse;
     profileData?: EProfile
@@ -96,7 +99,7 @@ export default class ProfileManager {
        const imageResolver = new ImageResolver({ h: 320, w: 500 }, "jpeg");
        const image = await imageResolver.Convert(profile_image_buffer);
        await fileStorage.Put(filePath,image);
-       const UpdatedProfile = await this.UpdateProfile(user_id,username,updated_at,ObjUrl,bio)
+       const UpdatedProfile = await this.UpdateProfile(user_id,username,updated_at,ObjUrl,bio,interests)
        resolve({
         responseStatus: {
           statusCode: HerrorStatus.StatusOK,
