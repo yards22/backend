@@ -236,7 +236,7 @@ export default class AuthManager {
               accessToken,
             });
           } else {
-            resolve({
+            reject({
               responseStatus: {
                 statusCode: HerrorStatus.StatusUnauthorized,
                 message: "password_invalid",
@@ -244,7 +244,7 @@ export default class AuthManager {
             });
           }
         } else {
-          resolve({
+          reject({
             responseStatus: {
               statusCode: HerrorStatus.StatusForbidden,
               message: "no_user_with_given_mail_exists",
@@ -275,7 +275,7 @@ export default class AuthManager {
             userData: otp,
           });
         } else {
-          resolve({
+          reject({
             responseStatus: {
               statusCode: HerrorStatus.StatusForbidden,
               message: "user_already_exists_in_db",
@@ -463,21 +463,21 @@ export default class AuthManager {
             const accessToken = await this.CreateSession(Token_Length, user);
             resolve({
               responseStatus: {
-                statusCode: HerrorStatus.StatusCreated,
-                message: "successful_signup",
+                statusCode: HerrorStatus.StatusOK,
+                message: "successful_password_update",
               },
               userData: updatedUser,
               accessToken,
             });
           } else
-            resolve({
+            reject({
               responseStatus: {
                 statusCode: HerrorStatus.StatusUnauthorized,
                 message: "otp_invalid",
               },
             });
         } else {
-          resolve({
+          reject({
             responseStatus: {
               statusCode: HerrorStatus.StatusForbidden,
               message: "user_doesnot_exists_in_db",
