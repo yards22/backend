@@ -6,6 +6,7 @@ CREATE TABLE `users` (
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `identity_provider` VARCHAR(191) NULL,
     `subject_id` VARCHAR(191) NULL,
+    `interests` VARCHAR(191) NULL,
 
     UNIQUE INDEX `users_mail_id_key`(`mail_id`),
     PRIMARY KEY (`user_id`)
@@ -20,14 +21,6 @@ CREATE TABLE `notifications` (
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
-CREATE TABLE `interests` (
-    `user_id` INTEGER NOT NULL,
-    `interest` VARCHAR(191) NOT NULL,
-
-    UNIQUE INDEX `interests_user_id_interest_key`(`user_id`, `interest`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -58,9 +51,6 @@ CREATE TABLE `token` (
 
 -- AddForeignKey
 ALTER TABLE `notifications` ADD CONSTRAINT `notifications_for_id_fkey` FOREIGN KEY (`for_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `interests` ADD CONSTRAINT `interests_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `profiles` ADD CONSTRAINT `profiles_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;

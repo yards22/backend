@@ -58,10 +58,10 @@ function AuthRoutes(app:App): Router{
 
 function ProfileRoutes(app: App): Router {
   const router = Router();
-  router.put("/",upload.single('image'),app.InHandler(HandleUpdateProfile));
-  router.get("/editProfile",app.InHandler(HandleGetUserPrimaryInfo ));
+  router.put("/",app.InHandler(CheckAllowance),upload.single('image'),app.InHandler(HandleUpdateProfile));
+  router.get("/editProfile",app.InHandler(CheckAllowance),app.InHandler(HandleGetUserPrimaryInfo ));
   router.get("/",app.InHandler(CheckAllowance),app.InHandler(HandleGetUserProfileInfo));
-  router.post("checkUsername",app.InHandler(HandleGetCheckUsername));
+  router.post("checkUsername",app.InHandler(CheckAllowance),app.InHandler(HandleGetCheckUsername));
   return router;
 }
 
