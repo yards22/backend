@@ -1,10 +1,7 @@
 import { PrismaClient } from "@prisma/client";
-import { resolve } from "path";
-import { S3FileStorage } from "../../pkg/file_storage/s3_file_storage";
-import { Herror } from "../../pkg/herror/herror";
+import { IFileStorage } from "../../pkg/file_storage/file_storage";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 import { ImageResolver } from "../../pkg/image_resolver/image_resolver_";
-import { RandomString } from "../../util/random";
 import EProfile from "../entities/profile";
 
 interface IResponse {
@@ -14,8 +11,16 @@ interface IResponse {
 
 export default class ProfileManager {
   private store: PrismaClient;
-  constructor(store: PrismaClient) {
+  private imageStorage: IFileStorage;
+  private imageResolver: ImageResolver;
+  constructor(
+    store: PrismaClient,
+    imageResolver: ImageResolver,
+    imageStorage: IFileStorage
+  ) {
     this.store = store;
+    this.imageStorage = imageStorage;
+    this.imageResolver = imageResolver;
   }
 
   GetUserByUsername(username: string): Promise<EProfile | null> {
@@ -38,15 +43,6 @@ export default class ProfileManager {
     return this.store.profile.findUnique({
       where: {
         user_id: user_id,
-      },
-      include: {
-        user: {
-          include: {
-            //TODO: to be added.
-            // Posts: true,
-            // Bookmarked :true.
-          },
-        },
       },
     });
   }
@@ -77,7 +73,7 @@ export default class ProfileManager {
     user_id: number,
     username: string,
     updated_at: Date,
-    profile_image_buffer: any,
+    rawImage: Buffer,
     bio?: string,
     interests?: string
   ): Promise<{
@@ -86,24 +82,19 @@ export default class ProfileManager {
   }> {
     return new Promise(async (resolve, reject) => {
       try {
-        const fileStorage = new S3FileStorage(
-          (process.env as any).S3_BUCKET,
-          (process.env as any).ACCESS_KEY_ID,
-          (process.env as any).ACCESS_KEY_SECRET,
-          (process.env as any).S3_REGION
+        const format = "jpg";
+        const filePath = username + "_dp." + format;
+        let resolvedImage = await this.imageResolver.Convert(
+          rawImage,
+          { h: 320, w: 512 },
+          format
         );
-        const filePath = username + "_dp.webp";
-        const BucketUrl =
-          "https://22yards-image-bucket.s3.ap-south-1.amazonaws.com/";
-        const ObjUrl = BucketUrl + filePath;
-        const imageResolver = new ImageResolver({ h: 320, w: 500 }, "jpeg");
-        const image = await imageResolver.Convert(profile_image_buffer);
-        await fileStorage.Put(filePath, image);
+        await this.imageStorage.Put(filePath, resolvedImage);
         const UpdatedProfile = await this.UpdateProfile(
           user_id,
           username,
           updated_at,
-          ObjUrl,
+          filePath,
           bio,
           interests
         );
