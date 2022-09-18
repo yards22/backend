@@ -8,6 +8,7 @@ import cors from "cors";
 import { RedisClientType } from "@redis/client";
 import { createClient } from "redis";
 import cron from "node-cron";
+import { S3FileStorage } from "../../pkg/file_storage/s3_file_storage";
 
 // server init
 export function ServerInit(): Express {
@@ -54,6 +55,15 @@ export async function RedisInit() {
   } catch (err) {
     throw err;
   }
+}
+
+export function RemoteFileStorageInit() {
+  return new S3FileStorage(
+    (process.env as any).S3_BUCKET,
+    (process.env as any).ACCESS_KEY_ID,
+    (process.env as any).ACCESS_KEY_SECRET,
+    (process.env as any).S3_REGION
+  );
 }
 
 export async function TimerInit() {

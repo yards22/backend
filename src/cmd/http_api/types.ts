@@ -6,7 +6,8 @@ import AuthManager from "../../internal/auth_manager/auth_manager";
 import ProfileManager from "../../internal/profile_manager/profile_manager";
 import { ToJson } from "../../util/json";
 import { IKVStore } from "../../pkg/kv_store/kv_store";
-
+import { ImageResolver } from "../../pkg/image_resolver/image_resolver_";
+import { IFileStorage } from "../../pkg/file_storage/file_storage";
 interface CustomRequest extends Request {
   context: any;
 }
@@ -25,13 +26,19 @@ export class App {
   profileManager: ProfileManager;
   db: PrismaClient;
   kvStore: IKVStore;
+  imageResolver: ImageResolver;
+  localFileStorage: IFileStorage;
+  remoteFileStorage: IFileStorage;
   constructor(
     srv: Express,
     authManager: AuthManager,
     notificationManager: NotificationManager,
     profileManager: ProfileManager,
     kvStore: IKVStore,
-    db: any
+    db: any,
+    imageResolver: ImageResolver,
+    localFileStore: IFileStorage,
+    remoteFileStorage: IFileStorage
   ) {
     this.srv = srv;
     this.notificationManager = notificationManager;
@@ -39,6 +46,9 @@ export class App {
     this.profileManager = profileManager;
     this.db = db;
     this.kvStore = kvStore;
+    this.imageResolver = imageResolver;
+    this.localFileStorage = localFileStore;
+    this.remoteFileStorage = remoteFileStorage;
   }
   InHandler(handler: RouteHandler) {
     return (req: Request, res: Response, next: NextFunction) => {
