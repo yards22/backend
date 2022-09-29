@@ -84,13 +84,16 @@ model Posts {
 
 model Likes {
   user    Users @relation(fields: [user_id], references: [user_id])
-  user_id Int   @unique
+  user_id Int
 
   post    Posts  @relation(fields: [post_id], references: [post_id])
   post_id BigInt
 
   type       Int
   created_at DateTime @default(now())
+
+  @@unique([user_id, post_id])
+  @@map("likes")
 }
 
 enum NotificationStatus {
