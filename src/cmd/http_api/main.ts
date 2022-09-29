@@ -14,6 +14,8 @@ import { App } from "./types";
 import Redis from "../../pkg/kv_store/redis";
 import { ImageResolver } from "../../pkg/image_resolver/image_resolver_";
 import { LocalFileStorage } from "../../pkg/file_storage/local_file_storage";
+import LikeManager from "../../internal/like_manager/like_manager";
+import PostManager from "../../internal/post_manager/post_manager";
 
 async function Init() {
   const srv = ServerInit();
@@ -31,12 +33,21 @@ async function Init() {
     imageResolver,
     remoteFileStorage
   );
+  const postManager = new PostManager(
+    db,
+    imageResolver,
+    remoteFileStorage,
+    redis
+  );
+  const likeManager = new LikeManager(db, redis);
 
   const app = new App(
     srv,
     authManager,
     notificationManager,
     profileManager,
+    postManager,
+    likeManager,
     redis,
     db,
     imageResolver,
