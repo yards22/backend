@@ -50,7 +50,7 @@ export default class LikeManager {
     });
   }
 
-  async Unlike(post_id: number, user_id: number) {
+  async Unlike(post_id: bigint, user_id: number) {
     return this.store.likes.delete({
       where: { user_id_post_id: { post_id, user_id } },
     });

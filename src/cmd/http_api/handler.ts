@@ -27,6 +27,7 @@ import multer from "multer";
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 import RouteHandler, { App } from "./types";
+import { HandleGetLikesForPost, HandleLikeAndUnlike } from "./like";
 
 function NotificationRoutes(app: App): Router {
   const router = Router();
@@ -81,10 +82,26 @@ function ProfileRoutes(app: App): Router {
   return router;
 }
 
+function LikeRoutes(app: App): Router {
+  const router = Router();
+  router.get(
+    "/",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleGetLikesForPost)
+  );
+  router.put(
+    "/",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleLikeAndUnlike)
+  );
+  return router;
+}
+
 function HandleRoutesFor(app: App) {
   app.srv.use("/notification", NotificationRoutes(app));
   app.srv.use("/profile", ProfileRoutes(app));
   app.srv.use("/auth", AuthRoutes(app));
+  app.srv.use("/like", LikeRoutes(app));
 }
 
 export default HandleRoutesFor;
