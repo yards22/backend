@@ -20,6 +20,8 @@ model Users {
   Notification      Notifications[]
   Profile           Profile?
   Token             Token[]
+  Post              Posts[]
+  Likes             Likes[]
 
   @@map("users")
 }
@@ -35,22 +37,13 @@ model Notifications {
   @@map("notifications")
 }
 
-// model Interests {
-//   user     Users  @relation(fields: [user_id], references: [user_id])
-//   user_id  Int
-//   interest String
-
-//   @@unique([user_id, interest])
-//   @@map("interests")
-// }
-
 model Profile {
   user              Users    @relation(fields: [user_id], references: [user_id])
   user_id           Int      @unique
   username          String   @unique
-  email_id          String  
+  email_id          String
   profile_image_uri String?  @default("https://22yards-image-bucket.s3.ap-south-1.amazonaws.com/sjFmewfzjI.webp")
-  bio               String?  
+  bio               String?
   cric_index        Int      @default(0)
   updated_at        DateTime @updatedAt
   interests         String?
@@ -59,15 +52,45 @@ model Profile {
 }
 
 model Token {
-  screen_id  BigInt   @id @default(autoincrement()) @db.BigInt
-  user       Users    @relation(fields: [user_id], references: [user_id])
+  screen_id  BigInt    @id @default(autoincrement()) @db.BigInt
+  user       Users     @relation(fields: [user_id], references: [user_id])
   user_id    Int
   token_id   String
-  created_at DateTime @default(now())
+  created_at DateTime  @default(now())
   expired_at DateTime?
 
   @@unique([user_id, token_id])
   @@map("token")
+}
+
+model Posts {
+  user        Users   @relation(fields: [user_id], references: [user_id])
+  user_id     Int
+  post_id     BigInt  @id @default(autoincrement()) @db.BigInt
+  content     String?
+  media       String?
+  is_private  Boolean @default(false)
+  original    Posts?  @relation("SharedRelation", fields: [original_id], references: [post_id], onDelete: Cascade)
+  original_id BigInt?
+  ToShared    Posts[] @relation("SharedRelation")
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  Likes      Likes[]
+
+  @@unique([user_id, post_id])
+  @@map("posts")
+}
+
+model Likes {
+  user    Users @relation(fields: [user_id], references: [user_id])
+  user_id Int   @unique
+
+  post    Posts  @relation(fields: [post_id], references: [post_id])
+  post_id BigInt
+
+  type       Int
+  created_at DateTime @default(now())
 }
 
 enum NotificationStatus {
