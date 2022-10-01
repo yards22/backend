@@ -11,10 +11,10 @@ datasource db {
 }
 
 model Users {
-  user_id           Int             @id @default(autoincrement()) @db.Int
-  mail_id           String          @unique
+  user_id           Int              @id @default(autoincrement()) @db.Int
+  mail_id           String           @unique
   password          String?
-  created_at        DateTime        @default(now())
+  created_at        DateTime         @default(now())
   identity_provider String?
   subject_id        String?
   Notification      Notifications[]
@@ -22,6 +22,8 @@ model Users {
   Token             Token[]
   Post              Posts[]
   Likes             Likes[]
+  ParentComments    ParentComments[]
+  ChildComments     ChildComments[]
 
   @@map("users")
 }
@@ -74,9 +76,10 @@ model Posts {
   original_id BigInt?
   ToShared    Posts[] @relation("SharedRelation")
 
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  Likes      Likes[]
+  created_at     DateTime         @default(now())
+  updated_at     DateTime         @updatedAt
+  Likes          Likes[]
+  ParentComments ParentComments[]
 
   @@unique([user_id, post_id])
   @@map("posts")
@@ -94,6 +97,35 @@ model Likes {
 
   @@unique([user_id, post_id])
   @@map("likes")
+}
+
+model ParentComments {
+  comment_id BigInt @id @default(autoincrement()) @db.BigInt
+  user       Users  @relation(fields: [user_id], references: [user_id])
+  user_id    Int
+
+  post    Posts  @relation(fields: [post_id], references: [post_id])
+  post_id BigInt
+
+  content       String
+  created_at    DateTime        @default(now())
+  ChildComments ChildComments[]
+
+  @@map("parent_comments")
+}
+
+model ChildComments {
+  comment_id BigInt @id @default(autoincrement()) @db.BigInt
+  user       Users  @relation(fields: [user_id], references: [user_id])
+  user_id    Int
+
+  parentComment     ParentComments @relation(fields: [parent_comment_id], references: [comment_id])
+  parent_comment_id BigInt
+
+  content    String
+  created_at DateTime @default(now())
+
+  @@map("child_comments")
 }
 
 enum NotificationStatus {
