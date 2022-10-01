@@ -99,7 +99,7 @@ export default class PostManager {
 
       // removing removed images from db array
       updatedMediaRef = updatedMediaRef.filter((item) => {
-        if (removed.includes[item]) return false;
+        if (removed.includes(item)) return false;
         return true;
       });
 

@@ -50,6 +50,8 @@ export class App {
     this.notificationManager = notificationManager;
     this.authManager = authManager;
     this.profileManager = profileManager;
+    this.postManager = postManager;
+    this.likeManager = likeManager;
     this.db = db;
     this.kvStore = kvStore;
     this.imageResolver = imageResolver;
