@@ -101,10 +101,10 @@ model Likes {
 
 model ParentComments {
   comment_id BigInt @id @default(autoincrement()) @db.BigInt
-  user       Users  @relation(fields: [user_id], references: [user_id])
+  user       Users  @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
   user_id    Int
 
-  post    Posts  @relation(fields: [post_id], references: [post_id])
+  post    Posts  @relation(fields: [post_id], references: [post_id], onDelete: Cascade)
   post_id BigInt
 
   content       String
@@ -119,7 +119,7 @@ model ChildComments {
   user       Users  @relation(fields: [user_id], references: [user_id])
   user_id    Int
 
-  parentComment     ParentComments @relation(fields: [parent_comment_id], references: [comment_id])
+  parentComment     ParentComments @relation(fields: [parent_comment_id], references: [comment_id], onDelete: Cascade)
   parent_comment_id BigInt
 
   content    String
