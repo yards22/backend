@@ -8,6 +8,7 @@ import { ToJson } from "../../util/json";
 import { IKVStore } from "../../pkg/kv_store/kv_store";
 import { ImageResolver } from "../../pkg/image_resolver/image_resolver_";
 import { IFileStorage } from "../../pkg/file_storage/file_storage";
+import  NetworkManager  from "../../internal/network_manager/network_manager";
 interface CustomRequest extends Request {
   context: any;
 }
@@ -24,6 +25,7 @@ export class App {
   authManager: AuthManager;
   notificationManager: NotificationManager;
   profileManager: ProfileManager;
+  networkManager: NetworkManager;
   db: PrismaClient;
   kvStore: IKVStore;
   imageResolver: ImageResolver;
@@ -34,6 +36,7 @@ export class App {
     authManager: AuthManager,
     notificationManager: NotificationManager,
     profileManager: ProfileManager,
+    networkManager:NetworkManager,
     kvStore: IKVStore,
     db: any,
     imageResolver: ImageResolver,
@@ -44,6 +47,7 @@ export class App {
     this.notificationManager = notificationManager;
     this.authManager = authManager;
     this.profileManager = profileManager;
+    this.networkManager = networkManager;
     this.db = db;
     this.kvStore = kvStore;
     this.imageResolver = imageResolver;

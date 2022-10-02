@@ -14,6 +14,8 @@ import { App } from "./types";
 import Redis from "../../pkg/kv_store/redis";
 import { ImageResolver } from "../../pkg/image_resolver/image_resolver_";
 import { LocalFileStorage } from "../../pkg/file_storage/local_file_storage";
+import { cache } from "sharp";
+import  NetworkManager  from "../../internal/network_manager/network_manager";
 
 async function Init() {
   const srv = ServerInit();
@@ -29,14 +31,17 @@ async function Init() {
   const profileManager = new ProfileManager(
     db,
     imageResolver,
-    remoteFileStorage
+    remoteFileStorage,
+    redis
   );
+  const networkManager = new NetworkManager(db);
 
   const app = new App(
     srv,
     authManager,
     notificationManager,
     profileManager,
+    networkManager,
     redis,
     db,
     imageResolver,

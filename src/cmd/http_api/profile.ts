@@ -9,6 +9,7 @@ export const HandleUpdateProfile: RouteHandler = async (
   app
 ) => {
   const user_id: number = Number(req.context.user_id);
+  const token :string = req.context.token;
   const bio: string = req.body.bio as string;
   const profile_buffer: any = req.file?.buffer;
   const updated_at: Date = new Date();
@@ -22,8 +23,9 @@ export const HandleUpdateProfile: RouteHandler = async (
         username,
         updated_at,
         profile_buffer,
+        token,
         bio,
-        interests
+        interests,
       );
     app.SendRes(res, {
       status: responseStatus.statusCode,
