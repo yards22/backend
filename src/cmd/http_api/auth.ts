@@ -157,7 +157,6 @@ const HandleLogout: RouteHandler = async (req, res, next, app) => {
 };
 
 const HandleOTPGeneration: RouteHandler = async (req, res, next, app) => {
-  console.log("Hello");
 
   const mail_id = req.body.mail_id;
   const valid: boolean = MailValidator(mail_id);
