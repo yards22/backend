@@ -20,6 +20,7 @@ model Users {
   Notification      Notifications[]
   Profile           Profile?
   Token             Token[]
+  Network           Networks[]
 
   @@map("users")
 }
@@ -35,14 +36,6 @@ model Notifications {
   @@map("notifications")
 }
 
-// model Interests {
-//   user     Users  @relation(fields: [user_id], references: [user_id])
-//   user_id  Int
-//   interest String
-
-//   @@unique([user_id, interest])
-//   @@map("interests")
-// }
 
 model Profile {
   user              Users    @relation(fields: [user_id], references: [user_id])
@@ -53,9 +46,20 @@ model Profile {
   bio               String?  
   cric_index        Int      @default(0)
   updated_at        DateTime @updatedAt
+  following         Int      @default(0)
+  followers         Int      @default(0)
   interests         String?
 
   @@map("profiles")
+}
+
+model Networks{
+  for        Users              @relation(fields: [follower], references: [user_id])
+  follower     Int
+  following    Int
+
+  @@unique([follower,following])
+  @@map("networks")
 }
 
 model Token {

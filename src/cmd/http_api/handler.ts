@@ -27,6 +27,9 @@ import multer from "multer";
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 import RouteHandler, { App } from "./types";
+import { 
+  HandleNewConnection,
+} from "./networks";
 
 function NotificationRoutes(app: App): Router {
   const router = Router();
@@ -81,10 +84,17 @@ function ProfileRoutes(app: App): Router {
   return router;
 }
 
+function NetworkRoutes(app:App):Router{
+  const router = Router();
+  router.post("/newConnect",app.InHandler(HandleNewConnection))
+  return router;
+}
+
 function HandleRoutesFor(app: App) {
   app.srv.use("/notification", NotificationRoutes(app));
   app.srv.use("/profile", ProfileRoutes(app));
   app.srv.use("/auth", AuthRoutes(app));
+  app.srv.use("/network",NetworkRoutes(app));
 }
 
 export default HandleRoutesFor;
