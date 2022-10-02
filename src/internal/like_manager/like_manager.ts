@@ -20,18 +20,36 @@ export default class LikeManager {
         take: limit,
         skip: offset,
         include: {
-          user: { select: { Profile: { select: { username: true } } } },
+          user: {
+            select: {
+              Profile: {
+                select: {
+                  username: true,
+                  profile_image_uri: true,
+                  user_id: true,
+                },
+              },
+            },
+          },
         },
       });
 
       // transforming data
-      const likes: { create_at: Date; username: string; type: number }[] = [];
+      const likes: {
+        create_at: Date;
+        username: string;
+        profile_pic_uri: string | null;
+        user_id: number;
+        type: number;
+      }[] = [];
       _likes.forEach((item, index) => {
         if (item.user.Profile?.username)
           likes.push({
             create_at: item.created_at,
             username: item.user.Profile.username,
             type: item.type,
+            profile_pic_uri: item.user.Profile.profile_image_uri,
+            user_id: item.user.Profile.user_id,
           });
       });
 
