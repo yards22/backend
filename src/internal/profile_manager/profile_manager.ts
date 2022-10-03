@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { nextTick, off } from "process";
 import { IFileStorage } from "../../pkg/file_storage/file_storage";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 import { ImageResolver } from "../../pkg/image_resolver/image_resolver_";
@@ -52,6 +53,18 @@ export default class ProfileManager {
       },
     });
   }
+
+  GetLeaderBoard(limit:number,offset:number){
+      return this.store.profile.findMany({
+        skip:offset,
+        take:limit,
+        orderBy:{
+          cric_index:'desc',
+        },
+      })
+  }
+
+
 
   UpdateProfile(
     user_id: number,
@@ -123,6 +136,27 @@ export default class ProfileManager {
         reject(err);
       }
     });
+  }
+
+  GetCommunityLeaderBoard(limit:number,offset:number):Promise<{
+    responseStatus:IResponse,
+    leaderBoard:any
+  }>{
+     return new Promise(async(resolve,reject)=>{
+       try{
+         const leaderBoard = await this.GetCommunityLeaderBoard(limit,offset);
+         resolve({
+           responseStatus:{
+             statusCode:HerrorStatus.StatusOK,
+             message:"community_leaderboard"
+           },
+           leaderBoard
+         })
+       }
+       catch(err){
+          reject(err);
+       }
+     })
   }
 
 
