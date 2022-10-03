@@ -1,7 +1,4 @@
 import {  PrismaClient } from "@prisma/client";
-import { resolve } from "path";
-import { off } from "process";
-import { Herror } from "../../pkg/herror/herror";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 const prisma = new PrismaClient();
 
@@ -21,7 +18,7 @@ export default class NetworkManager{
     GetFollowingUsers(user_id:number){
          return this.store.networks.findMany({
              where:{
-                follower:user_id
+                follower_id:user_id
              }
          })
     }
@@ -31,14 +28,73 @@ export default class NetworkManager{
             skip:offset,
             take:limit,
             where:{
-                following :{ in : users},
+                following_id :{ in : users},
             },
+        })
+    }
+
+    GetMyFollowers(user_id:number){
+        return this.store.networks.findMany({
+            where:{
+                following_id:user_id
+            },
+            select:{
+                follower:{
+                    select:{
+                        Profile:{
+                            select:{
+                                user_id:true,
+                                profile_image_uri:true,
+                                username:true
+                            }
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    GetWhoAmIFollowing(user_id:number){
+       return this.store.networks.findMany({
+            where:{
+               follower_id:user_id
+            },
+            select:{
+                following:{
+                    select:{
+                        Profile:{
+                            select:{
+                                user_id:true,
+                                profile_image_uri:true,
+                                username:true
+                            }
+                        }
+                    }
+                }
+            }
+       })
+    }
+
+    SearchResults(search_content:string){
+        return this.store.profile.findMany({
+            where:{
+                username:{
+                    contains:search_content,
+                }
+            }
         })
     }
 
     //TODO: To complete recommendations Firstly periodic service need to be done.
 
-    GetRecommendations(user_id:number,offset:number,limit:number):Promise<{ responseStatus: IResponse; recommended?: any }> {
+    GetRecommendations(
+        user_id:number,
+        offset:number,
+        limit:number
+        ): Promise<{ 
+          responseStatus: IResponse; 
+          recommended?: any
+        }> {
          return new Promise(async (resolve,reject)=>{
             try{
                const following = await this.GetFollowingUsers(user_id);
@@ -61,14 +117,19 @@ export default class NetworkManager{
          })
       }
 
-      CreateNewConnection(user_id:number,following_id:number):Promise<{responseStatus: IResponse;}>{
+      CreateNewConnection(
+        user_id:number,
+        following_id:number
+        ):Promise<{
+            responseStatus: IResponse;
+        }>{
          return new Promise(async(resolve,reject)=>{
             try{
                 await prisma.$transaction([
                     this.store.networks.create({
                         data:{
-                          follower:user_id,
-                          following:following_id
+                          follower_id:user_id,
+                          following_id:following_id
                         }
                      }),
 
@@ -106,4 +167,42 @@ export default class NetworkManager{
             }
          })
       }
+
+      GetFollowers(user_id:number){
+         return new Promise(async(resolve,reject)=>{
+            try{
+              const followerList = await this.GetMyFollowers(user_id);
+              resolve(followerList);
+            }
+            catch(err){
+                reject(err);
+            }
+         })
+      } 
+
+      GetFollowing(user_id:number){
+        return new Promise(async(resolve,reject)=>{
+           try{
+             const followingList = await this.GetWhoAmIFollowing(user_id);
+             resolve(followingList);
+           }
+           catch(err){
+               reject(err);
+           }
+        })
+     } 
+
+     GetSearchedUsers(search_content:string){
+        return new Promise(async(resolve,reject)=>{
+            try{
+               const searchResults = await this.SearchResults(search_content);
+               resolve(searchResults);
+            }
+            catch(err){
+                reject(err);
+            }
+        })
+     }
+
+
 }

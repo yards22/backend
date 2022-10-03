@@ -26,9 +26,12 @@ import { CheckAllowance } from "./middlewares";
 import multer from "multer";
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
-import RouteHandler, { App } from "./types";
+import { App } from "./types";
 import { 
+  HandleGetFollowers,
+  HandleGetFollowing,
   HandleNewConnection,
+  HandleSearches,
 } from "./networks";
 
 function NotificationRoutes(app: App): Router {
@@ -67,26 +70,29 @@ function ProfileRoutes(app: App): Router {
     app.InHandler(HandleUpdateProfile)
   );
   router.get(
-    "/editProfile",
-    app.InHandler(CheckAllowance),
-    app.InHandler(HandleGetUserPrimaryInfo)
+    "/editProfile",app.InHandler(CheckAllowance),app.InHandler(HandleGetUserPrimaryInfo)
   );
   router.get(
-    "/",
-    app.InHandler(CheckAllowance),
-    app.InHandler(HandleGetUserProfileInfo)
+    "/",app.InHandler(CheckAllowance),app.InHandler(HandleGetUserProfileInfo)
   );
   router.post(
-    "/checkUsername",
-    app.InHandler(CheckAllowance),
-    app.InHandler(HandleGetCheckUsername)
+    "/checkUsername",app.InHandler(CheckAllowance),app.InHandler(HandleGetCheckUsername)
   );
   return router;
 }
 
 function NetworkRoutes(app:App):Router{
   const router = Router();
-  router.post("/newConnect",app.InHandler(HandleNewConnection))
+  router.post("/newConnect",app.InHandler(HandleNewConnection));
+  router.get(
+    "/myfollowers",app.InHandler(HandleGetFollowers)
+  );
+  router.get(
+    "/whoAmIFollowing",app.InHandler(HandleGetFollowing)
+  );
+  router.get(
+    "/searchUsers",app.InHandler(HandleSearches)
+  );
   return router;
 }
 
