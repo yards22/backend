@@ -1,5 +1,9 @@
 import {  PrismaClient } from "@prisma/client";
+import { Firehose } from "aws-sdk";
+import { off } from "process";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
+import EProfile from "../entities/profile";
+import ERecommends from "../entities/recommends";
 const prisma = new PrismaClient();
 
 interface IResponse {
@@ -15,23 +19,6 @@ export default class NetworkManager{
         this.store = store;
     }
 
-    GetFollowingUsers(user_id:number){
-         return this.store.networks.findMany({
-             where:{
-                follower_id:user_id
-             }
-         })
-    }
-
-    GetFollowingOfMultipleUsers(users:any,offset:number,limit:number){
-        return this.store.networks.findMany({
-            skip:offset,
-            take:limit,
-            where:{
-                following_id :{ in : users},
-            },
-        })
-    }
 
     GetMyFollowers(user_id:number){
         return this.store.networks.findMany({
@@ -75,6 +62,61 @@ export default class NetworkManager{
        })
     }
 
+    CreateConnection(follower_id:number,following_id:number){
+        return this.store.networks.create({
+            data:{
+                follower_id,
+                following_id
+              }
+        })
+    }
+
+    FollowingUpdate(user_id:number){
+        return this.store.profile.update({
+            where:{
+                user_id
+            },
+            data:{
+              following:{
+                  increment:1
+              } 
+            }
+         })
+    }
+
+
+    FollowersUpdate(user_id:number){
+        return this.store.profile.update({
+            where:{
+                user_id
+            },
+            data:{
+                followers:{
+                    increment:1
+                } 
+            }
+        })
+    }
+
+    GetComputedRecommendations(user_id:number):Promise<ERecommends|null>{
+        return this.store.recommendations.findUnique({
+            where:{
+                user_id
+            }
+        })
+    }
+
+    UpdateRecommendations(user_id:number,new_recommends:string):void{
+        this.store.recommendations.update({
+            where:{
+              user_id
+            },
+            data:{
+              recommend:new_recommends
+            }
+        })
+    }
+
     SearchResults(search_content:string){
         return this.store.profile.findMany({
             where:{
@@ -97,18 +139,19 @@ export default class NetworkManager{
         }> {
          return new Promise(async (resolve,reject)=>{
             try{
-               const following = await this.GetFollowingUsers(user_id);
-               const requiredFollowing = await this.GetFollowingOfMultipleUsers(following,offset,limit);
-
-               // chance of getting duplicates.
-               // chance of getting connections which iam already following
+               
+              const parsedRecommendations:Array<number>  = await this.PickAndParseRecommends(user_id);
+               let truncatedRecommends:Array<number> = [];
+               for(let i=offset;i<offset+limit;i++){
+                 truncatedRecommends.push(parsedRecommendations[i]);
+               }
 
                resolve({
                   responseStatus:{
                     statusCode:HerrorStatus.StatusOK,
                     message:"recommendations",
                   },
-                  recommended:requiredFollowing
+                  recommended:truncatedRecommends
                });
             }
             catch(err){
@@ -121,40 +164,24 @@ export default class NetworkManager{
         user_id:number,
         following_id:number
         ):Promise<{
-            responseStatus: IResponse;
+            responseStatus: IResponse,
         }>{
          return new Promise(async(resolve,reject)=>{
             try{
                 await prisma.$transaction([
-                    this.store.networks.create({
-                        data:{
-                          follower_id:user_id,
-                          following_id:following_id
-                        }
-                     }),
+                    this.CreateConnection(user_id,following_id),
 
-                     this.store.profile.update({
-                        where:{
-                            user_id
-                        },
-                        data:{
-                          following:{
-                              increment:1
-                          } 
-                        }
-                     }),
+                    this.FollowingUpdate(following_id),
 
-                     this.store.profile.update({
-                        where:{
-                            user_id:following_id
-                        },
-                        data:{
-                          followers:{
-                              increment:1
-                          } 
-                        }
-                     }),
+                    this.FollowersUpdate(user_id)
                 ])
+
+                // Recommendations Table updates .....
+                const prevRecommends = await this.PickAndParseRecommends(user_id);
+                const newRecommends = prevRecommends.filter(user_id=>user_id!==following_id); 
+                const newStringifiedRecommends = JSON.stringify(newRecommends);
+                await this.UpdateRecommendations(user_id,newStringifiedRecommends);
+
                 resolve({
                     responseStatus:{
                         statusCode:HerrorStatus.StatusOK,
@@ -202,7 +229,21 @@ export default class NetworkManager{
                 reject(err);
             }
         })
+
      }
+     
+     PickAndParseRecommends(user_id:number):Promise<Array<number>>{
+        return new Promise(async(resolve,reject)=>{
+           try{
+            const recommendations:any = await this.GetComputedRecommendations(user_id);
+            const parsedRecommendations:Array<number> = JSON.parse(recommendations);
+            resolve(parsedRecommendations);
+           }
+           catch(err){
+             reject(err);
+           }
+        })
+    }
 
 
 }
