@@ -1,8 +1,5 @@
 import {  PrismaClient } from "@prisma/client";
-import { Firehose } from "aws-sdk";
-import { off } from "process";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
-import EProfile from "../entities/profile";
 import ERecommends from "../entities/recommends";
 const prisma = new PrismaClient();
 
@@ -71,6 +68,17 @@ export default class NetworkManager{
         })
     }
 
+    DeleteConnection(follower_id:number,following_id:number){
+        return this.store.networks.delete({
+            where:{
+                follower_id_following_id:{
+                    follower_id,
+                    following_id
+                }
+            }
+        })
+    }
+
     FollowingUpdate(user_id:number){
         return this.store.profile.update({
             where:{
@@ -126,8 +134,6 @@ export default class NetworkManager{
             }
         })
     }
-
-    //TODO: To complete recommendations Firstly periodic service need to be done.
 
     GetRecommendations(
         user_id:number,
@@ -193,6 +199,18 @@ export default class NetworkManager{
                  reject(err);
             }
          })
+      }
+
+      UnfollowUser(user_id:number,following_id:number){
+        return new Promise(async(resolve,reject)=>{
+            try{
+              await this.DeleteConnection(user_id,following_id);
+              resolve("successfully_deleted");
+            }
+            catch(err){
+               reject(err);
+            }
+        })
       }
 
       GetFollowers(user_id:number){

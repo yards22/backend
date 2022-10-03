@@ -31,6 +31,7 @@ import {
   HandleGetFollowers,
   HandleGetFollowing,
   HandleNewConnection,
+  HandleRemoveConnection,
   HandleSearches,
 } from "./networks";
 
@@ -92,6 +93,9 @@ function NetworkRoutes(app:App):Router{
   );
   router.get(
     "/searchUsers",app.InHandler(HandleSearches)
+  );
+  router.delete(
+    "/removeConnect",app.InHandler(HandleRemoveConnection)
   );
   return router;
 }

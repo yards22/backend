@@ -49,6 +49,22 @@ export const HandleNewConnection:RouteHandler=async(req,res,next,app)=>{
     }
 }
 
+export const HandleRemoveConnection:RouteHandler=async (req,res,next,app)=>{
+  const user_id = Number(req.context.user_id);
+  const following_id = Number(req.body.following_id);
+  if(user_id!==undefined && following_id!==undefined){
+      await app.networkManager.UnfollowUser(user_id,following_id);
+      app.SendRes(res,{
+        status:200,
+        message:"connection_deleted_successfully"
+      });
+  }
+  else{
+    next(new Herror("BadRequest", HerrorStatus.StatusBadRequest)); 
+
+  }
+}
+
 export const HandleGetFollowers:RouteHandler=async (req,res,next,app)=>{
    const user_id = Number(req.context.user_id);
    if(user_id!==undefined){
