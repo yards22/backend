@@ -6,7 +6,6 @@ CREATE TABLE `users` (
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `identity_provider` VARCHAR(191) NULL,
     `subject_id` VARCHAR(191) NULL,
-    `interests` VARCHAR(191) NULL,
 
     UNIQUE INDEX `users_mail_id_key`(`mail_id`),
     PRIMARY KEY (`user_id`)
@@ -32,9 +31,21 @@ CREATE TABLE `profiles` (
     `bio` VARCHAR(191) NULL,
     `cric_index` INTEGER NOT NULL DEFAULT 0,
     `updated_at` DATETIME(3) NOT NULL,
+    `following` INTEGER NOT NULL DEFAULT 0,
+    `followers` INTEGER NOT NULL DEFAULT 0,
+    `interests` VARCHAR(191) NULL,
 
     UNIQUE INDEX `profiles_user_id_key`(`user_id`),
     UNIQUE INDEX `profiles_username_key`(`username`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `networks` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `follower_id` INTEGER NOT NULL,
+    `following_id` INTEGER NULL,
+
+    PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -54,6 +65,12 @@ ALTER TABLE `notifications` ADD CONSTRAINT `notifications_for_id_fkey` FOREIGN K
 
 -- AddForeignKey
 ALTER TABLE `profiles` ADD CONSTRAINT `profiles_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `networks` ADD CONSTRAINT `networks_follower_id_fkey` FOREIGN KEY (`follower_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `networks` ADD CONSTRAINT `networks_following_id_fkey` FOREIGN KEY (`following_id`) REFERENCES `users`(`user_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `token` ADD CONSTRAINT `token_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
