@@ -59,8 +59,10 @@ model Networks{
   id         BigInt      @id @default(autoincrement()) @db.BigInt
   follower     Users     @relation("followers",fields: [follower_id], references: [user_id])
   follower_id  Int
-  following   Users?     @relation("following",fields: [following_id], references: [user_id])
-  following_id Int?
+  following   Users     @relation("following",fields: [following_id], references: [user_id])
+  following_id Int
+
+  @@unique([follower_id,following_id])
  
   @@map("networks")
 }
