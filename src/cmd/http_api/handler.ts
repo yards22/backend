@@ -1,4 +1,7 @@
 import { Router } from "express";
+import  { App } from "./types";
+import multer from "multer";
+
 import {
   HandleGetNotification,
   HandleUpdateNotificationStatus,
@@ -22,12 +25,23 @@ import {
   HandleGetUserProfileInfo,
   HandleGetCheckUsername,
 } from "./profile";
-import { CheckAllowance } from "./middlewares";
-import multer from "multer";
+import { 
+  CheckAllowance 
+} from "./middlewares";
+import { 
+  HandleGetLikesForPost,
+  HandleLikeAndUnlike 
+} from "./like";
+import {
+   HandleCommentReply,
+   HandleCreateComment, 
+   HandleDeleteComment, 
+   HandleDeleteCommentReply, 
+   HandleGetComments 
+} from "./comment";
+
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
-import RouteHandler, { App } from "./types";
-import { HandleGetLikesForPost, HandleLikeAndUnlike } from "./like";
 
 function NotificationRoutes(app: App): Router {
   const router = Router();
@@ -97,11 +111,48 @@ function LikeRoutes(app: App): Router {
   return router;
 }
 
+function CommentRoutes(app:App):Router {
+
+  //TODO: post_id can be passed in url parameters ..
+
+    const router =Router();
+    router.get(
+      "/",
+      app.InHandler(CheckAllowance),
+      app.InHandler(HandleGetComments)
+    );
+    router.post(
+      "/",
+      app.InHandler(CheckAllowance),
+      app.InHandler(HandleCreateComment)
+    );
+
+    router.delete(
+      '/',
+      app.InHandler(CheckAllowance),
+      app.InHandler(HandleDeleteComment)
+    );
+    
+    router.post(
+      '/reply',
+      app.InHandler(CheckAllowance),
+      app.InHandler(HandleCommentReply)
+    );
+
+    router.delete(
+      '/reply',
+      app.InHandler(CheckAllowance),
+      app.InHandler(HandleDeleteCommentReply)
+    );
+    return router;
+}
+
 function HandleRoutesFor(app: App) {
   app.srv.use("/notification", NotificationRoutes(app));
   app.srv.use("/profile", ProfileRoutes(app));
   app.srv.use("/auth", AuthRoutes(app));
   app.srv.use("/like", LikeRoutes(app));
+  app.srv.use("/comment",CommentRoutes(app));
 }
 
 export default HandleRoutesFor;
