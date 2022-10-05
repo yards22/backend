@@ -24,6 +24,7 @@ model Users {
   Likes             Likes[]
   ParentComments    ParentComments[]
   ChildComments     ChildComments[]
+  Favourites        Favourites[]
 
   @@map("users")
 }
@@ -80,6 +81,7 @@ model Posts {
   updated_at     DateTime         @updatedAt
   Likes          Likes[]
   ParentComments ParentComments[]
+  Favourites     Favourites[]
 
   @@unique([user_id, post_id])
   @@map("posts")
@@ -127,6 +129,18 @@ model ChildComments {
 
   @@map("child_comments")
 }
+
+model Favourites {
+  user       Users @relation(fields: [user_id],references: [user_id])
+  user_id    Int 
+  post   Posts  @relation(fields: [post_id],references: [post_id])
+  post_id    BigInt
+
+  @@unique([user_id,post_id])
+  @@map("favourites")
+}
+
+
 
 enum NotificationStatus {
   Unseen

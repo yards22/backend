@@ -39,6 +39,10 @@ import {
    HandleDeleteCommentReply, 
    HandleGetComments 
 } from "./comment";
+import { 
+  HandleAddToFavourites,
+  HandleCreatePost, HandleDeletePost, HandleShareToTimeline, HandleUpdatePost 
+} from "./post";
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -147,12 +151,50 @@ function CommentRoutes(app:App):Router {
     return router;
 }
 
+function PostRoutes(app:App):Router{
+  const router = Router();
+
+  router.post(
+    "/",
+    app.InHandler(CheckAllowance),
+    upload.array("images"),
+    app.InHandler(HandleCreatePost)
+  );
+
+  router.put(
+    "/",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleUpdatePost)
+  );
+
+  router.delete(
+    "/",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleDeletePost)
+  );
+
+  router.post(
+    "/shareToTimeline",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleShareToTimeline)
+  );
+
+  router.post(
+    "/addToFavourites",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleAddToFavourites)
+  );
+
+  return router;
+}
+
 function HandleRoutesFor(app: App) {
   app.srv.use("/notification", NotificationRoutes(app));
   app.srv.use("/profile", ProfileRoutes(app));
   app.srv.use("/auth", AuthRoutes(app));
   app.srv.use("/like", LikeRoutes(app));
   app.srv.use("/comment",CommentRoutes(app));
+  app.srv.use("/post",PostRoutes(app));
 }
 
 export default HandleRoutesFor;

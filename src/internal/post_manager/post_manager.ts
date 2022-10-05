@@ -36,29 +36,33 @@ export default class PostManager {
   }
 
   async Create(user_id: number, content: string, medias: Buffer[]) {
-    try {
-      const post = await this.store.posts.create({
-        data: {
-          content,
-          user_id: user_id,
-          media: JSON.stringify([]),
-        },
-      });
-
+    return new Promise(async(resolve,reject)=>{
       try {
-        await this.UploadMedias(user_id, post.post_id, medias);
-      } catch (err) {
-        // image upload failed, rollback: delete post
+        const post = await this.store.posts.create({
+          data: {
+            content,
+            user_id: user_id,
+            media: JSON.stringify([]),
+          },
+        });
+  
         try {
-          await this.Delete(user_id, post.post_id);
+          await this.UploadMedias(user_id, post.post_id, medias);
+           resolve("post_uploaded_succesfully");
         } catch (err) {
+          // image upload failed, rollback: delete post
+          try {
+            await this.Delete(user_id, post.post_id);
+            resolve("unable_to_upload_media");
+          } catch (err) {
+            throw err;
+          }
           throw err;
         }
+      } catch (err) {
         throw err;
       }
-    } catch (err) {
-      throw err;
-    }
+    })
   }
 
   Update(user_id: number, post_id: bigint, content?: string) {
@@ -74,7 +78,8 @@ export default class PostManager {
     });
   }
 
-  Share(user_id: number, original_id: number, content: string) {
+// TODO: what if the post which is shared contains of images as well.
+  async ShareToTimeline(user_id: number, original_id: bigint, content: string) {
     return this.store.posts.create({
       data: { content, user_id: user_id, original_id },
     });
@@ -166,4 +171,22 @@ export default class PostManager {
       throw err;
     }
   }
+ 
+  async BookmarkPosts(user_id:number,post_id:bigint){
+     return new Promise(async(resolve,reject)=>{
+         try{
+            const data= await this.store.favourites.create({
+              data:{
+                user_id,post_id
+              }
+            }); 
+            resolve(data);
+         }
+         catch(err){
+           reject(err);
+         }
+     })
+  }
+
+
 }
