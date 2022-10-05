@@ -60,7 +60,6 @@ export default class AuthManager {
     });
   }
 
-
   DeleteScreen(user_id: number, accessToken: string) {
     return this.store.token.deleteMany({
       where: {
@@ -85,12 +84,12 @@ export default class AuthManager {
     });
   }
 
-  CreateScreen(user_id: number, accessToken: string,expiry:Date) {
+  CreateScreen(user_id: number, accessToken: string, expiry: Date) {
     return this.store.token.create({
       data: {
         user_id,
         token_id: accessToken,
-        expired_at: expiry
+        expired_at: expiry,
       },
     });
   }
@@ -130,8 +129,8 @@ export default class AuthManager {
             );
             const accessToken = await this.CreateSession(Token_Length, user);
             const oneYearFromNow = new Date();
-            oneYearFromNow.setMonth(oneYearFromNow.getMonth()+1)
-            await this.CreateScreen(user.user_id, accessToken,oneYearFromNow);
+            oneYearFromNow.setMonth(oneYearFromNow.getMonth() + 1);
+            await this.CreateScreen(user.user_id, accessToken, oneYearFromNow);
             resolve({
               responseStatus: {
                 statusCode: HerrorStatus.StatusCreated,
@@ -177,8 +176,8 @@ export default class AuthManager {
           user
         );
         const oneYearFromNow = new Date();
-        oneYearFromNow.setMonth(oneYearFromNow.getMonth()+1)
-        await this.CreateScreen(user.user_id, accessToken,oneYearFromNow);
+        oneYearFromNow.setMonth(oneYearFromNow.getMonth() + 1);
+        await this.CreateScreen(user.user_id, accessToken, oneYearFromNow);
         resolve({
           responseStatus: {
             statusCode: HerrorStatus.StatusOK,
@@ -200,7 +199,13 @@ export default class AuthManager {
         if (!user) {
           const username: string = GenerateUsername(email);
           console.log("in upsert user about to create user");
-          user = await this.CreateUser(email, username, undefined, sub,"google");
+          user = await this.CreateUser(
+            email,
+            username,
+            undefined,
+            sub,
+            "google"
+          );
         }
         resolve(user);
       } catch (err) {
@@ -232,8 +237,8 @@ export default class AuthManager {
               user
             );
             const oneYearFromNow = new Date();
-            oneYearFromNow.setMonth(oneYearFromNow.getMonth()+1)
-            await this.CreateScreen(user.user_id, accessToken,oneYearFromNow);
+            oneYearFromNow.setMonth(oneYearFromNow.getMonth() + 1);
+            await this.CreateScreen(user.user_id, accessToken, oneYearFromNow);
             resolve({
               responseStatus: {
                 statusCode: HerrorStatus.StatusOK,

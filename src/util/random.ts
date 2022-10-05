@@ -1,5 +1,5 @@
 const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-const numbers ="0123456789";
+const numbers = "0123456789";
 function RandomString(n: number): string {
   let result = "";
   const charactersLength = alphabet.length;
@@ -14,13 +14,13 @@ function RandomNumber(min: number, max: number): number {
 }
 
 function GenerateOTP(): string {
-
-    let otp:string ="" ;
-    while(otp.length<4){
-      const RandNumber = (Math.floor(Math.random()*10));
-      otp+= RandNumber !==0 ? RandNumber.toString() :(RandNumber+1).toString();
-    }
-    return otp; 
+  let otp: string = "";
+  while (otp.length < 4) {
+    const RandNumber = Math.floor(Math.random() * 10);
+    otp +=
+      RandNumber !== 0 ? RandNumber.toString() : (RandNumber + 1).toString();
+  }
+  return otp;
 }
 
-export { RandomNumber, RandomString ,GenerateOTP};
+export { RandomNumber, RandomString, GenerateOTP };

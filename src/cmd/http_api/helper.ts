@@ -1,16 +1,18 @@
-import config  from "config";
+import config from "config";
 
 const { OAuth2Client } = require("google-auth-library");
 // this function checks the integrity of the googleIdToken and outputs the user data
-export default function verifyGoogleIdTokenAndGetUserData(googleIdToken:string) {
+export default function verifyGoogleIdTokenAndGetUserData(
+  googleIdToken: string
+) {
   return new Promise((resolve, reject) => {
-    const client = new OAuth2Client(config.get( "googleClientId"));
+    const client = new OAuth2Client(config.get("googleClientId"));
     return client
       .verifyIdToken({
         idToken: googleIdToken,
         audience: config.get("googleClientId"),
       })
-      .then((ticket:any) => {
+      .then((ticket: any) => {
         // the integrity of the google id token has been confirmed and obtained data in payload
         const payload = ticket.getPayload();
         // returning the user data obtained in the payload
@@ -24,5 +26,3 @@ export default function verifyGoogleIdTokenAndGetUserData(googleIdToken:string) 
       });
   });
 }
-
-

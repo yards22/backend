@@ -1,7 +1,7 @@
 import { RandomString } from "../util/random";
 import InMKV from "../pkg/kv_store/kv_store_";
 import { IKVStore } from "../pkg/kv_store/kv_store";
-import { createClient,RedisClientType } from "redis";
+import { createClient, RedisClientType } from "redis";
 import Redis from "../pkg/kv_store/redis";
 let kv: IKVStore;
 beforeAll(async () => {

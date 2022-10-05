@@ -28,7 +28,7 @@ export class S3FileStorage implements IFileStorage {
           Key: filePath,
           Body: fileData,
         },
-        (err,data) => {
+        (err, data) => {
           if (err) return reject(err);
           return resolve(data);
         }

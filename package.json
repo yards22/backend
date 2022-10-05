@@ -9,7 +9,8 @@
     "build": "tsc -p .",
     "test": "jest",
     "testi": "jest --detectOpenHandles",
-    "sqlgen": "npx pgtyped -c --watch pg_typed_config.json"
+    "sqlgen": "npx pgtyped -c --watch pg_typed_config.json",
+    "prepare": "husky install"
   },
   "keywords": [],
   "author": "Himanshu Sah",
@@ -17,6 +18,8 @@
   "dependencies": {
     "@prisma/client": "^4.2.1",
     "aws-sdk": "^2.1213.0",
+    "bcrypt": "^5.0.1",
+    "config": "^3.3.8",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.0.2",
@@ -54,6 +57,7 @@
     "@types/redis": "^4.0.11",
     "@types/sharp": "^0.30.5",
     "@types/uuid": "^8.3.4",
+    "husky": "^8.0.0",
     "jest": "^28.1.3",
     "nodemon": "^2.0.19",
     "prisma": "^4.2.1",
