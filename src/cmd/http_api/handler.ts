@@ -41,7 +41,7 @@ import {
 } from "./comment";
 import { 
   HandleAddToFavourites,
-  HandleCreatePost, HandleDeletePost, HandleShareToTimeline, HandleUpdatePost 
+  HandleCreatePost, HandleDeletePost, HandleGetPosts, HandleShareToTimeline, HandleUpdatePost 
 } from "./post";
 
 const storage = multer.memoryStorage();
@@ -171,6 +171,12 @@ function PostRoutes(app:App):Router{
     "/",
     app.InHandler(CheckAllowance),
     app.InHandler(HandleDeletePost)
+  );
+
+  router.get(
+    "/",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleGetPosts)
   );
 
   router.post(

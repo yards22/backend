@@ -25,6 +25,9 @@ model Users {
   ParentComments    ParentComments[]
   ChildComments     ChildComments[]
   Favourites        Favourites[]
+  PostRecommendations PostRecommendations?
+  Following         Networks[]   @relation("following")
+  Followers         Networks[]   @relation("followers")
 
   @@map("users")
 }
@@ -138,6 +141,25 @@ model Favourites {
 
   @@unique([user_id,post_id])
   @@map("favourites")
+}
+
+model PostRecommendations{
+  user Users @relation(fields: [user_id], references: [user_id])
+  user_id Int @unique
+  post_recommendations String
+
+  @@map("postRecommendations")
+}
+
+model Networks{
+  id         BigInt      @id @default(autoincrement()) @db.BigInt
+  follower     Users     @relation("followers",fields: [follower_id], references: [user_id])
+  follower_id  Int
+  following   Users     @relation("following",fields: [following_id], references: [user_id])
+  following_id Int
+  @@unique([follower_id,following_id])
+ 
+  @@map("networks")
 }
 
 

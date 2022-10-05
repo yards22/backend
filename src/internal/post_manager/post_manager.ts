@@ -1,7 +1,10 @@
-import { PrismaClient } from "@prisma/client";
+import {  PrismaClient } from "@prisma/client";
+import { json } from "stream/consumers";
 import { IFileStorage } from "../../pkg/file_storage/file_storage";
 import { ImageResolver } from "../../pkg/image_resolver/image_resolver_";
 import { IKVStore } from "../../pkg/kv_store/kv_store";
+const prisma = new PrismaClient();
+
 const ALLOWED_IMAGES = 3;
 const MAX_WIDTH = 1080;
 export default class PostManager {
@@ -188,5 +191,106 @@ export default class PostManager {
      })
   }
 
+  async DeleteBookmarkedPosts(user_id:number,post_id:bigint){
+    return new Promise(async(resolve,reject)=>{
+      try{
+         const data= await this.store.favourites.delete({
+           where:{
+             user_id_post_id:{user_id,post_id}
+           }
+         }); 
+         resolve(data);
+      }
+      catch(err){
+        reject(err);
+      }
+  })
+  }
 
+  async GetFollowing(user_id:number){
+      return this.store.networks.findMany({
+        where:{
+           follower_id:user_id
+        },
+        select:{
+          following_id:true
+        }
+      })
+  }
+
+  async GetPostsOfUsers(users,limit:number,offset:number){
+    return this.store.posts.findMany({
+      take:limit,
+      skip:offset,
+      where:{
+        user_id :{
+          in:users
+        }
+      },
+      include: { _count: { select: { Likes: true } } },
+    })
+  }
+
+  async GetPostRecommendations(user_id){
+    return this.store.postRecommendations.findUnique({
+       where :{
+        user_id
+       }
+    })
+  }
+
+  async GetPostsById(post_id,limit:number,offset:number){
+    return this.store.posts.findMany({
+      take:limit,
+      skip:offset,
+      where:{
+        post_id:{
+          in :post_id
+        }
+      },
+      include: { _count: { select: { Likes: true } } }, 
+    })
+  }
+
+  async GetUsersFeed(user_id:number,limit:number,offset:number){
+    return new Promise(async(resolve,reject)=>{
+      try{
+         let posts:any = [];
+         let following:any = [];
+        
+         following = await this.GetFollowing(user_id);
+
+         // xtraxt id's from following object array..
+
+         following = following.forEach(item=>{
+             item.following_id
+         });
+         
+         // get posts of these users.
+         
+         posts = await this.GetPostsOfUsers(following,limit,offset);
+
+         let recommended_posts:any = [];
+
+         // recommendation of posts by lcm service..
+
+         recommended_posts = await this.GetPostRecommendations(user_id);
+
+         recommended_posts = JSON.parse(recommended_posts);
+
+         let rec_posts = await this.GetPostsById(recommended_posts,limit,offset);
+
+         rec_posts.forEach((post)=>{
+           posts.push(post);
+         })
+
+         // posts contains all the posts to be displayed
+         resolve(posts);
+
+      }
+      catch(err){
+        reject(err);
+      }
+    });
+  }
 }

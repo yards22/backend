@@ -58,6 +58,22 @@ export const HandleDeletePost:RouteHandler = async(req,res,next,app)=>{
     }
 }
 
+export const HandleGetPosts:RouteHandler = async(req,res,next,app)=>{
+  const user_id : number = Number(req.context.user_id);
+  const limit:number = Number(req.query.limit);
+  const offset:number = Number(req.query.offset);
+  try{
+     const posts = await app.postManager.GetUsersFeed(user_id,limit,offset);
+     app.SendRes(res,{
+      status:200,
+      data:posts,
+    });
+  }
+  catch(err){
+    next(err);
+  }
+}
+
 export const HandleShareToTimeline:RouteHandler = async(req,res,next,app)=>{
     const user_id : number = Number(req.context.user_id);
     const post_id : bigint = BigInt(req.body.post_id);
