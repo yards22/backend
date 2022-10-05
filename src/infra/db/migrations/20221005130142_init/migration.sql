@@ -6,7 +6,6 @@ CREATE TABLE `users` (
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `identity_provider` VARCHAR(191) NULL,
     `subject_id` VARCHAR(191) NULL,
-    `interests` VARCHAR(191) NULL,
 
     UNIQUE INDEX `users_mail_id_key`(`mail_id`),
     PRIMARY KEY (`user_id`)
@@ -32,6 +31,7 @@ CREATE TABLE `profiles` (
     `bio` VARCHAR(191) NULL,
     `cric_index` INTEGER NOT NULL DEFAULT 0,
     `updated_at` DATETIME(3) NOT NULL,
+    `interests` VARCHAR(191) NULL,
 
     UNIQUE INDEX `profiles_user_id_key`(`user_id`),
     UNIQUE INDEX `profiles_username_key`(`username`)

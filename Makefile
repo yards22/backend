@@ -24,5 +24,8 @@ pmu:
 	npx prisma migrate dev -n init --schema ./src/infra/db/schema.prisma
 pgen:
 	npx prisma generate --schema ./src/infra/db/schema.prisma
+omg:
+	rm -rf ./src/infra/db/migrations/*
+	make pmu
 
 .PHONY: postgres createdb dropdb migrateup migratedown sqlc test migratecreate seed genprivatekey genpublickey err test_fail
