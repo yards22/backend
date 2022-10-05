@@ -1,4 +1,5 @@
 import {  PrismaClient } from "@prisma/client";
+import { bool } from "aws-sdk/clients/signer";
 import { json } from "stream/consumers";
 import { IFileStorage } from "../../pkg/file_storage/file_storage";
 import { ImageResolver } from "../../pkg/image_resolver/image_resolver_";
@@ -50,29 +51,61 @@ export default class PostManager {
         });
   
         try {
-          await this.UploadMedias(user_id, post.post_id, medias);
+          const removed_images:string = "";
+          await this.UploadMedias(
+            user_id, 
+            post.post_id,
+            medias,
+            removed_images,
+            true             // is_new
+          );
            resolve("post_uploaded_succesfully");
-        } catch (err) {
+        } 
+        catch (err) {
           // image upload failed, rollback: delete post
           try {
             await this.Delete(user_id, post.post_id);
             resolve("unable_to_upload_media");
-          } catch (err) {
+          }
+          catch (err) {
             throw err;
           }
           throw err;
         }
-      } catch (err) {
+      } 
+      catch (err) {
         throw err;
       }
-    })
+    });
   }
 
-  Update(user_id: number, post_id: bigint, content?: string) {
-    return this.store.posts.update({
-      data: { content },
-      where: { user_id_post_id: { post_id: post_id, user_id: user_id } },
-    });
+
+  async Update(user_id: number, post_id: bigint,removed_images:string, medias: Buffer[], content?: string) {
+    return new Promise(async(resolve,reject)=>{
+          try {
+            const images:string = await this.UploadMedias(
+              user_id,
+              post_id,
+              medias as Buffer[],
+              removed_images,
+              false           // is_new
+              ) as string;
+            try{
+                this.store.posts.update({
+                  data: {
+                    content,
+                    media:images,
+                  },
+                  where:{ user_id_post_id: { post_id: post_id, user_id: user_id } },
+                })
+            }
+             catch(err){
+                   reject(err);
+             }
+          } catch (err) {
+              resolve("unable_to_upload_media");
+            } 
+        });
   }
 
   async Delete(user_id: number, post_id: bigint) {
@@ -92,7 +125,8 @@ export default class PostManager {
     user_id: number,
     post_id: bigint,
     added: string[],
-    removed: string[]
+    removed: string[],
+    is_new: bool
   ) {
     try {
       const currentImagesRef = await this.store.posts.findUnique({
@@ -116,21 +150,27 @@ export default class PostManager {
         if (!updatedMediaRef.includes(item)) updatedMediaRef.push(item);
       });
 
-      // updating the database
-      try {
-        await this.store.posts.update({
-          data: { media: JSON.stringify(updatedMediaRef) },
-          where: { user_id_post_id: { user_id, post_id } },
-        });
-      } catch (err) {
-        throw err;
-      }
+     if(is_new){
+        try {
+          await this.store.posts.update({
+            data: { media: JSON.stringify(updatedMediaRef) },
+            where: { user_id_post_id: { user_id, post_id } },
+          });
+        } catch (err) {
+          throw err;
+        }
+     }
+
+     else{
+      return  JSON.stringify(updatedMediaRef);
+     }
+
     } catch (err) {
       throw err;
     }
   }
 
-  async UploadMedias(user_id: number, post_id: bigint, medias: Buffer[]) {
+  async UploadMedias(user_id: number, post_id: bigint, medias: Buffer[],removed_images:string,is_new:bool) {
     const mediaRef = medias.map((_, index) => {
       return `media_${post_id}_${index}.${this.imageResolver.defaultFormat}`;
     });
@@ -157,9 +197,16 @@ export default class PostManager {
     }
     // -----------------media upload completed----------------
 
-    // updating db
+    // updating stringified media ref...
     try {
-      await this.UpdateMediaRef(user_id, post_id, mediaRef, []);
+      if(is_new){
+        await this.UpdateMediaRef(user_id, post_id, mediaRef, [],is_new);
+      }
+      else{
+        const removed:string[] = JSON.parse(removed_images as string);
+        return await this.UpdateMediaRef(user_id, post_id, mediaRef, removed || [],is_new);
+      }
+
     } catch (err) {
       // updating media ref in db failed: delete images from storage
       try {
