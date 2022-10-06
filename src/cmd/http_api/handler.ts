@@ -44,21 +44,52 @@ function NotificationRoutes(app: App): Router {
 
 function AuthRoutes(app: App): Router {
   const router = Router();
-  router.get("/", app.InHandler(CheckAllowance), app.InHandler(HandleMe));
-  router.post("/signup", app.InHandler(HandleSignUp));
-  router.post("/login", app.InHandler(HandleLogin));
-  router.post("/oauth", app.InHandler(HandleGoogleOauth));
-  router.post("/sendOTP", app.InHandler(HandleOTPGenerationForSignUp));
-  router.post("/verifyOTP", app.InHandler(HandleOTPVerificationForSignUp));
+  router.get(
+    "/", 
+    app.InHandler(CheckAllowance), 
+    app.InHandler(HandleMe)
+  );
+  router.post(
+    "/signup", 
+    app.InHandler(HandleSignUp)
+  );
+  router.post(
+    "/login", 
+    app.InHandler(HandleLogin)
+  );
+  router.post(
+    "/oauth", 
+    app.InHandler(HandleGoogleOauth)
+  );
+  router.post(
+    "/sendOTP", 
+    app.InHandler(HandleOTPGenerationForSignUp)
+  );
+  router.post(
+    "/verifyOTP", 
+    app.InHandler(HandleOTPVerificationForSignUp)
+  );
   router.delete(
     "/logout",
     app.InHandler(CheckAllowance),
     app.InHandler(HandleLogout)
   );
-  router.post("/sendOTPforgot", app.InHandler(HandleOTPGeneration));
-  router.post("/verifyOTPforgot", app.InHandler(HandleOTPVerification));
-  router.put("/updPassword", app.InHandler(HandlePasswordUpdate));
-  router.post("/logoutAllScreens", app.InHandler(HandleLogoutAllScreen));
+  router.post(
+    "/sendOTPforgot", 
+    app.InHandler(HandleOTPGeneration)
+  );
+  router.post(
+    "/verifyOTPforgot", 
+    app.InHandler(HandleOTPVerification)
+  );
+  router.post(
+    "/updPassword", 
+    app.InHandler(HandlePasswordUpdate)
+  );
+  router.post(
+    "/logoutAllScreens", 
+    app.InHandler(HandleLogoutAllScreen)
+  );
   return router;
 }
 
@@ -71,31 +102,49 @@ function ProfileRoutes(app: App): Router {
     app.InHandler(HandleUpdateProfile)
   );
   router.get(
-    "/editProfile",app.InHandler(CheckAllowance),app.InHandler(HandleGetUserPrimaryInfo)
+    "/editProfile",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleGetUserPrimaryInfo)
   );
   router.get(
-    "/",app.InHandler(CheckAllowance),app.InHandler(HandleGetUserProfileInfo)
+    "/",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleGetUserProfileInfo)
   );
   router.post(
-    "/checkUsername",app.InHandler(CheckAllowance),app.InHandler(HandleGetCheckUsername)
+    "/checkUsername",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleGetCheckUsername)
   );
   return router;
 }
 
 function NetworkRoutes(app:App):Router{
   const router = Router();
-  router.post("/newConnect",app.InHandler(HandleNewConnection));
-  router.get(
-    "/myfollowers",app.InHandler(HandleGetFollowers)
+  router.post(
+    "/newConnect",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleNewConnection)
   );
   router.get(
-    "/whoAmIFollowing",app.InHandler(HandleGetFollowing)
+    "/myfollowers",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleGetFollowers)
   );
   router.get(
-    "/searchUsers",app.InHandler(HandleSearches)
+    "/whoAmIFollowing",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleGetFollowing)
+  );
+  router.get(
+    "/searchUsers",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleSearches)
   );
   router.delete(
-    "/removeConnect",app.InHandler(HandleRemoveConnection)
+    "/removeConnect",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleRemoveConnection)
   );
   return router;
 }

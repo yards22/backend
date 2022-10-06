@@ -1,4 +1,5 @@
 import {  PrismaClient } from "@prisma/client";
+import { parse } from "path";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 import ERecommends from "../entities/recommends";
 const prisma = new PrismaClient();
@@ -135,6 +136,27 @@ export default class NetworkManager{
         })
     }
 
+    GetRecommendedUsers(recommendations:number[],limit:number,offset:number){
+        return this.store.users.findMany({
+            take:limit,
+            skip:offset,
+            where:{
+                user_id:{
+                    in:recommendations
+                }
+            },
+            select:{
+                Profile:{
+                    select:{
+                        username:true,
+                        profile_image_uri:true,
+                        user_id:true,
+                    }
+                }
+            }
+        });
+    }
+
     GetRecommendations(
         user_id:number,
         offset:number,
@@ -147,11 +169,8 @@ export default class NetworkManager{
             try{
                
               const parsedRecommendations:Array<number>  = await this.PickAndParseRecommends(user_id);
-               let truncatedRecommends:Array<number> = [];
-               for(let i=offset;i<offset+limit;i++){
-                 truncatedRecommends.push(parsedRecommendations[i]);
-               }
-
+              
+               let truncatedRecommends = await this.GetRecommendedUsers(parsedRecommendations,limit,offset);
                resolve({
                   responseStatus:{
                     statusCode:HerrorStatus.StatusOK,
