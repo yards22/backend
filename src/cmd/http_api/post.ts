@@ -30,6 +30,7 @@ export const HandleUpdatePost:RouteHandler = async(req,res,next,app)=>{
       const content : string = String(req.body.content);
       const post_id:bigint = BigInt(req.body.post_id);
       const removed_images:string = String(req.body.removed_images);
+      const edits:number = Number(req.body.edits);
         const images = req.files as Array<any>;
         let image_buffer:Buffer[] = [];
         for(let i=0;i<images?.length;i++){
@@ -37,7 +38,7 @@ export const HandleUpdatePost:RouteHandler = async(req,res,next,app)=>{
         }
 
       try{
-        const updated_post = await app.postManager.Update(user_id,post_id,removed_images,images,content);
+        const updated_post = await app.postManager.Update(user_id,post_id,removed_images,image_buffer,edits,content);
         app.SendRes(res,{
             status:200,
             data:updated_post

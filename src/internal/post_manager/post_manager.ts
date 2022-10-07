@@ -1,5 +1,7 @@
 import {  PrismaClient } from "@prisma/client";
 import { bool } from "aws-sdk/clients/signer";
+import { appendFile } from "fs";
+import MimeNode from "nodemailer/lib/mime-node";
 import { json } from "stream/consumers";
 import { IFileStorage } from "../../pkg/file_storage/file_storage";
 import { ImageResolver } from "../../pkg/image_resolver/image_resolver_";
@@ -8,6 +10,11 @@ const prisma = new PrismaClient();
 
 const ALLOWED_IMAGES = 3;
 const MAX_WIDTH = 1080;
+
+interface IFollower{
+   following_id:number
+}
+
 export default class PostManager {
   private store: PrismaClient;
   private imageStorage: IFileStorage;
@@ -56,6 +63,7 @@ export default class PostManager {
             user_id, 
             post.post_id,
             medias,
+            0,
             removed_images,
             true             // is_new
           );
@@ -80,24 +88,29 @@ export default class PostManager {
   }
 
 
-  async Update(user_id: number, post_id: bigint,removed_images:string, medias: Buffer[], content?: string) {
+  async Update(user_id: number, post_id: bigint,removed_images:string, medias: Buffer[],edits:number, content?: string) {
     return new Promise(async(resolve,reject)=>{
           try {
-            const images:string = await this.UploadMedias(
+            const images = await this.UploadMedias(
               user_id,
               post_id,
               medias as Buffer[],
+              edits+1,
               removed_images,
               false           // is_new
-              ) as string;
+              ) ;
             try{
-                this.store.posts.update({
+                const data = await this.store.posts.update({
+                  where:{ user_id_post_id: { post_id: post_id, user_id: user_id } },
                   data: {
                     content,
                     media:images,
+                    edits:{
+                       increment:1
+                    }
                   },
-                  where:{ user_id_post_id: { post_id: post_id, user_id: user_id } },
                 })
+                resolve(data);
             }
              catch(err){
                    reject(err);
@@ -170,30 +183,40 @@ export default class PostManager {
     }
   }
 
-  async UploadMedias(user_id: number, post_id: bigint, medias: Buffer[],removed_images:string,is_new:bool) {
+  async UploadMedias(user_id: number, post_id: bigint, medias: Buffer[],edits:number,removed_images:string,is_new:bool) {
     const mediaRef = medias.map((_, index) => {
-      return `media_${post_id}_${index}.${this.imageResolver.defaultFormat}`;
+      console.log(edits,index);
+      return `media_${post_id}_${edits*3+index}.${this.imageResolver.defaultFormat}`;
     });
 
-    for (let i = 0; i < ALLOWED_IMAGES; i++) {
-      const imagesMetadata = await this.imageResolver.Metadata(medias[i]);
+    for (let i = 0; i < Math.min(ALLOWED_IMAGES,medias.length) ; i++) {
+      try{
+        const imagesMetadata = await this.imageResolver.Metadata(medias[i]);
+        let imageWidth = imagesMetadata.width || 1080;
+        if (imageWidth > MAX_WIDTH) imageWidth = MAX_WIDTH;
+  
+        try {
+          // uploading image
+  
+          await this.imageStorage.Put(
+            mediaRef[i],
+  
+            // converting image
+            await this.imageResolver.Convert(medias[i], { w: imageWidth })
+            
+          );
+        } catch (err) {
+          // media upload failed
+          throw err;
+        }
+      }
+      catch(err){
+        console.log(err);
+      }
+    
 
       // considering max width check
-      let imageWidth = imagesMetadata.width || 1080;
-      if (imageWidth > MAX_WIDTH) imageWidth = MAX_WIDTH;
-
-      try {
-        // uploading image
-        await this.imageStorage.Put(
-          mediaRef[i],
-
-          // converting image
-          await this.imageResolver.Convert(medias[i], { w: imageWidth })
-        );
-      } catch (err) {
-        // media upload failed
-        throw err;
-      }
+     
     }
     // -----------------media upload completed----------------
 
@@ -265,7 +288,7 @@ export default class PostManager {
       })
   }
 
-  async GetPostsOfUsers(users,limit:number,offset:number){
+  async GetPostsOfUsers(users:any,limit:number,offset:number){
     return this.store.posts.findMany({
       take:limit,
       skip:offset,
@@ -278,7 +301,7 @@ export default class PostManager {
     })
   }
 
-  async GetPostRecommendations(user_id){
+  async GetPostRecommendations(user_id:any){
     return this.store.postRecommendations.findUnique({
        where :{
         user_id
@@ -286,7 +309,7 @@ export default class PostManager {
     })
   }
 
-  async GetPostsById(post_id,limit:number,offset:number){
+  async GetPostsById(post_id:number,limit:number,offset:number){
     return this.store.posts.findMany({
       take:limit,
       skip:offset,
@@ -303,13 +326,13 @@ export default class PostManager {
     return new Promise(async(resolve,reject)=>{
       try{
          let posts:any = [];
-         let following:any = [];
+         let following_:IFollower[] = [];
         
-         following = await this.GetFollowing(user_id);
+         following_ = await this.GetFollowing(user_id);
 
          // xtraxt id's from following object array..
 
-         following = following.forEach(item=>{
+         const following = following_.forEach(item=>{
              item.following_id
          });
          

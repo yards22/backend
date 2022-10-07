@@ -79,7 +79,7 @@ model Posts {
   original    Posts?  @relation("SharedRelation", fields: [original_id], references: [post_id], onDelete: Cascade)
   original_id BigInt?
   ToShared    Posts[] @relation("SharedRelation")
-
+  edits       Int   @default(0)
   created_at     DateTime         @default(now())
   updated_at     DateTime         @updatedAt
   Likes          Likes[]
