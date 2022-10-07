@@ -117,8 +117,6 @@ function LikeRoutes(app: App): Router {
 
 function CommentRoutes(app:App):Router {
 
-  //TODO: post_id can be passed in url parameters ..
-
     const router =Router();
     router.get(
       "/",
@@ -144,7 +142,7 @@ function CommentRoutes(app:App):Router {
     );
 
     router.delete(
-      '/reply',
+      '/deleteReply',
       app.InHandler(CheckAllowance),
       app.InHandler(HandleDeleteCommentReply)
     );
@@ -164,6 +162,7 @@ function PostRoutes(app:App):Router{
   router.put(
     "/",
     app.InHandler(CheckAllowance),
+    upload.array("images"),
     app.InHandler(HandleUpdatePost)
   );
 

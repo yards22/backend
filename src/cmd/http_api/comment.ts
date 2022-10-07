@@ -28,10 +28,10 @@ export const HandleGetComments:RouteHandler = async(req,res,next,app)=>{
     }
     if(req.query.only_count){
        try{
-        const likes =  await app.commentManager.GetCommentsCount(post_id);
+        const comment_count =  await app.commentManager.GetCommentsCount(post_id);
          app.SendRes(res,{
             status:HerrorStatus.StatusOK,
-            data:{likes}
+            data:{comment_count}
          });
        }
        catch(err){

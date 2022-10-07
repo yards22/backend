@@ -69,8 +69,16 @@ export default class LikeManager {
   }
 
   async Unlike(post_id: bigint, user_id: number) {
-    return this.store.likes.delete({
-      where: { user_id_post_id: { post_id, user_id } },
-    });
+    return new Promise(async (resolve,reject)=>{
+          try{
+            await this.store.likes.delete({
+              where: { user_id_post_id: {user_id,post_id} }
+            });
+            resolve("Succesful_deletetion");
+          }
+          catch(err){
+              reject(err)
+          }
+    })
   }
 }

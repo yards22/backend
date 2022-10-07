@@ -104,7 +104,7 @@ export default class CommentManager {
   }
 
   async DeleteComment(post_id: bigint, user_id: number, comment_id: bigint) {
-    return this.store.parentComments.deleteMany({
+    return await this.store.parentComments.deleteMany({
       where: { AND: { post_id, user_id, comment_id } },
     });
   }
