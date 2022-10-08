@@ -22,7 +22,7 @@ model Users {
   Token             Token[]
   Following         Networks[]   @relation("following")
   Followers         Networks[]   @relation("followers")
-  Recommendations   Recommendations?
+  Recommendations   UserRecommendations?
 
   @@map("users")
 }
@@ -79,12 +79,12 @@ model Token {
   @@map("token")
 }
 
-model Recommendations{
+model UserRecommendations{
   user Users @relation(fields: [user_id], references: [user_id])
   user_id Int @unique
   recommend String
 
-  @@map("recommendations")
+  @@map("user_recommendations")
 }
 
 enum NotificationStatus {

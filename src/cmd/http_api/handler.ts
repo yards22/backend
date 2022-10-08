@@ -28,6 +28,7 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 import { App } from "./types";
 import { 
+  GetRecommendations,
   HandleGetFollowers,
   HandleGetFollowing,
   HandleNewConnection,
@@ -121,8 +122,13 @@ function ProfileRoutes(app: App): Router {
 
 function NetworkRoutes(app:App):Router{
   const router = Router();
+  router.get(
+    "/",
+    app.InHandler(CheckAllowance),
+    app.InHandler(GetRecommendations)
+  );
   router.post(
-    "/newConnect",
+    "/",
     app.InHandler(CheckAllowance),
     app.InHandler(HandleNewConnection)
   );
@@ -136,15 +142,20 @@ function NetworkRoutes(app:App):Router{
     app.InHandler(CheckAllowance),
     app.InHandler(HandleGetFollowing)
   );
+  router.delete(
+    "/",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleRemoveConnection)
+  );
+  return router;
+}
+
+function ExploreRoutes(app:App):Router{
+  const router = Router();
   router.get(
     "/searchUsers",
     app.InHandler(CheckAllowance),
     app.InHandler(HandleSearches)
-  );
-  router.delete(
-    "/removeConnect",
-    app.InHandler(CheckAllowance),
-    app.InHandler(HandleRemoveConnection)
   );
   return router;
 }
@@ -154,6 +165,7 @@ function HandleRoutesFor(app: App) {
   app.srv.use("/profile", ProfileRoutes(app));
   app.srv.use("/auth", AuthRoutes(app));
   app.srv.use("/network",NetworkRoutes(app));
+  app.srv.use("/explore",ExploreRoutes(app));
 }
 
 export default HandleRoutesFor;

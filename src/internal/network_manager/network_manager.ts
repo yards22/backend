@@ -23,7 +23,7 @@ export default class NetworkManager{
             where:{
                 following_id:user_id
             },
-            select:{
+            include:{
                 follower:{
                     select:{
                         Profile:{
@@ -44,7 +44,7 @@ export default class NetworkManager{
             where:{
                follower_id:user_id
             },
-            select:{
+            include:{
                 following:{
                     select:{
                         Profile:{
@@ -108,7 +108,7 @@ export default class NetworkManager{
     }
 
     GetComputedRecommendations(user_id:number):Promise<ERecommends|null>{
-        return this.store.recommendations.findUnique({
+        return this.store.userRecommendations.findUnique({
             where:{
                 user_id
             }
@@ -116,7 +116,7 @@ export default class NetworkManager{
     }
 
     UpdateRecommendations(user_id:number,new_recommends:string):void{
-        this.store.recommendations.update({
+        this.store.userRecommendations.update({
             where:{
               user_id
             },
@@ -235,7 +235,20 @@ export default class NetworkManager{
       GetFollowers(user_id:number){
          return new Promise(async(resolve,reject)=>{
             try{
-              const followerList = await this.GetMyFollowers(user_id);
+              const _followerList = await this.GetMyFollowers(user_id);
+              const followerList: {
+                username: string;
+                profile_pic_uri: string | null;
+                user_id: number;
+              }[] = [];
+              _followerList.forEach((item, index) => {
+                if (item.follower.Profile?.username)
+                  followerList.push({
+                    username: item.follower.Profile.username,
+                    profile_pic_uri: item.follower.Profile.profile_image_uri,
+                    user_id: item.follower.Profile.user_id,
+                  });
+              });
               resolve(followerList);
             }
             catch(err){
@@ -247,7 +260,20 @@ export default class NetworkManager{
       GetFollowing(user_id:number){
         return new Promise(async(resolve,reject)=>{
            try{
-             const followingList = await this.GetWhoAmIFollowing(user_id);
+             const _followingList = await this.GetWhoAmIFollowing(user_id);
+             const followingList: {
+                username: string;
+                profile_pic_uri: string | null;
+                user_id: number;
+              }[] = [];
+              _followingList.forEach((item, index) => {
+                if (item.following.Profile?.username)
+                  followingList.push({
+                    username: item.following.Profile.username,
+                    profile_pic_uri: item.following.Profile.profile_image_uri,
+                    user_id: item.following.Profile.user_id,
+                  });
+              });
              resolve(followingList);
            }
            catch(err){
