@@ -1,6 +1,14 @@
 export type SupportedImageType = "webp" | "png" | "jpg" | "jpeg" | "pdf";
+
+export interface ImageMetadata {
+  height?: number;
+  width?: number;
+  format?: SupportedImageType;
+  bufferSize?: number;
+}
+
 export abstract class IImageResolver {
-  defaultSize: { h: number; w: number };
+  defaultSize: { h?: number; w?: number };
   defaultFormat: SupportedImageType;
   constructor(size: { h: number; w: number }, format: SupportedImageType) {
     this.defaultSize = size;

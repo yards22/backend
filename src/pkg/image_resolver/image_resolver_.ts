@@ -1,10 +1,14 @@
-import { IImageResolver, SupportedImageType } from "./image_resolver";
+import {
+  IImageResolver,
+  SupportedImageType,
+  ImageMetadata,
+} from "./image_resolver";
 import sharp from "sharp";
 
 export class ImageResolver extends IImageResolver {
   Convert(
     imageFile: Buffer,
-    size?: { h: number; w: number },
+    size?: { h?: number; w?: number },
     format?: SupportedImageType
   ): Promise<Buffer> {
     return new Promise((resolve, reject) => {
@@ -17,7 +21,7 @@ export class ImageResolver extends IImageResolver {
         .catch((err) => reject(err));
     });
   }
-  async Metadata(imageFile: Buffer) {
+  async Metadata(imageFile: Buffer): Promise<ImageMetadata> {
     return new Promise((resolve, reject) => {
       sharp(imageFile)
         .metadata()
@@ -25,7 +29,7 @@ export class ImageResolver extends IImageResolver {
           resolve({
             height: data.height,
             width: data.width,
-            format: data.format,
+            format: data.format as SupportedImageType,
             bufferSize: data.size,
           })
         )

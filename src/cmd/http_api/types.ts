@@ -8,6 +8,9 @@ import { ToJson } from "../../util/json";
 import { IKVStore } from "../../pkg/kv_store/kv_store";
 import { ImageResolver } from "../../pkg/image_resolver/image_resolver_";
 import { IFileStorage } from "../../pkg/file_storage/file_storage";
+import LikeManager from "../../internal/like_manager/like_manager";
+import PostManager from "../../internal/post_manager/post_manager";
+import CommentManager from "../../internal/comment_manager/comment_manager";
 interface CustomRequest extends Request {
   context: any;
 }
@@ -24,6 +27,9 @@ export class App {
   authManager: AuthManager;
   notificationManager: NotificationManager;
   profileManager: ProfileManager;
+  postManager: PostManager;
+  likeManager: LikeManager;
+  commentManager: CommentManager;
   db: PrismaClient;
   kvStore: IKVStore;
   imageResolver: ImageResolver;
@@ -34,6 +40,9 @@ export class App {
     authManager: AuthManager,
     notificationManager: NotificationManager,
     profileManager: ProfileManager,
+    postManager: PostManager,
+    likeManager: LikeManager,
+    commentManager: CommentManager,
     kvStore: IKVStore,
     db: any,
     imageResolver: ImageResolver,
@@ -44,6 +53,9 @@ export class App {
     this.notificationManager = notificationManager;
     this.authManager = authManager;
     this.profileManager = profileManager;
+    this.postManager = postManager;
+    this.likeManager = likeManager;
+    this.commentManager = commentManager;
     this.db = db;
     this.kvStore = kvStore;
     this.imageResolver = imageResolver;
