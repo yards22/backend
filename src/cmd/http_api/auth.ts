@@ -145,6 +145,7 @@ const HandleOTPVerification: RouteHandler = async (req, res, next, app) => {
 const HandleLogout: RouteHandler = async (req, res, next, app) => {
   const token = req.context.token;
   const user_id = req.context.user_id;
+  console.log(user_id, token);
   try {
     const { responseStatus } = await app.authManager.LogoutUser(user_id, token);
     app.SendRes(res, {
@@ -157,13 +158,13 @@ const HandleLogout: RouteHandler = async (req, res, next, app) => {
 };
 
 const HandleOTPGeneration: RouteHandler = async (req, res, next, app) => {
-
   const mail_id = req.body.mail_id;
   const valid: boolean = MailValidator(mail_id);
   if (valid) {
     try {
-      const { responseStatus, } =
-        await app.authManager.OTPGenerationForForgot(mail_id);
+      const { responseStatus } = await app.authManager.OTPGenerationForForgot(
+        mail_id
+      );
       app.SendRes(res, {
         status: responseStatus.statusCode,
         message: responseStatus.message,

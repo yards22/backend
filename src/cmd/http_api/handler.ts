@@ -1,5 +1,4 @@
 import { Router } from "express";
-import  { App } from "./types";
 import multer from "multer";
 
 import {
@@ -25,27 +24,35 @@ import {
   HandleGetUserProfileInfo,
   HandleGetCheckUsername,
 } from "./profile";
-import { 
-  CheckAllowance 
-} from "./middlewares";
-import { 
-  HandleGetLikesForPost,
-  HandleLikeAndUnlike 
-} from "./like";
+import { CheckAllowance } from "./middlewares";
+import { HandleGetLikesForPost, HandleLikeAndUnlike } from "./like";
 import {
-   HandleCommentReply,
-   HandleCreateComment, 
-   HandleDeleteComment, 
-   HandleDeleteCommentReply, 
-   HandleGetComments 
+  HandleCommentReply,
+  HandleCreateComment,
+  HandleDeleteComment,
+  HandleDeleteCommentReply,
+  HandleGetComments,
 } from "./comment";
-import { 
+import {
   HandleAddToFavourites,
-  HandleCreatePost, HandleDeletePost, HandleGetPosts, HandleShareToTimeline, HandleUpdatePost 
+  HandleCreatePost,
+  HandleDeletePost,
+  HandleGetPosts,
+  HandleShareToTimeline,
+  HandleUpdatePost,
 } from "./post";
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+import { App } from "./types";
+import {
+  GetRecommendations,
+  HandleGetFollowers,
+  HandleGetFollowing,
+  HandleNewConnection,
+  HandleRemoveConnection,
+  HandleSearches,
+} from "./networks";
 
 function NotificationRoutes(app: App): Router {
   const router = Router();
@@ -69,7 +76,7 @@ function AuthRoutes(app: App): Router {
   );
   router.post("/sendOTPforgot", app.InHandler(HandleOTPGeneration));
   router.post("/verifyOTPforgot", app.InHandler(HandleOTPVerification));
-  router.put("/updPassword", app.InHandler(HandlePasswordUpdate));
+  router.post("/updPassword", app.InHandler(HandlePasswordUpdate));
   router.post("/logoutAllScreens", app.InHandler(HandleLogoutAllScreen));
   return router;
 }
@@ -115,41 +122,40 @@ function LikeRoutes(app: App): Router {
   return router;
 }
 
-function CommentRoutes(app:App):Router {
+function CommentRoutes(app: App): Router {
+  const router = Router();
+  router.get(
+    "/",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleGetComments)
+  );
+  router.post(
+    "/",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleCreateComment)
+  );
 
-    const router =Router();
-    router.get(
-      "/",
-      app.InHandler(CheckAllowance),
-      app.InHandler(HandleGetComments)
-    );
-    router.post(
-      "/",
-      app.InHandler(CheckAllowance),
-      app.InHandler(HandleCreateComment)
-    );
+  router.delete(
+    "/",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleDeleteComment)
+  );
 
-    router.delete(
-      '/',
-      app.InHandler(CheckAllowance),
-      app.InHandler(HandleDeleteComment)
-    );
-    
-    router.post(
-      '/reply',
-      app.InHandler(CheckAllowance),
-      app.InHandler(HandleCommentReply)
-    );
+  router.post(
+    "/reply",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleCommentReply)
+  );
 
-    router.delete(
-      '/deleteReply',
-      app.InHandler(CheckAllowance),
-      app.InHandler(HandleDeleteCommentReply)
-    );
-    return router;
+  router.delete(
+    "/deleteReply",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleDeleteCommentReply)
+  );
+  return router;
 }
 
-function PostRoutes(app:App):Router{
+function PostRoutes(app: App): Router {
   const router = Router();
 
   router.post(
@@ -172,11 +178,7 @@ function PostRoutes(app:App):Router{
     app.InHandler(HandleDeletePost)
   );
 
-  router.get(
-    "/",
-    app.InHandler(CheckAllowance),
-    app.InHandler(HandleGetPosts)
-  );
+  router.get("/", app.InHandler(CheckAllowance), app.InHandler(HandleGetPosts));
 
   router.post(
     "/shareToTimeline",
@@ -185,11 +187,51 @@ function PostRoutes(app:App):Router{
   );
 
   router.post(
-    "/addToFavourites",
+    "addToFavorites",
     app.InHandler(CheckAllowance),
     app.InHandler(HandleAddToFavourites)
   );
 
+  return router;
+}
+
+function NetworkRoutes(app: App): Router {
+  const router = Router();
+  router.get(
+    "/",
+    app.InHandler(CheckAllowance),
+    app.InHandler(GetRecommendations)
+  );
+  router.post(
+    "/",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleNewConnection)
+  );
+  router.get(
+    "/myfollowers",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleGetFollowers)
+  );
+  router.get(
+    "/whoAmIFollowing",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleGetFollowing)
+  );
+  router.delete(
+    "/",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleRemoveConnection)
+  );
+  return router;
+}
+
+function ExploreRoutes(app: App): Router {
+  const router = Router();
+  router.get(
+    "/searchUsers",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleSearches)
+  );
   return router;
 }
 
@@ -198,8 +240,10 @@ function HandleRoutesFor(app: App) {
   app.srv.use("/profile", ProfileRoutes(app));
   app.srv.use("/auth", AuthRoutes(app));
   app.srv.use("/like", LikeRoutes(app));
-  app.srv.use("/comment",CommentRoutes(app));
-  app.srv.use("/post",PostRoutes(app));
+  app.srv.use("/comment", CommentRoutes(app));
+  app.srv.use("/post", PostRoutes(app));
+  app.srv.use("/network", NetworkRoutes(app));
+  app.srv.use("/explore", ExploreRoutes(app));
 }
 
 export default HandleRoutesFor;

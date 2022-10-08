@@ -11,23 +11,24 @@ datasource db {
 }
 
 model Users {
-  user_id           Int              @id @default(autoincrement()) @db.Int
-  mail_id           String           @unique
-  password          String?
-  created_at        DateTime         @default(now())
-  identity_provider String?
-  subject_id        String?
-  Notification      Notifications[]
-  Profile           Profile?
-  Token             Token[]
-  Post              Posts[]
-  Likes             Likes[]
-  ParentComments    ParentComments[]
-  ChildComments     ChildComments[]
-  Favourites        Favourites[]
+  user_id             Int                  @id @default(autoincrement()) @db.Int
+  mail_id             String               @unique
+  password            String?
+  created_at          DateTime             @default(now())
+  identity_provider   String?
+  subject_id          String?
+  Notification        Notifications[]
+  Profile             Profile?
+  Token               Token[]
+  Post                Posts[]
+  Likes               Likes[]
+  ParentComments      ParentComments[]
+  ChildComments       ChildComments[]
+  Favourites          Favourites[]
   PostRecommendations PostRecommendations?
-  Following         Networks[]   @relation("following")
-  Followers         Networks[]   @relation("followers")
+  Following           Networks[]           @relation("following")
+  Followers           Networks[]           @relation("followers")
+  Recommendations     UserRecommendations?
 
   @@map("users")
 }
@@ -52,9 +53,22 @@ model Profile {
   bio               String?
   cric_index        Int      @default(0)
   updated_at        DateTime @updatedAt
+  following         Int      @default(0)
+  followers         Int      @default(0)
   interests         String?
 
   @@map("profiles")
+}
+
+model Networks {
+  id           BigInt @id @default(autoincrement()) @db.BigInt
+  follower     Users  @relation("followers", fields: [follower_id], references: [user_id])
+  follower_id  Int
+  following    Users  @relation("following", fields: [following_id], references: [user_id])
+  following_id Int
+
+  @@unique([follower_id, following_id])
+  @@map("networks")
 }
 
 model Token {
@@ -70,16 +84,16 @@ model Token {
 }
 
 model Posts {
-  user        Users   @relation(fields: [user_id], references: [user_id])
-  user_id     Int
-  post_id     BigInt  @id @default(autoincrement()) @db.BigInt
-  content     String?
-  media       String?
-  is_private  Boolean @default(false)
-  original    Posts?  @relation("SharedRelation", fields: [original_id], references: [post_id], onDelete: Cascade)
-  original_id BigInt?
-  ToShared    Posts[] @relation("SharedRelation")
-  edits       Int   @default(0)
+  user           Users            @relation(fields: [user_id], references: [user_id])
+  user_id        Int
+  post_id        BigInt           @id @default(autoincrement()) @db.BigInt
+  content        String?
+  media          String?
+  is_private     Boolean          @default(false)
+  original       Posts?           @relation("SharedRelation", fields: [original_id], references: [post_id], onDelete: Cascade)
+  original_id    BigInt?
+  ToShared       Posts[]          @relation("SharedRelation")
+  edits          Int              @default(0)
   created_at     DateTime         @default(now())
   updated_at     DateTime         @updatedAt
   Likes          Likes[]
@@ -134,35 +148,30 @@ model ChildComments {
 }
 
 model Favourites {
-  user       Users @relation(fields: [user_id],references: [user_id])
-  user_id    Int 
-  post   Posts  @relation(fields: [post_id],references: [post_id])
-  post_id    BigInt
+  user    Users  @relation(fields: [user_id], references: [user_id])
+  user_id Int
+  post    Posts  @relation(fields: [post_id], references: [post_id])
+  post_id BigInt
 
-  @@unique([user_id,post_id])
+  @@unique([user_id, post_id])
   @@map("favourites")
 }
 
-model PostRecommendations{
-  user Users @relation(fields: [user_id], references: [user_id])
-  user_id Int @unique
+model PostRecommendations {
+  user                 Users  @relation(fields: [user_id], references: [user_id])
+  user_id              Int    @unique
   post_recommendations String
 
   @@map("postRecommendations")
 }
 
-model Networks{
-  id         BigInt      @id @default(autoincrement()) @db.BigInt
-  follower     Users     @relation("followers",fields: [follower_id], references: [user_id])
-  follower_id  Int
-  following   Users     @relation("following",fields: [following_id], references: [user_id])
-  following_id Int
-  @@unique([follower_id,following_id])
- 
-  @@map("networks")
+model UserRecommendations {
+  user      Users  @relation(fields: [user_id], references: [user_id])
+  user_id   Int    @unique
+  recommend String
+
+  @@map("user_recommendations")
 }
-
-
 
 enum NotificationStatus {
   Unseen

@@ -1,8 +1,12 @@
 import { PrismaClient } from "@prisma/client";
+import { nextTick, off } from "process";
 import { IFileStorage } from "../../pkg/file_storage/file_storage";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 import { ImageResolver } from "../../pkg/image_resolver/image_resolver_";
+import { IKVStore } from "../../pkg/kv_store/kv_store";
 import EProfile from "../entities/profile";
+
+const SEC_IN_YEAR = 31536000;
 
 interface IResponse {
   statusCode: number;
@@ -13,14 +17,17 @@ export default class ProfileManager {
   private store: PrismaClient;
   private imageStorage: IFileStorage;
   private imageResolver: ImageResolver;
+  private cache: IKVStore;
   constructor(
     store: PrismaClient,
     imageResolver: ImageResolver,
-    imageStorage: IFileStorage
+    imageStorage: IFileStorage,
+    cache: IKVStore
   ) {
     this.store = store;
     this.imageStorage = imageStorage;
     this.imageResolver = imageResolver;
+    this.cache = cache;
   }
 
   GetUserByUsername(username: string): Promise<EProfile | null> {
@@ -46,6 +53,18 @@ export default class ProfileManager {
       },
     });
   }
+
+  GetLeaderBoard(limit:number,offset:number){
+      return this.store.profile.findMany({
+        skip:offset,
+        take:limit,
+        orderBy:{
+          cric_index:'desc',
+        },
+      })
+  }
+
+
 
   UpdateProfile(
     user_id: number,
@@ -74,6 +93,7 @@ export default class ProfileManager {
     username: string,
     updated_at: Date,
     rawImage: Buffer,
+    token:string,
     bio?: string,
     interests?: string
   ): Promise<{
@@ -98,6 +118,13 @@ export default class ProfileManager {
           bio,
           interests
         );
+
+        const UpdatedProfileDetails: string = JSON.stringify(UpdatedProfile);
+        // also change the profile details in redis for this particular token .
+        // but there a raises a problem with expiry TTL.
+
+        await this.cache.Set(token,UpdatedProfileDetails,SEC_IN_YEAR);
+
         resolve({
           responseStatus: {
             statusCode: HerrorStatus.StatusOK,
@@ -110,6 +137,28 @@ export default class ProfileManager {
       }
     });
   }
+
+  GetCommunityLeaderBoard(limit:number,offset:number):Promise<{
+    responseStatus:IResponse,
+    leaderBoard:any
+  }>{
+     return new Promise(async(resolve,reject)=>{
+       try{
+         const leaderBoard = await this.GetCommunityLeaderBoard(limit,offset);
+         resolve({
+           responseStatus:{
+             statusCode:HerrorStatus.StatusOK,
+             message:"community_leaderboard"
+           },
+           leaderBoard
+         })
+       }
+       catch(err){
+          reject(err);
+       }
+     })
+  }
+
 
   CheckUsername(username: string): Promise<{
     responseStatus: IResponse;

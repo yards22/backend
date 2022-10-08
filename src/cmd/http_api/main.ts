@@ -17,6 +17,7 @@ import { LocalFileStorage } from "../../pkg/file_storage/local_file_storage";
 import LikeManager from "../../internal/like_manager/like_manager";
 import PostManager from "../../internal/post_manager/post_manager";
 import CommentManager from "../../internal/comment_manager/comment_manager";
+import NetworkManager from "../../internal/network_manager/network_manager";
 
 async function Init() {
   const srv = ServerInit();
@@ -32,7 +33,8 @@ async function Init() {
   const profileManager = new ProfileManager(
     db,
     imageResolver,
-    remoteFileStorage
+    remoteFileStorage,
+    redis
   );
   const postManager = new PostManager(
     db,
@@ -42,6 +44,8 @@ async function Init() {
   );
   const likeManager = new LikeManager(db, redis);
   const commentManager = new CommentManager(db, redis);
+  const networkManager = new NetworkManager(db);
+
   const app = new App(
     srv,
     authManager,
@@ -50,6 +54,7 @@ async function Init() {
     postManager,
     likeManager,
     commentManager,
+    networkManager,
     redis,
     db,
     imageResolver,
