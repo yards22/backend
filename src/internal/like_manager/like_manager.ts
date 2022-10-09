@@ -6,8 +6,12 @@ import { LikeNotification } from "../notification_manager/types";
 export default class LikeManager {
   private store: PrismaClient;
   private cache: IKVStore;
-  private notificationManager:  NotificationManager;
-  constructor(store: PrismaClient, cache: IKVStore, notificationManager: NotificationManager) {
+  private notificationManager: NotificationManager;
+  constructor(
+    store: PrismaClient,
+    cache: IKVStore,
+    notificationManager: NotificationManager
+  ) {
     this.store = store;
     this.cache = cache;
     this.notificationManager = notificationManager;
@@ -65,16 +69,18 @@ export default class LikeManager {
 
   // updates the like type or creates one
   async Like(post_id: bigint, user_id: number, type: number) {
-     await this.store.likes.upsert({
+    await this.store.likes.upsert({
       where: { user_id_post_id: { post_id, user_id } },
       update: { type },
       create: { type, user_id, post_id },
     });
 
-    const creator = await this.store.posts.findUnique({where:{post_id}})
-    if(creator)
-    this.notificationManager.Create(creator.user_id, new LikeNotification(post_id, user_id))
-
+    const creator = await this.store.posts.findUnique({ where: { post_id } });
+    if (creator)
+      this.notificationManager.Create(
+        creator.user_id,
+        new LikeNotification(post_id, user_id)
+      );
   }
 
   async Unlike(post_id: bigint, user_id: number) {
