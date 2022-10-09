@@ -176,7 +176,7 @@ model UserRecommendations {
 model Feedback {
   user           Users            @relation(fields: [user_id], references: [user_id])
   user_id        Int              @unique
-  image_uri String?  @default("https://22yards-image-bucket.s3.ap-south-1.amazonaws.com/sjFmewfzjI.webp")
+  image_uri String?  
   content String
 
   @@map("feedback")
