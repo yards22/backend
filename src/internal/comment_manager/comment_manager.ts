@@ -1,12 +1,16 @@
 import { PrismaClient } from "@prisma/client";
 import { IKVStore } from "../../pkg/kv_store/kv_store";
-import NotificationManager from "../notification_manager/notification_manager"
+import NotificationManager from "../notification_manager/notification_manager";
 import { CommentNotification } from "../notification_manager/types";
 export default class CommentManager {
   private store: PrismaClient;
   private cache: IKVStore;
   private notificationManager: NotificationManager;
-  constructor(store: PrismaClient, cache: IKVStore, notificationManager: NotificationManager) {
+  constructor(
+    store: PrismaClient,
+    cache: IKVStore,
+    notificationManager: NotificationManager
+  ) {
     this.store = store;
     this.cache = cache;
     this.notificationManager = notificationManager;
@@ -101,7 +105,7 @@ export default class CommentManager {
   }
 
   async Comment(post_id: bigint, user_id: number, content: string) {
-    await  this.store.parentComments.create({
+    await this.store.parentComments.create({
       data: { content, user_id, post_id },
     });
 
