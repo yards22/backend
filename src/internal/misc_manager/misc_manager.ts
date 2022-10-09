@@ -51,7 +51,7 @@ export default class MiscManager {
                 resolve({
                     responseStatus: {
                         statusCode: HerrorStatus.StatusOK,
-                        message: "Feedback Received successfully",
+                        message: "feedback_received_successfully",
                       }
                    })
            }
