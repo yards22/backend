@@ -1,6 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import ENotification from "../entities/notification";
-import { ENotificationStatus, LikeNotification, NotificationMetadataType } from "./types";
+import {
+  ENotificationStatus,
+  LikeNotification,
+  NotificationMetadataType,
+} from "./types";
 
 export default class NotificationManager {
   private store: PrismaClient;
@@ -8,7 +12,10 @@ export default class NotificationManager {
     this.store = store;
   }
 
-  async Create(forId: number, metadata: NotificationMetadataType): Promise<ENotification> {
+  async Create(
+    forId: number,
+    metadata: NotificationMetadataType
+  ): Promise<ENotification> {
     return this.store.notifications.create({
       data: { for_id: forId, status: "Unseen", metadata: metadata.ToJson() },
     });

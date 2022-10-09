@@ -2,9 +2,14 @@ import { Herror } from "../../pkg/herror/herror";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 import RouteHandler from "./types";
 
-export const HandleUpdateProfile: RouteHandler = async (req,res,next,app) => {
+export const HandleUpdateProfile: RouteHandler = async (
+  req,
+  res,
+  next,
+  app
+) => {
   const user_id: number = Number(req.context.user_id);
-  const token :string = req.context.token;
+  const token: string = req.context.token;
   const bio: string = req.body.bio as string;
   const profile_buffer: any = req.file?.buffer;
   const updated_at: Date = new Date();
@@ -20,7 +25,7 @@ export const HandleUpdateProfile: RouteHandler = async (req,res,next,app) => {
         profile_buffer,
         token,
         bio,
-        interests,
+        interests
       );
     app.SendRes(res, {
       status: responseStatus.statusCode,
@@ -32,7 +37,12 @@ export const HandleUpdateProfile: RouteHandler = async (req,res,next,app) => {
   }
 };
 
-export const HandleGetUserPrimaryInfo: RouteHandler = async (req,res,next,app) => {
+export const HandleGetUserPrimaryInfo: RouteHandler = async (
+  req,
+  res,
+  next,
+  app
+) => {
   const user_id = Number(req.context.user_id);
   if (user_id != undefined) {
     const userProfile = await app.profileManager.GetUserPrimaryInfoById(
@@ -47,7 +57,12 @@ export const HandleGetUserPrimaryInfo: RouteHandler = async (req,res,next,app) =
   }
 };
 
-export const HandleGetUserProfileInfo: RouteHandler = async (req,res,next,app) => {
+export const HandleGetUserProfileInfo: RouteHandler = async (
+  req,
+  res,
+  next,
+  app
+) => {
   const user_id = Number(req.context.user_id);
   if (user_id != undefined) {
     const userProfile = await app.profileManager.GetUserProfileById(user_id);
@@ -60,7 +75,12 @@ export const HandleGetUserProfileInfo: RouteHandler = async (req,res,next,app) =
   }
 };
 
-export const HandleGetCheckUsername: RouteHandler = async (req,res,next,app) => {
+export const HandleGetCheckUsername: RouteHandler = async (
+  req,
+  res,
+  next,
+  app
+) => {
   const username = req.body.username;
   if (username != undefined) {
     try {
@@ -79,20 +99,23 @@ export const HandleGetCheckUsername: RouteHandler = async (req,res,next,app) => 
   }
 };
 
-export const HandleGetLeaderBoard:RouteHandler = async(req,res,next,app)=>{
-    const limit = Number(req.query.limit ?? 10);
-    const offset = Number(req.query.offset ?? 0);
-    try{
-      const {responseStatus,leaderBoard} = await app.profileManager.GetCommunityLeaderBoard(limit,offset);
-      app.SendRes(res,{
-        status:responseStatus.statusCode,
-        message:responseStatus.message,
-        data:leaderBoard
-      })
-    }
-    catch(err){
-       next(err);
-    }
-}
-
-
+export const HandleGetLeaderBoard: RouteHandler = async (
+  req,
+  res,
+  next,
+  app
+) => {
+  const limit = Number(req.query.limit ?? 10);
+  const offset = Number(req.query.offset ?? 0);
+  try {
+    const { responseStatus, leaderBoard } =
+      await app.profileManager.GetCommunityLeaderBoard(limit, offset);
+    app.SendRes(res, {
+      status: responseStatus.statusCode,
+      message: responseStatus.message,
+      data: leaderBoard,
+    });
+  } catch (err) {
+    next(err);
+  }
+};

@@ -46,7 +46,7 @@ async function Init() {
   const likeManager = new LikeManager(db, redis);
   const commentManager = new CommentManager(db, redis);
   const networkManager = new NetworkManager(db);
-  const miscManager = new MiscManager(db,imageResolver,remoteFileStorage);
+  const miscManager = new MiscManager(db, imageResolver, remoteFileStorage);
   const app = new App(
     srv,
     authManager,

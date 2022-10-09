@@ -1,4 +1,4 @@
-import {  PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { bool } from "aws-sdk/clients/signer";
 import { appendFile } from "fs";
 import MimeNode from "nodemailer/lib/mime-node";
@@ -11,8 +11,8 @@ const prisma = new PrismaClient();
 const ALLOWED_IMAGES = 3;
 const MAX_WIDTH = 1080;
 
-interface IFollower{
-   following_id:number
+interface IFollower {
+  following_id: number;
 }
 
 export default class PostManager {
@@ -47,7 +47,7 @@ export default class PostManager {
   }
 
   async Create(user_id: number, content: string, medias: Buffer[]) {
-    return new Promise(async(resolve,reject)=>{
+    return new Promise(async (resolve, reject) => {
       try {
         const post = await this.store.posts.create({
           data: {
@@ -56,69 +56,71 @@ export default class PostManager {
             media: JSON.stringify([]),
           },
         });
-  
+
         try {
-          const removed_images:string = "";
+          const removed_images: string = "";
           await this.UploadMedias(
-            user_id, 
+            user_id,
             post.post_id,
             medias,
             0,
             removed_images,
-            true             // is_new
+            true // is_new
           );
-           resolve("post_uploaded_succesfully");
-        } 
-        catch (err) {
+          resolve("post_uploaded_succesfully");
+        } catch (err) {
           // image upload failed, rollback: delete post
           try {
             await this.Delete(user_id, post.post_id);
             resolve("unable_to_upload_media");
-          }
-          catch (err) {
+          } catch (err) {
             throw err;
           }
           throw err;
         }
-      } 
-      catch (err) {
+      } catch (err) {
         throw err;
       }
     });
   }
 
-
-  async Update(user_id: number, post_id: bigint,removed_images:string, medias: Buffer[],edits:number, content?: string) {
-    return new Promise(async(resolve,reject)=>{
-          try {
-            const images = await this.UploadMedias(
-              user_id,
-              post_id,
-              medias as Buffer[],
-              edits+1,
-              removed_images,
-              false           // is_new
-              ) ;
-            try{
-                const data = await this.store.posts.update({
-                  where:{ user_id_post_id: { post_id: post_id, user_id: user_id } },
-                  data: {
-                    content,
-                    media:images,
-                    edits:{
-                       increment:1
-                    }
-                  },
-                })
-                resolve(data);
-            }
-             catch(err){
-                   reject(err);
-             }
-          } catch (err) {
-              resolve("unable_to_upload_media");
-            } 
-        });
+  async Update(
+    user_id: number,
+    post_id: bigint,
+    removed_images: string,
+    medias: Buffer[],
+    edits: number,
+    content?: string
+  ) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const images = await this.UploadMedias(
+          user_id,
+          post_id,
+          medias as Buffer[],
+          edits + 1,
+          removed_images,
+          false // is_new
+        );
+        try {
+          const data = await this.store.posts.update({
+            where: { user_id_post_id: { post_id: post_id, user_id: user_id } },
+            data: {
+              content,
+              media: images,
+              edits: {
+                increment: 1,
+              },
+            },
+          });
+          resolve(data);
+        } catch (err) {
+          reject(err);
+        }
+      } catch (err) {
+        resolve("unable_to_upload_media");
+      }
+    });
   }
 
   async Delete(user_id: number, post_id: bigint) {
@@ -127,7 +129,7 @@ export default class PostManager {
     });
   }
 
-// TODO: what if the post which is shared contains of images as well.
+  // TODO: what if the post which is shared contains of images as well.
   async ShareToTimeline(user_id: number, original_id: bigint, content: string) {
     return this.store.posts.create({
       data: { content, user_id: user_id, original_id },
@@ -163,7 +165,7 @@ export default class PostManager {
         if (!updatedMediaRef.includes(item)) updatedMediaRef.push(item);
       });
 
-     if(is_new){
+      if (is_new) {
         try {
           await this.store.posts.update({
             data: { media: JSON.stringify(updatedMediaRef) },
@@ -172,64 +174,70 @@ export default class PostManager {
         } catch (err) {
           throw err;
         }
-     }
-
-     else{
-      return  JSON.stringify(updatedMediaRef);
-     }
-
+      } else {
+        return JSON.stringify(updatedMediaRef);
+      }
     } catch (err) {
       throw err;
     }
   }
 
-  async UploadMedias(user_id: number, post_id: bigint, medias: Buffer[],edits:number,removed_images:string,is_new:bool) {
+  async UploadMedias(
+    user_id: number,
+    post_id: bigint,
+    medias: Buffer[],
+    edits: number,
+    removed_images: string,
+    is_new: bool
+  ) {
     const mediaRef = medias.map((_, index) => {
-      console.log(edits,index);
-      return `media_${post_id}_${edits*3+index}.${this.imageResolver.defaultFormat}`;
+      console.log(edits, index);
+      return `media_${post_id}_${edits * 3 + index}.${
+        this.imageResolver.defaultFormat
+      }`;
     });
 
-    for (let i = 0; i < Math.min(ALLOWED_IMAGES,medias.length) ; i++) {
-      try{
+    for (let i = 0; i < Math.min(ALLOWED_IMAGES, medias.length); i++) {
+      try {
         const imagesMetadata = await this.imageResolver.Metadata(medias[i]);
         let imageWidth = imagesMetadata.width || 1080;
         if (imageWidth > MAX_WIDTH) imageWidth = MAX_WIDTH;
-  
+
         try {
           // uploading image
-  
+
           await this.imageStorage.Put(
             mediaRef[i],
-  
+
             // converting image
             await this.imageResolver.Convert(medias[i], { w: imageWidth })
-            
           );
         } catch (err) {
           // media upload failed
           throw err;
         }
-      }
-      catch(err){
+      } catch (err) {
         console.log(err);
       }
-    
 
       // considering max width check
-     
     }
     // -----------------media upload completed----------------
 
     // updating stringified media ref...
     try {
-      if(is_new){
-        await this.UpdateMediaRef(user_id, post_id, mediaRef, [],is_new);
+      if (is_new) {
+        await this.UpdateMediaRef(user_id, post_id, mediaRef, [], is_new);
+      } else {
+        const removed: string[] = JSON.parse(removed_images as string);
+        return await this.UpdateMediaRef(
+          user_id,
+          post_id,
+          mediaRef,
+          removed || [],
+          is_new
+        );
       }
-      else{
-        const removed:string[] = JSON.parse(removed_images as string);
-        return await this.UpdateMediaRef(user_id, post_id, mediaRef, removed || [],is_new);
-      }
-
     } catch (err) {
       // updating media ref in db failed: delete images from storage
       try {
@@ -244,121 +252,122 @@ export default class PostManager {
       throw err;
     }
   }
- 
-  async BookmarkPosts(user_id:number,post_id:bigint){
-     return new Promise(async(resolve,reject)=>{
-         try{
-            const data= await this.store.favourites.create({
-              data:{
-                user_id,post_id
-              }
-            }); 
-            resolve(data);
-         }
-         catch(err){
-           reject(err);
-         }
-     })
-  }
 
-  async DeleteBookmarkedPosts(user_id:number,post_id:bigint){
-    return new Promise(async(resolve,reject)=>{
-      try{
-         const data= await this.store.favourites.delete({
-           where:{
-             user_id_post_id:{user_id,post_id}
-           }
-         }); 
-         resolve(data);
-      }
-      catch(err){
+  async BookmarkPosts(user_id: number, post_id: bigint) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const data = await this.store.favourites.create({
+          data: {
+            user_id,
+            post_id,
+          },
+        });
+        resolve(data);
+      } catch (err) {
         reject(err);
       }
-  })
+    });
   }
 
-  async GetFollowing(user_id:number){
-      return this.store.networks.findMany({
-        where:{
-           follower_id:user_id
-        },
-        select:{
-          following_id:true
-        }
-      })
+  async DeleteBookmarkedPosts(user_id: number, post_id: bigint) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const data = await this.store.favourites.delete({
+          where: {
+            user_id_post_id: { user_id, post_id },
+          },
+        });
+        resolve(data);
+      } catch (err) {
+        reject(err);
+      }
+    });
   }
 
-  async GetPostsOfUsers(users:any,limit:number,offset:number){
+  async GetFollowing(user_id: number) {
+    return this.store.networks.findMany({
+      where: {
+        follower_id: user_id,
+      },
+      select: {
+        following_id: true,
+      },
+    });
+  }
+
+  async GetPostsOfUsers(users: any, limit: number, offset: number) {
     return this.store.posts.findMany({
-      take:limit,
-      skip:offset,
-      where:{
-        user_id :{
-          in:users
-        }
+      take: limit,
+      skip: offset,
+      where: {
+        user_id: {
+          in: users,
+        },
       },
       include: { _count: { select: { Likes: true } } },
-    })
+    });
   }
 
-  async GetPostRecommendations(user_id:any){
+  async GetPostRecommendations(user_id: any) {
     return this.store.postRecommendations.findUnique({
-       where :{
-        user_id
-       }
-    })
-  }
-
-  async GetPostsById(post_id:number,limit:number,offset:number){
-    return this.store.posts.findMany({
-      take:limit,
-      skip:offset,
-      where:{
-        post_id:{
-          in :post_id
-        }
+      where: {
+        user_id,
       },
-      include: { _count: { select: { Likes: true } } }, 
-    })
+    });
   }
 
-  async GetUsersFeed(user_id:number,limit:number,offset:number){
-    return new Promise(async(resolve,reject)=>{
-      try{
-         let posts:any = [];
-         let following_:IFollower[] = [];
-        
-         following_ = await this.GetFollowing(user_id);
+  async GetPostsById(post_id: number, limit: number, offset: number) {
+    return this.store.posts.findMany({
+      take: limit,
+      skip: offset,
+      where: {
+        post_id: {
+          in: post_id,
+        },
+      },
+      include: { _count: { select: { Likes: true } } },
+    });
+  }
 
-         // xtraxt id's from following object array..
+  async GetUsersFeed(user_id: number, limit: number, offset: number) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let posts: any = [];
+        let following_: IFollower[] = [];
 
-         const following = following_.forEach(item=>{
-             item.following_id
-         });
-         
-         // get posts of these users.
-         
-         posts = await this.GetPostsOfUsers(following,limit,offset);
+        following_ = await this.GetFollowing(user_id);
 
-         let recommended_posts:any = [];
+        // xtraxt id's from following object array..
 
-         // recommendation of posts by lcm service..
+        const following = following_.forEach((item) => {
+          item.following_id;
+        });
 
-         recommended_posts = await this.GetPostRecommendations(user_id);
+        // get posts of these users.
 
-         recommended_posts = JSON.parse(recommended_posts);
+        posts = await this.GetPostsOfUsers(following, limit, offset);
 
-         let rec_posts = await this.GetPostsById(recommended_posts,limit,offset);
+        let recommended_posts: any = [];
 
-         rec_posts.forEach((post)=>{
-           posts.push(post);
-         })
+        // recommendation of posts by lcm service..
 
-         // posts contains all the posts to be displayed
-         resolve(posts);
+        recommended_posts = await this.GetPostRecommendations(user_id);
 
-      }
-      catch(err){
+        recommended_posts = JSON.parse(recommended_posts);
+
+        let rec_posts = await this.GetPostsById(
+          recommended_posts,
+          limit,
+          offset
+        );
+
+        rec_posts.forEach((post) => {
+          posts.push(post);
+        });
+
+        // posts contains all the posts to be displayed
+        resolve(posts);
+      } catch (err) {
         reject(err);
       }
     });

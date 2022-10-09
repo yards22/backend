@@ -54,17 +54,15 @@ export default class ProfileManager {
     });
   }
 
-  GetLeaderBoard(limit:number,offset:number){
-      return this.store.profile.findMany({
-        skip:offset,
-        take:limit,
-        orderBy:{
-          cric_index:'desc',
-        },
-      })
+  GetLeaderBoard(limit: number, offset: number) {
+    return this.store.profile.findMany({
+      skip: offset,
+      take: limit,
+      orderBy: {
+        cric_index: "desc",
+      },
+    });
   }
-
-
 
   UpdateProfile(
     user_id: number,
@@ -93,7 +91,7 @@ export default class ProfileManager {
     username: string,
     updated_at: Date,
     rawImage: Buffer,
-    token:string,
+    token: string,
     bio?: string,
     interests?: string
   ): Promise<{
@@ -123,7 +121,7 @@ export default class ProfileManager {
         // also change the profile details in redis for this particular token .
         // but there a raises a problem with expiry TTL.
 
-        await this.cache.Set(token,UpdatedProfileDetails,SEC_IN_YEAR);
+        await this.cache.Set(token, UpdatedProfileDetails, SEC_IN_YEAR);
 
         resolve({
           responseStatus: {
@@ -138,27 +136,28 @@ export default class ProfileManager {
     });
   }
 
-  GetCommunityLeaderBoard(limit:number,offset:number):Promise<{
-    responseStatus:IResponse,
-    leaderBoard:any
-  }>{
-     return new Promise(async(resolve,reject)=>{
-       try{
-         const leaderBoard = await this.GetCommunityLeaderBoard(limit,offset);
-         resolve({
-           responseStatus:{
-             statusCode:HerrorStatus.StatusOK,
-             message:"community_leaderboard"
-           },
-           leaderBoard
-         })
-       }
-       catch(err){
-          reject(err);
-       }
-     })
+  GetCommunityLeaderBoard(
+    limit: number,
+    offset: number
+  ): Promise<{
+    responseStatus: IResponse;
+    leaderBoard: any;
+  }> {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const leaderBoard = await this.GetCommunityLeaderBoard(limit, offset);
+        resolve({
+          responseStatus: {
+            statusCode: HerrorStatus.StatusOK,
+            message: "community_leaderboard",
+          },
+          leaderBoard,
+        });
+      } catch (err) {
+        reject(err);
+      }
+    });
   }
-
 
   CheckUsername(username: string): Promise<{
     responseStatus: IResponse;

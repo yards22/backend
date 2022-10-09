@@ -24,7 +24,7 @@ export default class CommentManager {
             select: {
               Profile: {
                 select: {
-                  username:true,
+                  username: true,
                   user_id: true,
                   profile_image_uri: true,
                 },
