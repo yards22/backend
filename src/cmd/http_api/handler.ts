@@ -41,9 +41,7 @@ import {
   HandleShareToTimeline,
   HandleUpdatePost,
 } from "./post";
-import {
-  HandleRecieveFeedback
-} from "./misc"
+import { HandleRecieveFeedback } from "./misc";
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 import { App } from "./types";
@@ -233,13 +231,13 @@ function ExploreRoutes(app: App): Router {
 }
 
 function MiscRoutes(app: App): Router {
-   const router = Router();
-   router.post(
-     "/feedback",
-     app.InHandler(CheckAllowance),
-     app.InHandler(HandleRecieveFeedback)
-   )
-   return router;
+  const router = Router();
+  router.post(
+    "/feedback",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleRecieveFeedback)
+  );
+  return router;
 }
 function HandleRoutesFor(app: App) {
   app.srv.use("/notification", NotificationRoutes(app));
@@ -250,7 +248,7 @@ function HandleRoutesFor(app: App) {
   app.srv.use("/post", PostRoutes(app));
   app.srv.use("/network", NetworkRoutes(app));
   app.srv.use("/explore", ExploreRoutes(app));
-  app.srv.use("/misc",MiscRoutes(app));
+  app.srv.use("/misc", MiscRoutes(app));
 }
 
 export default HandleRoutesFor;

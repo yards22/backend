@@ -43,10 +43,10 @@ async function Init() {
     remoteFileStorage,
     redis
   );
-  const likeManager = new LikeManager(db, redis);
-  const commentManager = new CommentManager(db, redis);
+  const likeManager = new LikeManager(db, redis, notificationManager);
+  const commentManager = new CommentManager(db, redis, notificationManager);
   const networkManager = new NetworkManager(db);
-  const miscManager = new MiscManager(db,imageResolver,remoteFileStorage);
+  const miscManager = new MiscManager(db, imageResolver, remoteFileStorage);
   const app = new App(
     srv,
     authManager,

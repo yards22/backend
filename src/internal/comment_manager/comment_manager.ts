@@ -1,12 +1,19 @@
 import { PrismaClient } from "@prisma/client";
 import { IKVStore } from "../../pkg/kv_store/kv_store";
-
+import NotificationManager from "../notification_manager/notification_manager";
+import { CommentNotification } from "../notification_manager/types";
 export default class CommentManager {
   private store: PrismaClient;
   private cache: IKVStore;
-  constructor(store: PrismaClient, cache: IKVStore) {
+  private notificationManager: NotificationManager;
+  constructor(
+    store: PrismaClient,
+    cache: IKVStore,
+    notificationManager: NotificationManager
+  ) {
     this.store = store;
     this.cache = cache;
+    this.notificationManager = notificationManager;
   }
 
   async GetCommentsCount(post_id: bigint) {
@@ -24,7 +31,7 @@ export default class CommentManager {
             select: {
               Profile: {
                 select: {
-                  username:true,
+                  username: true,
                   user_id: true,
                   profile_image_uri: true,
                 },
@@ -98,9 +105,16 @@ export default class CommentManager {
   }
 
   async Comment(post_id: bigint, user_id: number, content: string) {
-    return this.store.parentComments.create({
+    await this.store.parentComments.create({
       data: { content, user_id, post_id },
     });
+
+    const creator = await this.store.posts.findUnique({ where: { post_id } });
+    if (creator)
+      this.notificationManager.Create(
+        creator.user_id,
+        new CommentNotification(post_id, user_id)
+      );
   }
 
   async DeleteComment(post_id: bigint, user_id: number, comment_id: bigint) {
