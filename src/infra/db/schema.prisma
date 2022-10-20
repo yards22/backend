@@ -29,7 +29,7 @@ model Users {
   Following           Networks[]           @relation("following")
   Followers           Networks[]           @relation("followers")
   Recommendations     UserRecommendations?
-  Feedback            Feedback?
+  Feedback            Feedback[]
   @@map("users")
 }
 
@@ -174,10 +174,11 @@ model UserRecommendations {
 }
 
 model Feedback {
+  feedback_id   BigInt            @id @default(autoincrement()) @db.BigInt
   user           Users            @relation(fields: [user_id], references: [user_id])
-  user_id        Int              @unique
-  image_uri String?  
-  content String
+  user_id        Int              
+  image_uri    String?  
+  content      String?
 
   @@map("feedback")
 }
