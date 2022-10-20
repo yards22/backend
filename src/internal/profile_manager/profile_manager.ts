@@ -1,12 +1,9 @@
 import { PrismaClient } from "@prisma/client";
-import { nextTick, off } from "process";
 import { IFileStorage } from "../../pkg/file_storage/file_storage";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 import { ImageResolver } from "../../pkg/image_resolver/image_resolver_";
 import { IKVStore } from "../../pkg/kv_store/kv_store";
 import EProfile from "../entities/profile";
-
-const SEC_IN_YEAR = 31536000;
 
 interface IResponse {
   statusCode: number;
@@ -22,7 +19,7 @@ export default class ProfileManager {
     store: PrismaClient,
     imageResolver: ImageResolver,
     imageStorage: IFileStorage,
-    cache: IKVStore
+    cache:IKVStore
   ) {
     this.store = store;
     this.imageStorage = imageStorage;
@@ -38,19 +35,57 @@ export default class ProfileManager {
     });
   }
 
-  GetUserPrimaryInfoById(user_id: number): Promise<EProfile | null> {
-    return this.store.profile.findUnique({
+  async GetUserPrimaryInfoById(user_id: number): Promise<EProfile | null> {
+    return await this.store.profile.findUnique({
       where: {
         user_id: user_id,
       },
     });
   }
 
-  GetUserProfileById(user_id: number): Promise<EProfile | null> {
-    return this.store.profile.findUnique({
+ async GetUserProfileById(user_id: number,offset:number,limit:number): Promise<EProfile | null> {
+    return await this.store.profile.findUnique({
       where: {
         user_id: user_id,
       },
+      include:{
+        user:{
+          select:{
+            Post:{
+              take:limit,
+              skip:offset,
+              include:{
+                _count:{
+                   select:{
+                    Likes:true,
+                    ParentComments:true
+                   }
+                }
+              }
+            },
+            Favourites:{
+              take:limit,
+              skip:offset,
+              include:{
+                user:{
+                  select:{
+                    Post:{
+                      include:{
+                        _count:{
+                           select:{
+                            Likes:true,
+                            ParentComments:true
+                           }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     });
   }
 
@@ -90,8 +125,8 @@ export default class ProfileManager {
     user_id: number,
     username: string,
     updated_at: Date,
-    rawImage: Buffer,
     token: string,
+    rawImage: Buffer,
     bio?: string,
     interests?: string
   ): Promise<{
@@ -122,7 +157,6 @@ export default class ProfileManager {
         // but there a raises a problem with expiry TTL.
 
         await this.cache.Set(token, UpdatedProfileDetails, SEC_IN_YEAR);
-
         resolve({
           responseStatus: {
             statusCode: HerrorStatus.StatusOK,
@@ -158,7 +192,7 @@ export default class ProfileManager {
       }
     });
   }
-
+  
   CheckUsername(username: string): Promise<{
     responseStatus: IResponse;
     userData?: EProfile;
@@ -185,5 +219,41 @@ export default class ProfileManager {
         reject(err);
       }
     });
+  }
+
+  GetMyPosts(user_id:number,limit:number,offset:number){
+     new Promise(async(resolve,reject)=>{
+        try{
+          const posts = await this.store.posts.findMany({
+             take:limit,
+             skip:offset,
+             where:{
+               user_id
+             }
+          })
+          resolve(posts); 
+        }
+        catch(err){
+           reject(err);
+        }
+     });
+  }
+
+  GetBookmarkedPosts(user_id:number,limit:number,offset:number){
+      new Promise(async(resolve,reject)=>{
+          try{
+              const posts = await this.store.posts.findMany({
+                take:limit,
+                skip:offset,
+                where:{
+                  user_id
+                }
+           })
+           resolve(posts); 
+          }
+          catch(err){
+            reject(err);
+          }
+      });
   }
 }

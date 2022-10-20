@@ -99,11 +99,6 @@ function ProfileRoutes(app: App): Router {
     app.InHandler(CheckAllowance),
     app.InHandler(HandleGetUserProfileInfo)
   );
-  router.post(
-    "/checkUsername",
-    app.InHandler(CheckAllowance),
-    app.InHandler(HandleGetCheckUsername)
-  );
   return router;
 }
 
