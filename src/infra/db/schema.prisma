@@ -30,6 +30,7 @@ model Users {
   Followers           Networks[]           @relation("followers")
   Recommendations     UserRecommendations?
   Feedback            Feedback[]
+  PollsReaction       PollsReaction[]
   @@map("users")
 }
 
@@ -66,6 +67,7 @@ model Networks {
   follower_id  Int
   following    Users  @relation("following", fields: [following_id], references: [user_id])
   following_id Int
+  created_at DateTime @default(now())
 
   @@unique([follower_id, following_id])
   @@map("networks")
@@ -99,6 +101,7 @@ model Posts {
   Likes          Likes[]
   ParentComments ParentComments[]
   Favourites     Favourites[]
+  
 
   @@unique([user_id, post_id])
   @@map("posts")
@@ -181,6 +184,31 @@ model Feedback {
   content      String?
 
   @@map("feedback")
+}
+
+model Polls {
+  poll_id   Int        @id @default(autoincrement()) @db.Int
+  poll_by   String     @default("Admin")
+  poll_question String?
+  options_count Int
+  options       String
+   created_at DateTime @default(now())
+
+  PollsReaction  PollsReaction[]
+
+  @@map("polls") 
+}
+
+model PollsReaction{
+   poll      Polls    @relation(fields: [poll_id], references: [poll_id])
+   poll_id   Int
+   user           Users            @relation(fields: [user_id], references: [user_id])
+   user_id        Int    
+   type      Int
+
+
+   @@unique([poll_id,user_id])
+   @@map("polls_reaction")
 }
 
 

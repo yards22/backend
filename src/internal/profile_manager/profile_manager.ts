@@ -10,6 +10,9 @@ interface IResponse {
   message?: string;
 }
 
+const SEC_IN_YEAR = 31536000;
+
+
 export default class ProfileManager {
   private store: PrismaClient;
   private imageStorage: IFileStorage;

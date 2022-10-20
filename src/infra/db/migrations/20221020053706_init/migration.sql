@@ -133,6 +133,37 @@ CREATE TABLE `user_recommendations` (
     UNIQUE INDEX `user_recommendations_user_id_key`(`user_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `feedback` (
+    `feedback_id` BIGINT NOT NULL AUTO_INCREMENT,
+    `user_id` INTEGER NOT NULL,
+    `image_uri` VARCHAR(191) NULL,
+    `content` VARCHAR(191) NULL,
+
+    PRIMARY KEY (`feedback_id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `polls` (
+    `poll_id` INTEGER NOT NULL AUTO_INCREMENT,
+    `poll_by` VARCHAR(191) NOT NULL DEFAULT 'Admin',
+    `poll_question` VARCHAR(191) NULL,
+    `options_count` INTEGER NOT NULL,
+    `options` VARCHAR(191) NOT NULL,
+
+    PRIMARY KEY (`poll_id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `polls_reaction` (
+    `reaction_id` BIGINT NOT NULL AUTO_INCREMENT,
+    `poll_id` INTEGER NOT NULL,
+    `user_id` INTEGER NOT NULL,
+    `type` INTEGER NOT NULL,
+
+    PRIMARY KEY (`reaction_id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `notifications` ADD CONSTRAINT `notifications_for_id_fkey` FOREIGN KEY (`for_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -183,3 +214,12 @@ ALTER TABLE `postRecommendations` ADD CONSTRAINT `postRecommendations_user_id_fk
 
 -- AddForeignKey
 ALTER TABLE `user_recommendations` ADD CONSTRAINT `user_recommendations_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `feedback` ADD CONSTRAINT `feedback_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `polls_reaction` ADD CONSTRAINT `polls_reaction_poll_id_fkey` FOREIGN KEY (`poll_id`) REFERENCES `polls`(`poll_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `polls_reaction` ADD CONSTRAINT `polls_reaction_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
