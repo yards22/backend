@@ -63,6 +63,7 @@ export class App {
     this.likeManager = likeManager;
     this.commentManager = commentManager;
     this.networkManager = networkManager;
+    this.miscManager = miscManager;
     this.db = db;
     this.kvStore = kvStore;
     this.imageResolver = imageResolver;

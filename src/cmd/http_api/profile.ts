@@ -8,6 +8,8 @@ export const HandleUpdateProfile: RouteHandler = async (
   next,
   app
 ) => {
+  // console.log("Hello");
+  // console.log(req.body);
   const user_id: number = Number(req.context.user_id);
   const token: string = req.context.token;
   const bio: string = req.body.bio as string;
@@ -15,6 +17,8 @@ export const HandleUpdateProfile: RouteHandler = async (
   const updated_at: Date = new Date();
   const username: string = req.body.username;
   const interests: string = req.body.interests;
+
+  console.log(user_id, token , bio , updated_at, username,profile_buffer);
 
   if (username != undefined && user_id != undefined) {
     const { responseStatus, profileData } =

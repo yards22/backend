@@ -31,6 +31,7 @@ model Users {
   Recommendations     UserRecommendations?
   Feedback            Feedback[]
   PollsReaction       PollsReaction[]
+  TrendingUsers       TrendingUsers[]
   @@map("users")
 }
 
@@ -101,6 +102,7 @@ model Posts {
   Likes          Likes[]
   ParentComments ParentComments[]
   Favourites     Favourites[]
+  TrendingPosts  TrendingPosts[]
   
 
   @@unique([user_id, post_id])
@@ -166,6 +168,22 @@ model PostRecommendations {
   post_recommendations String
 
   @@map("postRecommendations")
+}
+
+model TrendingUsers{
+    tu_id   BigInt @id @default(autoincrement()) @db.BigInt
+    user      Users  @relation(fields: [user_id], references: [user_id])
+    user_id   Int    
+
+    @@map("trending_users")
+}
+
+model TrendingPosts{
+    tp_id   BigInt @id @default(autoincrement()) @db.BigInt
+    post      Posts  @relation(fields: [post_id], references: [post_id])
+    post_id   BigInt  
+
+    @@map("trending_posts")  
 }
 
 model UserRecommendations {

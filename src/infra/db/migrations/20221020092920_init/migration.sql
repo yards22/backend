@@ -44,6 +44,7 @@ CREATE TABLE `networks` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
     `follower_id` INTEGER NOT NULL,
     `following_id` INTEGER NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     UNIQUE INDEX `networks_follower_id_following_id_key`(`follower_id`, `following_id`),
     PRIMARY KEY (`id`)
@@ -126,6 +127,22 @@ CREATE TABLE `postRecommendations` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `trending_users` (
+    `tu_id` BIGINT NOT NULL AUTO_INCREMENT,
+    `user_id` INTEGER NOT NULL,
+
+    PRIMARY KEY (`tu_id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `trending_posts` (
+    `tp_id` BIGINT NOT NULL AUTO_INCREMENT,
+    `post_id` BIGINT NOT NULL,
+
+    PRIMARY KEY (`tp_id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `user_recommendations` (
     `user_id` INTEGER NOT NULL,
     `recommend` VARCHAR(191) NOT NULL,
@@ -150,18 +167,18 @@ CREATE TABLE `polls` (
     `poll_question` VARCHAR(191) NULL,
     `options_count` INTEGER NOT NULL,
     `options` VARCHAR(191) NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     PRIMARY KEY (`poll_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `polls_reaction` (
-    `reaction_id` BIGINT NOT NULL AUTO_INCREMENT,
     `poll_id` INTEGER NOT NULL,
     `user_id` INTEGER NOT NULL,
     `type` INTEGER NOT NULL,
 
-    PRIMARY KEY (`reaction_id`)
+    UNIQUE INDEX `polls_reaction_poll_id_user_id_key`(`poll_id`, `user_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
@@ -211,6 +228,12 @@ ALTER TABLE `favourites` ADD CONSTRAINT `favourites_post_id_fkey` FOREIGN KEY (`
 
 -- AddForeignKey
 ALTER TABLE `postRecommendations` ADD CONSTRAINT `postRecommendations_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `trending_users` ADD CONSTRAINT `trending_users_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `trending_posts` ADD CONSTRAINT `trending_posts_post_id_fkey` FOREIGN KEY (`post_id`) REFERENCES `posts`(`post_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `user_recommendations` ADD CONSTRAINT `user_recommendations_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
