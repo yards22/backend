@@ -160,17 +160,16 @@ export default class AuthManager {
     });
   }
 
-  //TODO: change update and insert into a single step inbuilt upsert.
-
   GoogleLogin(id_token: string): Promise<{
     responseStatus: IResponse;
     userData?: EAuth;
+    is_exists:boolean;
     accessToken?: string;
   }> {
     return new Promise(async (resolve, reject) => {
       try {
         const payload: any = await verifyGoogleIdTokenAndGetUserData(id_token);
-        const user: EAuth = await this.UpsertUser(payload.email, payload.sub);
+        const {user,already_exists} = await this.UpsertUser(payload.email, payload.sub);
         const accessToken: string = await this.CreateSession(
           Token_Length,
           user
@@ -184,6 +183,7 @@ export default class AuthManager {
             message: "successful_login",
           },
           userData: user,
+          is_exists:already_exists,
           accessToken,
         });
       } catch (err) {
@@ -192,10 +192,14 @@ export default class AuthManager {
     });
   }
 
-  UpsertUser(email: string, sub: string): PromiseLike<EAuth> {
+  UpsertUser(email: string, sub: string): Promise<{
+    user:EAuth;
+    already_exists:boolean
+  }> {
     return new Promise(async (resolve, reject) => {
       try {
         let user = await this.GetUserByMail(email);
+        let already_exists :boolean  = true;
         if (!user) {
           const username: string = GenerateUsername(email);
           console.log("in upsert user about to create user");
@@ -206,8 +210,9 @@ export default class AuthManager {
             sub,
             "google"
           );
+          already_exists = false;
         }
-        resolve(user);
+        resolve({user,already_exists});
       } catch (err) {
         reject(err);
       }
