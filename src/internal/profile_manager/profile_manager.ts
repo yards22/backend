@@ -19,7 +19,7 @@ export default class ProfileManager {
     store: PrismaClient,
     imageResolver: ImageResolver,
     imageStorage: IFileStorage,
-    cache:IKVStore
+    cache: IKVStore
   ) {
     this.store = store;
     this.imageStorage = imageStorage;
@@ -43,49 +43,53 @@ export default class ProfileManager {
     });
   }
 
- async GetUserProfileById(user_id: number,offset:number,limit:number): Promise<EProfile | null> {
+  async GetUserProfileById(
+    user_id: number,
+    offset: number,
+    limit: number
+  ): Promise<EProfile | null> {
     return await this.store.profile.findUnique({
       where: {
         user_id: user_id,
       },
-      include:{
-        user:{
-          select:{
-            Post:{
-              take:limit,
-              skip:offset,
-              include:{
-                _count:{
-                   select:{
-                    Likes:true,
-                    ParentComments:true
-                   }
-                }
-              }
+      include: {
+        user: {
+          select: {
+            Post: {
+              take: limit,
+              skip: offset,
+              include: {
+                _count: {
+                  select: {
+                    Likes: true,
+                    ParentComments: true,
+                  },
+                },
+              },
             },
-            Favourites:{
-              take:limit,
-              skip:offset,
-              include:{
-                user:{
-                  select:{
-                    Post:{
-                      include:{
-                        _count:{
-                           select:{
-                            Likes:true,
-                            ParentComments:true
-                           }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+            Favourites: {
+              take: limit,
+              skip: offset,
+              include: {
+                user: {
+                  select: {
+                    Post: {
+                      include: {
+                        _count: {
+                          select: {
+                            Likes: true,
+                            ParentComments: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
   }
 
@@ -192,7 +196,7 @@ export default class ProfileManager {
       }
     });
   }
-  
+
   CheckUsername(username: string): Promise<{
     responseStatus: IResponse;
     userData?: EProfile;
@@ -221,39 +225,37 @@ export default class ProfileManager {
     });
   }
 
-  GetMyPosts(user_id:number,limit:number,offset:number){
-     new Promise(async(resolve,reject)=>{
-        try{
-          const posts = await this.store.posts.findMany({
-             take:limit,
-             skip:offset,
-             where:{
-               user_id
-             }
-          })
-          resolve(posts); 
-        }
-        catch(err){
-           reject(err);
-        }
-     });
+  GetMyPosts(user_id: number, limit: number, offset: number) {
+    new Promise(async (resolve, reject) => {
+      try {
+        const posts = await this.store.posts.findMany({
+          take: limit,
+          skip: offset,
+          where: {
+            user_id,
+          },
+        });
+        resolve(posts);
+      } catch (err) {
+        reject(err);
+      }
+    });
   }
 
-  GetBookmarkedPosts(user_id:number,limit:number,offset:number){
-      new Promise(async(resolve,reject)=>{
-          try{
-              const posts = await this.store.posts.findMany({
-                take:limit,
-                skip:offset,
-                where:{
-                  user_id
-                }
-           })
-           resolve(posts); 
-          }
-          catch(err){
-            reject(err);
-          }
-      });
+  GetBookmarkedPosts(user_id: number, limit: number, offset: number) {
+    new Promise(async (resolve, reject) => {
+      try {
+        const posts = await this.store.posts.findMany({
+          take: limit,
+          skip: offset,
+          where: {
+            user_id,
+          },
+        });
+        resolve(posts);
+      } catch (err) {
+        reject(err);
+      }
+    });
   }
 }
