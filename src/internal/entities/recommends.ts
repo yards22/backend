@@ -1,3 +1,3 @@
-import { Recommendations } from "@prisma/client";
+import { UserRecommendations } from "@prisma/client";
 
-export default interface ERecommends extends Recommendations {}
+export default interface ERecommends extends UserRecommendations {}
