@@ -14,15 +14,19 @@ export const HandleLikeAndUnlike: RouteHandler = async (
     return next(new Herror("post id missing", HerrorStatus.StatusBadRequest));
   }
   try {
-    if (req.query.is_like){
+    if (req.query.is_like) {
       await app.likeManager.Like(BigInt(_post_id), user_id, req.body.type || 1);
-      app.SendRes(res, { status: HerrorStatus.StatusOK,message:"liked_succesfully" });
-    }
-    else {
+      app.SendRes(res, {
+        status: HerrorStatus.StatusOK,
+        message: "liked_succesfully",
+      });
+    } else {
       await app.likeManager.Unlike(BigInt(_post_id), user_id);
-      app.SendRes(res, { status: HerrorStatus.StatusOK,message:"disliked_succesfully" });
+      app.SendRes(res, {
+        status: HerrorStatus.StatusOK,
+        message: "disliked_succesfully",
+      });
     }
-    
   } catch (err) {
     next(err);
   }

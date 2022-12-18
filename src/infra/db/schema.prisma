@@ -29,7 +29,7 @@ model Users {
   Following           Networks[]           @relation("following")
   Followers           Networks[]           @relation("followers")
   Recommendations     UserRecommendations?
-
+  Feedback            Feedback?
   @@map("users")
 }
 
@@ -173,6 +173,14 @@ model UserRecommendations {
   @@map("user_recommendations")
 }
 
+model Feedback {
+  user           Users            @relation(fields: [user_id], references: [user_id])
+  user_id        Int              @unique
+  image_uri String?  
+  content String
+
+  @@map("feedback")
+}
 enum NotificationStatus {
   Unseen
   Seen
