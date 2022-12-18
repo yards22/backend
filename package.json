@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node dist/app.js",
     "dev": "nodemon src/cmd/http_api/main.ts",
-    "build": "tsc -p .",
+    "build": "tsc --project tsconfig.build.json",
     "test": "jest",
     "testi": "jest --detectOpenHandles",
     "sqlgen": "npx pgtyped -c --watch pg_typed_config.json",

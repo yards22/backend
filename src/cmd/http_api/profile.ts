@@ -41,8 +41,12 @@ export const HandleUpdateProfile: RouteHandler = async (
   }
 };
 
-
-export const HandleGetUserPrimaryInfo: RouteHandler = async (req,res,next,app) => {
+export const HandleGetUserPrimaryInfo: RouteHandler = async (
+  req,
+  res,
+  next,
+  app
+) => {
   const user_id = Number(req.context.user_id);
   console.log(user_id);
   if (user_id != undefined) {
@@ -69,7 +73,11 @@ export const HandleGetUserProfileInfo: RouteHandler = async (
   const limit = Number(req.query.limit || 10);
   const offset = Number(req.query.offset || 0);
   if (user_id != undefined) {
-    const userProfile = await app.profileManager.GetUserProfileById(user_id,offset,limit);
+    const userProfile = await app.profileManager.GetUserProfileById(
+      user_id,
+      offset,
+      limit
+    );
     app.SendRes(res, {
       status: HerrorStatus.StatusOK,
       data: userProfile,
@@ -123,4 +131,3 @@ export const HandleGetLeaderBoard: RouteHandler = async (
     next(err);
   }
 };
-
