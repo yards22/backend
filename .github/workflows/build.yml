@@ -42,6 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: pm2 stop all
+      - run: ls -la ../../../
       - run: cp ../../../.env ./
       - run: yarn
       - run: npx prisma generate --schema ./src/infra/db/schema.prisma
