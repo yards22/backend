@@ -42,14 +42,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: pm2 stop all
-      - run: ls -la
-      - run: cd ../
-      - run: sudo rm -r ../../../backend/
-      - run: cp -r ./backend/ ../../../
-      - run: cd ../../../backend/
-      - run: git checkout stage
+      - run: cp ../../../.env ./
       - run: yarn
-      - run: cp ../.env ./
       - run: npx prisma generate --schema ./src/infra/db/schema.prisma
       - run: npx prisma migrate deploy --schema ./src/infra/db/schema.prisma
       - run: pm2 start dist/src/cmd/http_api/main.js
