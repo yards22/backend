@@ -32,7 +32,7 @@ jobs:
       - run: git config user.name "GitHub Actions Bot"
       - run: git config user.email "<>"
       - run: git add .
-      - run: git commit -m 'Github Actions Bot Build' --allow-empty
+      - run: git commit -m 'Github Actions Bot Build ${{ github.head_ref }}.${{ github.sha }}' --allow-empty
       - run: git push origin stage
 
   deploy:
@@ -41,11 +41,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - run: rm -r ../../../../backend/dist/
-      - run: mv dist/ ../../../../backend/
-      - run: cd ../../../../backend/
+      - run: pm2 stop all
+      - run: cd ../
+      - run: sudo rm -r ../../../backend/
+      - run: cp -r ./backend/ ../../../
+      - run: cd ../../../backend/
+      - run: git checkout stage
       - run: yarn
+      - run: cp ../.env ./
       - run: npx prisma generate --schema ./src/infra/db/schema.prisma
       - run: npx prisma migrate deploy --schema ./src/infra/db/schema.prisma
-      - run: pm2 stop dist/src/cmd/http_api/main.js
       - run: pm2 start dist/src/cmd/http_api/main.js
