@@ -4,12 +4,11 @@
   "description": "",
   "main": "src/app.ts",
   "scripts": {
-    "start": "node dist/app.js",
-    "dev": "nodemon src/cmd/http_api/main.ts",
-    "build": "tsc --project tsconfig.build.json",
+    "start": "node dist/src/cmd/http_api/main.js",
+    "dev": "ts-node src/cmd/http_api/main.ts",
+    "build": "tsc --build --verbose",
     "test": "jest",
     "testi": "jest --detectOpenHandles",
-    "sqlgen": "npx pgtyped -c --watch pg_typed_config.json",
     "prepare": "husky install"
   },
   "keywords": [],
