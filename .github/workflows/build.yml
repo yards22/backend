@@ -29,4 +29,10 @@ jobs:
       - run: npx prisma
       - run: npx prisma generate --schema ./src/infra/db/schema.prisma
       - run: npm run build
+      - run: git config user.name "GitHub Actions Bot"
+      - run: git config user.email "<>"
+      - run: git add .
+      - run: git commit -m 'Github Actions Bot Build'
+      - run: git push origin stage
+         
 
