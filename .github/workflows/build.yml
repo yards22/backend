@@ -42,6 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: pm2 stop all
+      - run: ls -la
       - run: cd ../
       - run: sudo rm -r ../../../backend/
       - run: cp -r ./backend/ ../../../
