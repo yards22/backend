@@ -41,11 +41,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - run: yarn
-      - run: npx prisma generate --schema ./src/infra/db/schema.prisma
-      - run: npx prisma migrate deploy --schema ./src/infra/db/schema.prisma
       - run: rm -r ../../../../backend/dist/
       - run: mv dist/ ../../../../backend/
       - run: cd ../../../../backend/
+      - run: yarn
+      - run: npx prisma generate --schema ./src/infra/db/schema.prisma
+      - run: npx prisma migrate deploy --schema ./src/infra/db/schema.prisma
       - run: pm2 stop dist/src/cmd/http_api/main.js
       - run: pm2 start dist/src/cmd/http_api/main.js
