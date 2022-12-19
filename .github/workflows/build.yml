@@ -32,7 +32,7 @@ jobs:
       - run: git config user.name "GitHub Actions Bot"
       - run: git config user.email "<>"
       - run: git add .
-      - run: git commit -m 'Github Actions Bot Build'
+      - run: git commit -m 'Github Actions Bot Build' --allow-empty
       - run: git push origin stage
 
   deploy:
