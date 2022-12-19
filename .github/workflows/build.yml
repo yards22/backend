@@ -24,11 +24,9 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
       - run: npm install -g typescript
-      
-      - name: Build TS Project
       - run: npm install
       - run: mkdir dist
       - run: npx prisma
       - run: npx prisma generate --schema ./src/infra/db/schema.prisma
       - run: npm run build
-      
+
