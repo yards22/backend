@@ -46,7 +46,7 @@ export async function DBInit(): Promise<PrismaClient> {
 export async function RedisInit() {
   try {
     const store = createClient({
-      url: `redis://localhost:6379`,
+      url: process.env.REDIS_URL,
     });
     await store.connect();
     return store;

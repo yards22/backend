@@ -10,4 +10,5 @@ RUN npx prisma generate
 RUN npm run build
 RUN npm prune --production
 COPY .env ./
-CMD ["node","dist/src/cmd/http_api/main.js"]
+EXPOSE 4000
+CMD ["node","dist/cmd/http_api/main.js"]
