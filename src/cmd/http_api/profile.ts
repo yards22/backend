@@ -20,7 +20,7 @@ export const HandleUpdateProfile: RouteHandler = async (
 
   console.log(user_id, token , bio , updated_at, username,profile_buffer);
 
-  if (username != undefined && user_id != undefined) {
+  if (username != undefined) {
     const { responseStatus, profileData } =
       await app.profileManager.UpdateProfileDetails(
         user_id,

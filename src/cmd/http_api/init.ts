@@ -5,8 +5,7 @@ import { HerrorStatus } from "../../pkg/herror/status_codes";
 import { Herror } from "../../pkg/herror/herror";
 import config from "config";
 import cors from "cors";
-import { RedisClientType } from "@redis/client";
-import { createClient } from "redis";
+import { RedisClientType,createClient } from "@redis/client";
 import cron from "node-cron";
 import { S3FileStorage } from "../../pkg/file_storage/s3_file_storage";
 
@@ -26,6 +25,7 @@ export function ServerInit(): Express {
   );
 
   srv.use(express.json());
+  
   srv.use(express.urlencoded({ extended: true }));
   return srv;
 }
