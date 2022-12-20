@@ -3,11 +3,9 @@ import { App } from "./types";
 import { PrismaClient } from "@prisma/client";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 import { Herror } from "../../pkg/herror/herror";
-import config from "config";
 import cors from "cors";
 import { RedisClientType } from "@redis/client";
 import { createClient } from "redis";
-import cron from "node-cron";
 import { S3FileStorage } from "../../pkg/file_storage/s3_file_storage";
 
 // server init
@@ -20,7 +18,7 @@ export function ServerInit(): Express {
   srv.enable("trust proxy");
   srv.use(
     cors({
-      origin: config.get("origin"),
+      origin: process.env.REACT_ORIGIN,
       credentials: true,
     })
   );
@@ -66,18 +64,6 @@ export function RemoteFileStorageInit() {
   );
 }
 
-export async function TimerInit() {
-  try {
-    var cronJob = cron.schedule("0 0 0 * * *", function () {
-      // perform db cleanup periodically.
-
-      console.info("cron job in background");
-    });
-    cronJob.start();
-  } catch (err) {
-    throw err;
-  }
-}
 // Sink init
 export function SinkInit(app: App) {
   app.srv.use((req, res, next) => {

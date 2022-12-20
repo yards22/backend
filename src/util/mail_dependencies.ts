@@ -1,6 +1,10 @@
-import config from "config";
 import EmailValidator from "email-validator";
 import nodemailer from "nodemailer";
+
+const MAIL_SERVICE = process.env.MAIL_SERVICE;
+const MAIL_ID = process.env.MAIL_ID;
+const MAIL_PASSWORD = process.env.MAIL_PASSWORD;
+const MAIL_PORT = process.env.MAIL_PORT;
 
 function MailValidator(mail_id: string): boolean {
   return EmailValidator.validate(mail_id);
@@ -8,11 +12,11 @@ function MailValidator(mail_id: string): boolean {
 
 function SendMail(mail_id: string, otp: string): void {
   const transporter = nodemailer.createTransport({
-    service: config.get("service"), // sevice name
-    port: config.get("SMTPport"), // port for secure SMTP
+    service: MAIL_SERVICE,
+    port: isNaN(Number(MAIL_PORT)) ? 587 : Number(MAIL_PORT),
     auth: {
-      user: config.get("mailId"),
-      pass: config.get("password"),
+      user: MAIL_ID,
+      pass: MAIL_PASSWORD,
     },
   });
 

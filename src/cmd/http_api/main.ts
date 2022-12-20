@@ -8,7 +8,6 @@ import {
   RemoteFileStorageInit,
   ServerInit,
   SinkInit,
-  TimerInit,
 } from "./init";
 import { App } from "./types";
 import Redis from "../../pkg/kv_store/redis";

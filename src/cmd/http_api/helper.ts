@@ -1,16 +1,15 @@
-import config from "config";
-
 const { OAuth2Client } = require("google-auth-library");
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 // this function checks the integrity of the googleIdToken and outputs the user data
 export default function verifyGoogleIdTokenAndGetUserData(
   googleIdToken: string
 ) {
   return new Promise((resolve, reject) => {
-    const client = new OAuth2Client(config.get("googleClientId"));
+    const client = new OAuth2Client(GOOGLE_CLIENT_ID);
     return client
       .verifyIdToken({
         idToken: googleIdToken,
-        audience: config.get("googleClientId"),
+        audience: GOOGLE_CLIENT_ID,
       })
       .then((ticket: any) => {
         // the integrity of the google id token has been confirmed and obtained data in payload
