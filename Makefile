@@ -24,7 +24,11 @@ pgen:
 omg:
 	rm -rf ./src/infra/db/migrations/*
 	make pmu
-
+di:
+	docker build -t 22_yards_nodejs_app .
+rdi:
+	docker rm 22_yards_nodejs_app_container
+	docker run -d -it -p 4000:4000 --name=22_yards_nodejs_app_container 22_yards_nodejs_app
 .PHONY: postgres createdb dropdb migrateup migratedown sqlc test migratecreate seed genprivatekey genpublickey err test_fail
 
 
