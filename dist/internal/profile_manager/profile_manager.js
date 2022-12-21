@@ -137,8 +137,10 @@ var ProfileManager = /** @class */ (function () {
                         _a.trys.push([0, 6, , 7]);
                         format = "jpg";
                         filePath = undefined;
+                        if (rawImage == undefined)
+                            console.log("no image");
                         if (!(rawImage !== undefined)) return [3 /*break*/, 3];
-                        filePath = username + "_dp." + format;
+                        filePath = user_id + "_dp." + format;
                         return [4 /*yield*/, this.imageResolver.Convert(rawImage, { h: 320, w: 512 }, format)];
                     case 1:
                         resolvedImage = _a.sent();
@@ -151,7 +153,7 @@ var ProfileManager = /** @class */ (function () {
                                 user_id: user_id,
                             },
                             data: {
-                                username: username,
+                                username: username === "" ? undefined : username,
                                 profile_image_uri: filePath,
                                 bio: bio,
                                 interests: interests,

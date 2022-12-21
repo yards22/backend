@@ -52,7 +52,6 @@ var HandleUpdateProfile = function (req, res, next, app) { return __awaiter(void
                     profile_buffer = req.file.buffer;
                 username = req.body.username;
                 interests = req.body.interests;
-                if (!(username != undefined && user_id != undefined)) return [3 /*break*/, 2];
                 return [4 /*yield*/, app.profileManager.UpdateProfileDetails(user_id, username, token, profile_buffer, bio, interests)];
             case 1:
                 _a = _b.sent(), responseStatus = _a.responseStatus, profileData = _a.profileData;
@@ -61,11 +60,7 @@ var HandleUpdateProfile = function (req, res, next, app) { return __awaiter(void
                     data: profileData,
                     message: responseStatus.message,
                 });
-                return [3 /*break*/, 3];
-            case 2:
-                next(new herror_1.Herror("BadRequest", status_codes_1.HerrorStatus.StatusBadRequest));
-                _b.label = 3;
-            case 3: return [2 /*return*/];
+                return [2 /*return*/];
         }
     });
 }); };
