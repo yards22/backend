@@ -119,10 +119,10 @@ export default class ProfileManager {
     return new Promise(async (resolve, reject) => {
       try {
         const format = "jpg";
-        let filePath: string | undefined = username + "_dp." + format;
+        let filePath: string | undefined = undefined;
 
         // only if image is there
-        if (rawImage) {
+        if (rawImage !== undefined) {
           filePath = username + "_dp." + format;
           let resolvedImage = await this.imageResolver.Convert(
             rawImage,
