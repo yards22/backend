@@ -41,20 +41,21 @@ var herror_1 = require("../../pkg/herror/herror");
 var status_codes_1 = require("../../pkg/herror/status_codes");
 var HandleUpdateProfile = function (req, res, next, app) { return __awaiter(void 0, void 0, void 0, function () {
     var user_id, token, bio, profile_buffer, username, interests, _a, responseStatus, profileData;
-    var _b;
-    return __generator(this, function (_c) {
-        switch (_c.label) {
+    return __generator(this, function (_b) {
+        switch (_b.label) {
             case 0:
                 user_id = Number(req.context.user_id);
                 token = req.context.token;
                 bio = req.body.bio;
-                profile_buffer = (_b = req.file) === null || _b === void 0 ? void 0 : _b.buffer;
+                profile_buffer = undefined;
+                if (req.file && req.file.buffer)
+                    profile_buffer = req.file.buffer;
                 username = req.body.username;
                 interests = req.body.interests;
                 if (!(username != undefined && user_id != undefined)) return [3 /*break*/, 2];
                 return [4 /*yield*/, app.profileManager.UpdateProfileDetails(user_id, username, token, profile_buffer, bio, interests)];
             case 1:
-                _a = _c.sent(), responseStatus = _a.responseStatus, profileData = _a.profileData;
+                _a = _b.sent(), responseStatus = _a.responseStatus, profileData = _a.profileData;
                 app.SendRes(res, {
                     status: responseStatus.statusCode,
                     data: profileData,
@@ -63,7 +64,7 @@ var HandleUpdateProfile = function (req, res, next, app) { return __awaiter(void
                 return [3 /*break*/, 3];
             case 2:
                 next(new herror_1.Herror("BadRequest", status_codes_1.HerrorStatus.StatusBadRequest));
-                _c.label = 3;
+                _b.label = 3;
             case 3: return [2 /*return*/];
         }
     });

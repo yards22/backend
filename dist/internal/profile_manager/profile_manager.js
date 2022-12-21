@@ -136,8 +136,8 @@ var ProfileManager = /** @class */ (function () {
                     case 0:
                         _a.trys.push([0, 6, , 7]);
                         format = "jpg";
-                        filePath = username + "_dp." + format;
-                        if (!rawImage) return [3 /*break*/, 3];
+                        filePath = undefined;
+                        if (!(rawImage !== undefined)) return [3 /*break*/, 3];
                         filePath = username + "_dp." + format;
                         return [4 /*yield*/, this.imageResolver.Convert(rawImage, { h: 320, w: 512 }, format)];
                     case 1:
