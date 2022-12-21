@@ -1,13 +1,14 @@
-FROM node:14-alpine
+FROM node:14
 WORKDIR /app
-COPY package.json .
-
-ARG NODE_ENV
-RUN if [ "$NODE_ENV" = "development" ]; \
-    then npm install --production=false; \
-    else npm install --only=production; \ 
-    fi
-
+COPY package*.json ./
+COPY tsconfig.json ./
+COPY src/infra/db/schema.prisma ./prisma/
+RUN npm install
 COPY . .
-EXPOSE 3000
-CMD ["node","app.js"]
+RUN npx prisma
+RUN npx prisma generate
+RUN npm run build
+RUN npm prune --production
+COPY .env ./
+EXPOSE 4000
+CMD ["node","dist/cmd/http_api/main.js"]
