@@ -11,7 +11,8 @@ export const HandleUpdateProfile: RouteHandler = async (
   const user_id: number = Number(req.context.user_id);
   const token: string = req.context.token;
   const bio: string = req.body.bio as string;
-  const profile_buffer = req.file?.buffer;
+  let profile_buffer: Buffer | undefined = undefined;
+  if (req.file && req.file.buffer) profile_buffer = req.file.buffer;
 
   const username: string = req.body.username;
   const interests: string = req.body.interests;
