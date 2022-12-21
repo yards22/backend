@@ -121,9 +121,11 @@ export default class ProfileManager {
         const format = "jpg";
         let filePath: string | undefined = undefined;
 
+        if (rawImage == undefined) console.log("no image");
+
         // only if image is there
         if (rawImage !== undefined) {
-          filePath = username + "_dp." + format;
+          filePath = user_id + "_dp." + format;
           let resolvedImage = await this.imageResolver.Convert(
             rawImage,
             { h: 320, w: 512 },
@@ -138,7 +140,7 @@ export default class ProfileManager {
             user_id: user_id,
           },
           data: {
-            username: username,
+            username: username === "" ? undefined : username,
             profile_image_uri: filePath,
             bio: bio,
             interests,

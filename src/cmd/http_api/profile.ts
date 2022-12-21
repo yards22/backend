@@ -17,24 +17,20 @@ export const HandleUpdateProfile: RouteHandler = async (
   const username: string = req.body.username;
   const interests: string = req.body.interests;
 
-  if (username != undefined && user_id != undefined) {
-    const { responseStatus, profileData } =
-      await app.profileManager.UpdateProfileDetails(
-        user_id,
-        username,
-        token,
-        profile_buffer,
-        bio,
-        interests
-      );
-    app.SendRes(res, {
-      status: responseStatus.statusCode,
-      data: profileData,
-      message: responseStatus.message,
-    });
-  } else {
-    next(new Herror("BadRequest", HerrorStatus.StatusBadRequest));
-  }
+  const { responseStatus, profileData } =
+    await app.profileManager.UpdateProfileDetails(
+      user_id,
+      username,
+      token,
+      profile_buffer,
+      bio,
+      interests
+    );
+  app.SendRes(res, {
+    status: responseStatus.statusCode,
+    data: profileData,
+    message: responseStatus.message,
+  });
 };
 
 export const HandleGetUserPrimaryInfo: RouteHandler = async (
