@@ -2,12 +2,7 @@ import { Herror } from "../../pkg/herror/herror";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 import RouteHandler from "./types";
 
-export const HandleUpdateProfile: RouteHandler = async (
-  req,
-  res,
-  next,
-  app
-) => {
+export const HandleUpdateProfile: RouteHandler = async (req,res,next,app) => {
   const user_id: number = Number(req.context.user_id);
   const token: string = req.context.token;
   const bio: string = req.body.bio as string;
