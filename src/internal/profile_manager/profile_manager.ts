@@ -37,6 +37,56 @@ export default class ProfileManager {
     });
   }
 
+  async GetUserByUsernameBulk(
+    username: string, 
+    offset:number,
+    limit:number
+    ) : Promise<EProfile|null>{
+      return await this.store.profile.findUnique({
+        where: {
+          username: username,
+        },
+        include: {
+          user: {
+            select: {
+              Post: {
+                take: limit,
+                skip: offset,
+                include: {
+                  _count: {
+                    select: {
+                      Likes: true,
+                      ParentComments: true,
+                    },
+                  },
+                },
+              },
+              Favourites: {
+                take: limit,
+                skip: offset,
+                include: {
+                  user: {
+                    select: {
+                      Post: {
+                        include: {
+                          _count: {
+                            select: {
+                              Likes: true,
+                              ParentComments: true,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+    }
+
   async GetUserPrimaryInfoById(user_id: number): Promise<EProfile | null> {
     return await this.store.profile.findUnique({
       where: {
@@ -120,15 +170,18 @@ export default class ProfileManager {
       try {
         const format = "jpg";
         let filePath: string | undefined = username + "_dp." + format;
+        console.log(filePath);
+        console.log(rawImage);
 
         // only if image is there
-        if (rawImage) {
+        if (rawImage!==undefined) {
           filePath = username + "_dp." + format;
           let resolvedImage = await this.imageResolver.Convert(
             rawImage,
             { h: 320, w: 512 },
             format
           );
+          console.log(filePath);
           await this.imageStorage.Put(filePath, resolvedImage);
         }
 
@@ -197,7 +250,7 @@ export default class ProfileManager {
           resolve({
             responseStatus: {
               statusCode: HerrorStatus.StatusOK,
-              message: "username_exists",
+              message: "u_can_pick_this",
             },
           });
         } else {

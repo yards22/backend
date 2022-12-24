@@ -99,6 +99,7 @@ function ProfileRoutes(app: App): Router {
     app.InHandler(CheckAllowance),
     app.InHandler(HandleGetUserProfileInfo)
   );
+  
   return router;
 }
 
