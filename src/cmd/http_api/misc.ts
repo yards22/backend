@@ -3,7 +3,7 @@ import { Herror } from "../../pkg/herror/herror";
 import RouteHandler from "./types";
 import { resolve } from "path";
 
-export const HandleRecieveFeedback: RouteHandler = async (
+export const HandlePostFeedback: RouteHandler = async (
   req,
   res,
   next,

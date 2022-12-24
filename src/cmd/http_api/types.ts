@@ -13,6 +13,7 @@ import PostManager from "../../internal/post_manager/post_manager";
 import CommentManager from "../../internal/comment_manager/comment_manager";
 import NetworkManager from "../../internal/network_manager/network_manager";
 import MiscManager from "../../internal/misc_manager/misc_manager";
+import ExploreManager from "../../internal/explore_manager/explore_manager";
 interface CustomRequest extends Request {
   context: any;
 }
@@ -34,6 +35,7 @@ export class App {
   commentManager: CommentManager;
   networkManager: NetworkManager;
   miscManager: MiscManager;
+  exploreManager: ExploreManager;
   db: PrismaClient;
   kvStore: IKVStore;
   imageResolver: ImageResolver;
@@ -49,6 +51,7 @@ export class App {
     commentManager: CommentManager,
     networkManager: NetworkManager,
     miscManager: MiscManager,
+    exploreManager: ExploreManager,
     kvStore: IKVStore,
     db: any,
     imageResolver: ImageResolver,
@@ -64,6 +67,7 @@ export class App {
     this.commentManager = commentManager;
     this.networkManager = networkManager;
     this.miscManager = miscManager;
+    this.exploreManager = exploreManager;
     this.db = db;
     this.kvStore = kvStore;
     this.imageResolver = imageResolver;

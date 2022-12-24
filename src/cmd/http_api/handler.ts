@@ -41,7 +41,7 @@ import {
   HandleShareToTimeline,
   HandleUpdatePost,
 } from "./post";
-import { HandleRecieveFeedback } from "./misc";
+import { HandleGetPolls, HandlePostFeedback, HandlePostPolls } from "./misc";
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 import { App } from "./types";
@@ -233,6 +233,11 @@ function ExploreRoutes(app: App): Router {
     app.InHandler(CheckAllowance),
     app.InHandler(HandleSearches)
   );
+  router.get(
+   "/stories",
+   app.InHandler(CheckAllowance),
+  //  app.InHandler(HandleSearches)
+  )
   return router;
 }
 
@@ -241,10 +246,21 @@ function MiscRoutes(app: App): Router {
   router.post(
     "/feedback",
     app.InHandler(CheckAllowance),
-    app.InHandler(HandleRecieveFeedback)
+    app.InHandler(HandlePostFeedback)
   );
+  router.post(
+    "/poll",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandlePostPolls)
+  )
+  router.get(
+    "/poll",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleGetPolls)
+  )
   return router;
 }
+
 function HandleRoutesFor(app: App) {
   app.srv.use("/notification", NotificationRoutes(app));
   app.srv.use("/profile", ProfileRoutes(app));

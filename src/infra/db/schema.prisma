@@ -32,6 +32,7 @@ model Users {
   Feedback            Feedback[]
   PollsReaction       PollsReaction[]
   TrendingUsers       TrendingUsers[]
+  Stories             Stories[]
   @@map("users")
 }
 
@@ -210,7 +211,7 @@ model Polls {
   poll_question String?
   options_count Int
   options       String
-   created_at DateTime @default(now())
+  created_at DateTime @default(now())
 
   PollsReaction  PollsReaction[]
 
@@ -227,6 +228,17 @@ model PollsReaction{
 
    @@unique([poll_id,user_id])
    @@map("polls_reaction")
+}
+
+model Stories{
+  story_id Int   @id @default(autoincrement()) @db.Int
+  user           Users            @relation(fields: [user_id], references: [user_id])
+  user_id        Int    
+  content  String 
+  media String
+  created_at DateTime @default(now())
+
+  @@map("stories")    
 }
 
 model AdminUsers{

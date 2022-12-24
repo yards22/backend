@@ -18,6 +18,7 @@ import PostManager from "../../internal/post_manager/post_manager";
 import CommentManager from "../../internal/comment_manager/comment_manager";
 import NetworkManager from "../../internal/network_manager/network_manager";
 import MiscManager from "../../internal/misc_manager/misc_manager";
+import ExploreManager from "../../internal/explore_manager/explore_manager";
 
 async function Init() {
   const srv = ServerInit();
@@ -46,6 +47,11 @@ async function Init() {
   const commentManager = new CommentManager(db, redis, notificationManager);
   const networkManager = new NetworkManager(db);
   const miscManager = new MiscManager(db, imageResolver, remoteFileStorage);
+  const exploreManager = new ExploreManager(
+    db,
+    imageResolver,
+    remoteFileStorage
+    );
   const app = new App(
     srv,
     authManager,
@@ -56,6 +62,7 @@ async function Init() {
     commentManager,
     networkManager,
     miscManager,
+    exploreManager,
     redis,
     db,
     imageResolver,
