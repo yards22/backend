@@ -60,20 +60,35 @@ export const HandleGetUserProfileInfo: RouteHandler = async (
   next,
   app
 ) => {
+  var username :string 
+  username = req.query.user as string 
   const user_id = Number(req.context.user_id);
-  console.log(user_id);
   const limit = Number(req.query.limit || 10);
   const offset = Number(req.query.offset || 0);
   if (user_id != undefined) {
-    const userProfile = await app.profileManager.GetUserProfileById(
-      user_id,
-      offset,
-      limit
-    );
-    app.SendRes(res, {
-      status: HerrorStatus.StatusOK,
-      data: userProfile,
-    });
+    if(username === undefined){
+      const userProfile = await app.profileManager.GetUserProfileById(
+        user_id,
+        offset,
+        limit
+      );
+      app.SendRes(res, {
+        status: HerrorStatus.StatusOK,
+        data: userProfile,
+      });
+    }
+    else{
+      const userProfile = await app.profileManager.GetUserByUsernameBulk(
+        username,
+        offset,
+        limit
+        );
+      app.SendRes(res, {
+        status: HerrorStatus.StatusOK,
+        data: userProfile,
+      });
+    }
+
   } else {
     next(new Herror("BadRequest", HerrorStatus.StatusBadRequest));
   }
