@@ -11,30 +11,26 @@ export const HandleUpdateProfile: RouteHandler = async (
   const user_id: number = Number(req.context.user_id);
   const token: string = req.context.token;
   const bio: string = req.body.bio as string;
-  const profile_buffer = req.file?.buffer;
+  let profile_buffer: Buffer | undefined = undefined;
+  if (req.file && req.file.buffer) profile_buffer = req.file.buffer;
+
   const username: string = req.body.username;
   const interests: string = req.body.interests;
 
-  console.log("req.file",req.file?.buffer)
-
-  if (username != undefined && user_id != undefined) {
-    const { responseStatus, profileData } =
-      await app.profileManager.UpdateProfileDetails(
-        user_id,
-        username,
-        token,
-        profile_buffer,
-        bio,
-        interests
-      );
-    app.SendRes(res, {
-      status: responseStatus.statusCode,
-      data: profileData,
-      message: responseStatus.message,
-    });
-  } else {
-    next(new Herror("BadRequest", HerrorStatus.StatusBadRequest));
-  }
+  const { responseStatus, profileData } =
+    await app.profileManager.UpdateProfileDetails(
+      user_id,
+      username,
+      token,
+      profile_buffer,
+      bio,
+      interests
+    );
+  app.SendRes(res, {
+    status: responseStatus.statusCode,
+    data: profileData,
+    message: responseStatus.message,
+  });
 };
 
 export const HandleGetUserPrimaryInfo: RouteHandler = async (

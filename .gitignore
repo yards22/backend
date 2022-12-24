@@ -6,4 +6,3 @@ firebaseAuthCredentials.json
 pgdata
 .idea/
 package-lock.json
-dist/
