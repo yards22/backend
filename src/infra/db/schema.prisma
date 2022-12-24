@@ -229,6 +229,14 @@ model PollsReaction{
    @@map("polls_reaction")
 }
 
+model AdminUsers{
+   mail_id String 
+   open_to String 
+
+  @@unique([mail_id,open_to])
+   @@map("admin_users")
+}
+
 
 enum NotificationStatus {
   Unseen
