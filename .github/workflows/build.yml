@@ -1,0 +1,50 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: Build TS Project
+
+on:
+  push:
+    branches: ["stage"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+      - run: npm install -g typescript
+      - run: npm install
+      - run: mkdir -p dist
+      - run: npx prisma
+      - run: npx prisma generate --schema ./src/infra/db/schema.prisma
+      - run: npm run build
+      - run: git config user.name "GitHub Actions Bot"
+      - run: git config user.email "<>"
+      - run: git add .
+      - run: git commit -m 'Github Actions Bot Build ${{ github.head_ref }}.${{ github.sha }}' --allow-empty
+      - run: git push origin stage
+
+  deploy:
+    needs: build
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v3
+      - run: pm2 stop all
+      - run: ls -la ../../../
+      - run: cp ../../../../.env ./
+      - run: yarn
+      - run: npx prisma generate --schema ./src/infra/db/schema.prisma
+      - run: npx prisma migrate deploy --schema ./src/infra/db/schema.prisma
+      - run: pm2 start dist/src/cmd/http_api/main.js
