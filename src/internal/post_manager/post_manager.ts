@@ -361,15 +361,20 @@ export default class PostManager {
 
         recommended_posts = JSON.parse(recommended_posts);
 
-        let rec_posts = await this.GetPostsById(
-          recommended_posts,
-          limit,
-          offset
-        );
+        console.log(recommended_posts);
 
-        rec_posts.forEach((post) => {
-          posts.push(post);
-        });
+        while(recommended_posts !== null){
+          const r_p = recommended_posts.split("-");
+          let rec_posts = await this.GetPostsById(
+            r_p,
+            limit,
+            offset
+          );
+  
+          rec_posts.forEach((post) => {
+            posts.push(post);
+          });
+        }
 
         // posts contains all the posts to be displayed
         resolve(posts);
