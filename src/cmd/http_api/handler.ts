@@ -43,7 +43,7 @@ import {
   HandleShareToTimeline,
   HandleUpdatePost,
 } from "./post";
-import { HandleReceiveFeedback } from "./misc";
+import { HandleGetPolls, HandlePostPolls, HandlePostFeedback } from "./misc";
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -56,12 +56,24 @@ import {
   HandleRemoveConnection,
   HandleSearches,
 } from "./networks";
-import { HandleGetExplore, HandleGetRecommendedUsers, HandleGetTrending } from "./explore";
+import {
+  HandleGetExplore,
+  HandleGetRecommendedUsers,
+  HandleGetTrending,
+} from "./explore";
 
 function NotificationRoutes(app: App): Router {
   const router = Router();
-  router.get("/", app.InHandler(CheckAllowance),app.InHandler(HandleGetNotification));
-  router.put("/", app.InHandler(CheckAllowance),app.InHandler(HandleUpdateNotificationStatus));
+  router.get(
+    "/",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleGetNotification)
+  );
+  router.put(
+    "/",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleUpdateNotificationStatus)
+  );
   return router;
 }
 
@@ -108,18 +120,18 @@ function ProfileRoutes(app: App): Router {
     "/myPosts",
     app.InHandler(CheckAllowance),
     app.InHandler(HandleGetUserPosts)
-  )
+  );
   router.get(
     "/myFavourites",
     app.InHandler(CheckAllowance),
     app.InHandler(HandleGetUserStaredPosts)
-  )
+  );
   router.post(
     "/checkUsername",
     app.InHandler(CheckAllowance),
     app.InHandler(HandleGetCheckUsername)
-  )
-  
+  );
+
   return router;
 }
 
@@ -249,9 +261,9 @@ function ExploreRoutes(app: App): Router {
     app.InHandler(HandleSearches)
   );
   router.get(
-   "/stories",
-   app.InHandler(CheckAllowance),
-   app.InHandler(HandleSearches)
+    "/stories",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleSearches)
   );
   router.get(
     "/recommendations",
@@ -267,7 +279,7 @@ function ExploreRoutes(app: App): Router {
     "/explore",
     app.InHandler(CheckAllowance),
     app.InHandler(HandleGetExplore)
-  )
+  );
 
   return router;
 }
@@ -277,21 +289,19 @@ function MiscRoutes(app: App): Router {
   router.post(
     "/feedback",
     app.InHandler(CheckAllowance),
-
     upload.single("image"),
-    app.InHandler(HandleReceiveFeedback)
-
+    app.InHandler(HandlePostFeedback)
   );
   router.post(
     "/poll",
     app.InHandler(CheckAllowance),
     app.InHandler(HandlePostPolls)
-  )
+  );
   router.get(
     "/poll",
     app.InHandler(CheckAllowance),
     app.InHandler(HandleGetPolls)
-  )
+  );
   return router;
 }
 
