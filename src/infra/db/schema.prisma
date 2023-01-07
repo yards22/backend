@@ -89,7 +89,7 @@ model Token {
 
 model Posts {
   user           Users            @relation(fields: [user_id], references: [user_id])
-  user_id        Int
+  user_id        Int            
   post_id        BigInt           @id @default(autoincrement()) @db.BigInt
   content        String?
   media          String?

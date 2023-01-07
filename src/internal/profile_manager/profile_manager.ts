@@ -267,37 +267,76 @@ export default class ProfileManager {
     });
   }
 
-  GetMyPosts(user_id: number, limit: number, offset: number) {
-    new Promise(async (resolve, reject) => {
-      try {
-        const posts = await this.store.posts.findMany({
-          take: limit,
-          skip: offset,
-          where: {
-            user_id,
-          },
-        });
-        resolve(posts);
-      } catch (err) {
-        reject(err);
-      }
+   GetUserPostsById(user_id: number, limit: number, offset: number) {
+    return this.store.posts.findMany({
+       where:{
+        user_id
+       },
+       include: { _count: { select: { Likes: true } } },
     });
   }
 
-  GetBookmarkedPosts(user_id: number, limit: number, offset: number) {
-    new Promise(async (resolve, reject) => {
-      try {
-        const posts = await this.store.posts.findMany({
-          take: limit,
-          skip: offset,
-          where: {
-            user_id,
-          },
-        });
-        resolve(posts);
-      } catch (err) {
-        reject(err);
+   GetUserPostsByUsername(username:string,limit:number,offset:number){
+    return this.store.profile.findUnique({
+      where: {
+        username
+      },
+      include:{
+         user:{
+          select:{
+             Post:{
+              include:{
+                _count:{
+                  select:{
+                    Likes:true,
+                    ParentComments:true
+                  }
+                }
+              }
+             }
+          }
+         }
+      }
+    
+    });
+  }
+
+  GetStaredPostsById(user_id: number, limit: number, offset: number) {
+    return this.store.posts.findMany({
+      take: limit,
+      skip: offset,
+      where: {
+        user_id,
+      },
+    });
+  }
+
+  GetStaredPostsByUsername(username:string,limit:number,offset:number){
+    return this.store.profile.findUnique({
+      where: {
+        username
+      },
+      include:{
+         user:{
+          select:{
+             Favourites:{
+              include:{
+                post:{
+                   include:{
+                    _count:{
+                      select:{
+                        Likes:true,
+                        ParentComments:true
+                      }
+                    } 
+                   } 
+                }
+              }
+             }
+          }
+         }
       }
     });
   }
+  
 }

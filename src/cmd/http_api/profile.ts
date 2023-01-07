@@ -89,6 +89,79 @@ export const HandleGetUserProfileInfo: RouteHandler = async (
   }
 };
 
+export const HandleGetUserPosts:RouteHandler =async (req,res,next,app)=>{
+  var username :string 
+  username = req.query.username as string ;
+  console.log(username);
+  const limit = Number(req.query.limit || 10);
+  const offset = Number(req.query.offset || 0);
+  const user_id = req.context.user_id;
+  if (user_id != undefined) {
+    if(username === undefined){
+      const userProfile = await app.profileManager.GetUserPostsById(
+        user_id,
+        offset,
+        limit
+      );
+      console.log(userProfile)
+      app.SendRes(res, {
+        status: HerrorStatus.StatusOK,
+        data: userProfile,
+      });
+    }
+    else{
+      const userProfile = await app.profileManager.GetUserPostsByUsername(
+        username,
+        offset,
+        limit
+        );
+      app.SendRes(res, {
+        status: HerrorStatus.StatusOK,
+        data: userProfile,
+      });
+    }
+
+  } else {
+    next(new Herror("BadRequest", HerrorStatus.StatusBadRequest));
+  }
+}
+
+export const HandleGetUserStaredPosts:RouteHandler =async (req,res,next,app)=>{
+  var username :string 
+  username = req.query.username as string ;
+  const limit = Number(req.query.limit || 10);
+  const offset = Number(req.query.offset || 0);
+  const user_id = req.context.user_id;
+  if (user_id != undefined) {
+    if(username === undefined){
+      const userProfile = await app.profileManager.GetStaredPostsById(
+        user_id,
+        offset,
+        limit
+      );
+      console.log(userProfile)
+      app.SendRes(res, {
+        status: HerrorStatus.StatusOK,
+        data: userProfile,
+      });
+    }
+    else{
+      const userProfile = await app.profileManager.GetStaredPostsByUsername(
+        username,
+        offset,
+        limit
+        );
+      app.SendRes(res, {
+        status: HerrorStatus.StatusOK,
+        data: userProfile,
+      });
+    }
+
+  } else {
+    next(new Herror("BadRequest", HerrorStatus.StatusBadRequest));
+  }
+}
+
 export const HandleGetCheckUsername: RouteHandler = async (
   req,
   res,

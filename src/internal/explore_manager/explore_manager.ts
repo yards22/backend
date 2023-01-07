@@ -253,6 +253,17 @@ export default class ExploreManager {
        })
     }
 
+    async GetExplore(user_id:number){
+      return new Promise(async(resolve,reject)=>{
+        try{
+           
+        }
+        catch(err){
+
+        }
+      })
+    }
+
     async CreateStories(user_id:number, content :string, medias:Buffer[]){
       return new Promise(async (resolve, reject) => {
         try {
