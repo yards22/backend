@@ -52,6 +52,19 @@ export const HandleGetRecommendedUsers:RouteHandler=async (req,res,next,app)=>{
 }
 
 // add handleGetExplore Controller.
+export const HandleGetExplore:RouteHandler=async (req,res,next,app)=>{
+    const user_id:number = Number(req.context.user_id);
+    if(user_id !== undefined){
+        const data = app.exploreManager.GetExplore(user_id);
+        app.SendRes(res,{
+            status:HerrorStatus.StatusOK,
+            data
+        });
+    }
+    else{
+        next(new Herror("BadRequest", HerrorStatus.StatusBadRequest));
+    }
+}
 
 
 export const HandlePostStories:RouteHandler = async(req,res,next,app)=>{
