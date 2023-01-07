@@ -3,6 +3,7 @@ import { IFileStorage } from "../../pkg/file_storage/file_storage";
 import { ImageResolver } from "../../pkg/image_resolver/image_resolver_";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 import { HandleGetPolls } from "../../cmd/http_api/misc";
+import { randomUUID } from "crypto";
 
 interface IResponse {
   statusCode: number;
@@ -24,24 +25,28 @@ export default class MiscManager {
     this.imageResolver = imageResolver;
   }
 
-  recieveFeedback(
+  receiveFeedback(
     user_id: number,
-    username: String,
-    rawImage: Buffer,
-    content: string
+    content: string,
+    rawImage?: Buffer
   ): Promise<{
     responseStatus: IResponse;
   }> {
     return new Promise(async (resolve, reject) => {
       try {
-        const format = "jpg";
-        const filePath = username + "_fb." + format;
-        let resolvedImage = await this.imageResolver.Convert(
-          rawImage,
-          { h: 320, w: 512 },
-          format
-        );
-        await this.imageStorage.Put(filePath, resolvedImage);
+        let filePath: string | undefined = undefined;
+
+        // checking if we have file
+        if (rawImage) {
+          const format = "jpg";
+          filePath = randomUUID() + "_fb." + format;
+          let resolvedImage = await this.imageResolver.Convert(
+            rawImage,
+            { h: 320, w: 512 },
+            format
+          );
+          await this.imageStorage.Put(filePath, resolvedImage);
+        }
         await this.store.feedback.create({
           data: {
             content,
@@ -51,7 +56,7 @@ export default class MiscManager {
         });
         resolve({
           responseStatus: {
-            statusCode: HerrorStatus.StatusOK,
+            statusCode: HerrorStatus.StatusCreated,
             message: "feedback_received_successfully",
           },
         });
@@ -70,65 +75,61 @@ export default class MiscManager {
     });
   }
 
-  GetPolls(limit:number,offset:number){
-     return this.store.polls.findMany({
-      take:limit,
-      skip:offset,
-      orderBy:[
+  GetPolls(limit: number, offset: number) {
+    return this.store.polls.findMany({
+      take: limit,
+      skip: offset,
+      orderBy: [
         {
-           created_at:'desc',
+          created_at: "desc",
         },
-      ]
-     })
+      ],
+    });
   }
 
-  GetPollTypes(poll_id:number){
+  GetPollTypes(poll_id: number) {
     return this.store.polls.findUnique({
-      where:{
-        poll_id
-      }
-    })
+      where: {
+        poll_id,
+      },
+    });
   }
 
   //TODO: upsert polls reacn ...
 
-  UpsertReactions(poll_id:number,user_id:number,type:number){
-     return this.store.pollsReaction.upsert({
-      where:{
-        poll_id_user_id:{
+  UpsertReactions(poll_id: number, user_id: number, type: number) {
+    return this.store.pollsReaction.upsert({
+      where: {
+        poll_id_user_id: {
           poll_id,
-          user_id
-        }
+          user_id,
+        },
       },
-      update:{
-        type
+      update: {
+        type,
       },
-      create:{
-        poll_id:poll_id,
-        user_id:user_id,
-        type:type,
+      create: {
+        poll_id: poll_id,
+        user_id: user_id,
+        type: type,
       },
-     })
+    });
   }
 
-  PostPollReactions(poll_id:number,user_id:number,type:number){
-     return new Promise(async(resolve,reject)=>{
-        try{
-          const poll = await this.GetPollTypes(poll_id);
-          if (poll?.options_count as number <=type && type > 0){
-              // if type is valid  ...
-            await this.PostPollReactions(poll_id,user_id,type);
-            resolve("reaction_posted_successfully");
-          }
-          else{
-             resolve("type_invalid");
-          }
+  PostPollReactions(poll_id: number, user_id: number, type: number) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const poll = await this.GetPollTypes(poll_id);
+        if ((poll?.options_count as number) <= type && type > 0) {
+          // if type is valid  ...
+          await this.PostPollReactions(poll_id, user_id, type);
+          resolve("reaction_posted_successfully");
+        } else {
+          resolve("type_invalid");
         }
-        catch(err){
-           reject(err);
-        }
-     })
+      } catch (err) {
+        reject(err);
+      }
+    });
   }
-  
 }
-
