@@ -34,7 +34,12 @@ jobs:
       - run: git add .
       - run: git commit -m 'Github Actions Bot Build ${{ github.head_ref }}.${{ github.sha }}' --allow-empty
       - run: git push origin stage
-      - run: |
+      - name: SSH and resolve
+        env:
+            PRIVATE_KEY: ${{ secrets.PRIVATE_KEY  }}
+            HOSTNAME: ${{ secrets.HOSTNAME  }}
+            USER_NAME: ${{ secrets.USER_NAME  }}
+        run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
             
