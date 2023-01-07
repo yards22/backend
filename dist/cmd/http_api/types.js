@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.App = void 0;
 var json_1 = require("../../util/json");
 var App = /** @class */ (function () {
-    function App(srv, authManager, notificationManager, profileManager, postManager, likeManager, commentManager, networkManager, miscManager, kvStore, db, imageResolver, localFileStore, remoteFileStorage) {
+    function App(srv, authManager, notificationManager, profileManager, postManager, likeManager, commentManager, networkManager, miscManager, exploreManager, kvStore, db, imageResolver, localFileStore, remoteFileStorage) {
         this.srv = srv;
         this.notificationManager = notificationManager;
         this.authManager = authManager;
@@ -13,6 +13,7 @@ var App = /** @class */ (function () {
         this.commentManager = commentManager;
         this.networkManager = networkManager;
         this.miscManager = miscManager;
+        this.exploreManager = exploreManager;
         this.db = db;
         this.kvStore = kvStore;
         this.imageResolver = imageResolver;

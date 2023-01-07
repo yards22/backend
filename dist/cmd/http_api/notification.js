@@ -5,7 +5,7 @@ var herror_1 = require("../../pkg/herror/herror");
 var status_codes_1 = require("../../pkg/herror/status_codes");
 var HandleGetNotification = function (req, res, next, app) {
     var _a, _b, _c;
-    var forId = Number(req.context.userId);
+    var forId = Number(req.context.user_id);
     var id = req.query.id ? BigInt(Number((_a = req.query.id) !== null && _a !== void 0 ? _a : -1)) : -1;
     // looking for many notifications
     if (id == -1) {

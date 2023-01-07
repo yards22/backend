@@ -53,9 +53,10 @@ var post_manager_1 = __importDefault(require("../../internal/post_manager/post_m
 var comment_manager_1 = __importDefault(require("../../internal/comment_manager/comment_manager"));
 var network_manager_1 = __importDefault(require("../../internal/network_manager/network_manager"));
 var misc_manager_1 = __importDefault(require("../../internal/misc_manager/misc_manager"));
+var explore_manager_1 = __importDefault(require("../../internal/explore_manager/explore_manager"));
 function Init() {
     return __awaiter(this, void 0, void 0, function () {
-        var srv, db, r, redis, imageResolver, localFileStorage, remoteFileStorage, notificationManager, authManager, profileManager, postManager, likeManager, commentManager, networkManager, miscManager, app;
+        var srv, db, r, redis, imageResolver, localFileStorage, remoteFileStorage, notificationManager, authManager, profileManager, postManager, likeManager, commentManager, networkManager, miscManager, exploreManager, app;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -78,7 +79,8 @@ function Init() {
                     commentManager = new comment_manager_1.default(db, redis, notificationManager);
                     networkManager = new network_manager_1.default(db);
                     miscManager = new misc_manager_1.default(db, imageResolver, remoteFileStorage);
-                    app = new types_1.App(srv, authManager, notificationManager, profileManager, postManager, likeManager, commentManager, networkManager, miscManager, redis, db, imageResolver, localFileStorage, remoteFileStorage);
+                    exploreManager = new explore_manager_1.default(db, imageResolver, remoteFileStorage);
+                    app = new types_1.App(srv, authManager, notificationManager, profileManager, postManager, likeManager, commentManager, networkManager, miscManager, exploreManager, redis, db, imageResolver, localFileStorage, remoteFileStorage);
                     (0, handler_1.default)(app);
                     (0, init_1.SinkInit)(app);
                     return [2 /*return*/, app];

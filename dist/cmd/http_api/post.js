@@ -41,7 +41,7 @@ var herror_1 = require("../../pkg/herror/herror");
 var status_codes_1 = require("../../pkg/herror/status_codes");
 //TODO: Perform proper error handling.
 var HandleCreatePost = function (req, res, next, app) { return __awaiter(void 0, void 0, void 0, function () {
-    var user_id, content, images, image_buffer, i, err_1;
+    var user_id, content, images, image_buffer, i, post, err_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -57,9 +57,10 @@ var HandleCreatePost = function (req, res, next, app) { return __awaiter(void 0,
                 _a.trys.push([1, 3, , 4]);
                 return [4 /*yield*/, app.postManager.Create(user_id, content, image_buffer)];
             case 2:
-                _a.sent();
+                post = _a.sent();
                 app.SendRes(res, {
-                    status: 200,
+                    status: 201,
+                    data: post,
                 });
                 return [3 /*break*/, 4];
             case 3:

@@ -36,23 +36,23 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.HandlePostPolls = exports.HandleGetPolls = exports.HandleRecieveFeedback = void 0;
+exports.HandlePostPolls = exports.HandleGetPolls = exports.HandlePostFeedback = void 0;
 var status_codes_1 = require("../../pkg/herror/status_codes");
 var herror_1 = require("../../pkg/herror/herror");
-var HandleRecieveFeedback = function (req, res, next, app) { return __awaiter(void 0, void 0, void 0, function () {
-    var user_id, content, username, images, image_buffer, responseStatus, err_1;
+var HandlePostFeedback = function (req, res, next, app) { return __awaiter(void 0, void 0, void 0, function () {
+    var user_id, content, image_buffer, responseStatus, err_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 user_id = Number(req.context.user_id);
                 content = String(req.body.content);
-                username = String(req.body.username);
-                images = req.files;
-                image_buffer = images[0].buffer;
+                image_buffer = undefined;
+                if (req.file && req.file.buffer)
+                    image_buffer = req.file.buffer;
                 _a.label = 1;
             case 1:
                 _a.trys.push([1, 3, , 4]);
-                return [4 /*yield*/, app.miscManager.recieveFeedback(user_id, username, image_buffer, content)];
+                return [4 /*yield*/, app.miscManager.receiveFeedback(user_id, content, image_buffer)];
             case 2:
                 responseStatus = (_a.sent()).responseStatus;
                 app.SendRes(res, {
@@ -68,7 +68,7 @@ var HandleRecieveFeedback = function (req, res, next, app) { return __awaiter(vo
         }
     });
 }); };
-exports.HandleRecieveFeedback = HandleRecieveFeedback;
+exports.HandlePostFeedback = HandlePostFeedback;
 var HandleGetPolls = function (req, res, next, app) { return __awaiter(void 0, void 0, void 0, function () {
     var poll_id, limit, offset, poll_data;
     return __generator(this, function (_a) {
@@ -83,7 +83,7 @@ var HandleGetPolls = function (req, res, next, app) { return __awaiter(void 0, v
                 poll_data = _a.sent();
                 app.SendRes(res, {
                     status: 200,
-                    data: poll_data
+                    data: poll_data,
                 });
                 return [3 /*break*/, 3];
             case 2:
@@ -109,7 +109,7 @@ var HandlePostPolls = function (req, res, next, app) { return __awaiter(void 0, 
             case 2:
                 _a.sent();
                 app.SendRes(res, {
-                    status: 200
+                    status: 200,
                 });
                 return [3 /*break*/, 4];
             case 3:

@@ -82,7 +82,7 @@ var PostManager = /** @class */ (function () {
                                         )];
                                 case 3:
                                     _a.sent();
-                                    resolve("post_uploaded_succesfully");
+                                    resolve(post);
                                     return [3 /*break*/, 9];
                                 case 4:
                                     err_1 = _a.sent();
@@ -92,16 +92,18 @@ var PostManager = /** @class */ (function () {
                                     return [4 /*yield*/, this.Delete(user_id, post.post_id)];
                                 case 6:
                                     _a.sent();
-                                    resolve("unable_to_upload_media");
+                                    reject("unable_to_upload_media");
                                     return [3 /*break*/, 8];
                                 case 7:
                                     err_2 = _a.sent();
-                                    throw err_2;
-                                case 8: throw err_1;
+                                    reject(err_2);
+                                    return [3 /*break*/, 8];
+                                case 8: return [3 /*break*/, 9];
                                 case 9: return [3 /*break*/, 11];
                                 case 10:
                                     err_3 = _a.sent();
-                                    throw err_3;
+                                    reject(err_3);
+                                    return [3 /*break*/, 11];
                                 case 11: return [2 /*return*/];
                             }
                         });
@@ -446,11 +448,11 @@ var PostManager = /** @class */ (function () {
             var _this = this;
             return __generator(this, function (_a) {
                 return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-                        var posts_1, following_, following, recommended_posts, rec_posts, err_14;
+                        var posts_1, following_, following, recommended_posts, r_p, rec_posts, err_14;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
-                                    _a.trys.push([0, 5, , 6]);
+                                    _a.trys.push([0, 7, , 8]);
                                     posts_1 = [];
                                     following_ = [];
                                     return [4 /*yield*/, this.GetFollowing(user_id)];
@@ -469,20 +471,27 @@ var PostManager = /** @class */ (function () {
                                     // recommendation of posts by lcm service..
                                     recommended_posts = _a.sent();
                                     recommended_posts = JSON.parse(recommended_posts);
-                                    return [4 /*yield*/, this.GetPostsById(recommended_posts, limit, offset)];
+                                    console.log(recommended_posts);
+                                    _a.label = 4;
                                 case 4:
+                                    if (!(recommended_posts !== null)) return [3 /*break*/, 6];
+                                    r_p = recommended_posts.split("-");
+                                    return [4 /*yield*/, this.GetPostsById(r_p, limit, offset)];
+                                case 5:
                                     rec_posts = _a.sent();
                                     rec_posts.forEach(function (post) {
                                         posts_1.push(post);
                                     });
+                                    return [3 /*break*/, 4];
+                                case 6:
                                     // posts contains all the posts to be displayed
                                     resolve(posts_1);
-                                    return [3 /*break*/, 6];
-                                case 5:
+                                    return [3 /*break*/, 8];
+                                case 7:
                                     err_14 = _a.sent();
                                     reject(err_14);
-                                    return [3 /*break*/, 6];
-                                case 6: return [2 /*return*/];
+                                    return [3 /*break*/, 8];
+                                case 8: return [2 /*return*/];
                             }
                         });
                     }); })];
