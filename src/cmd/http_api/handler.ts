@@ -23,6 +23,8 @@ import {
   HandleGetUserPrimaryInfo,
   HandleGetUserProfileInfo,
   HandleGetCheckUsername,
+  HandleGetUserPosts,
+  HandleGetUserStaredPosts,
 } from "./profile";
 import { CheckAllowance } from "./middlewares";
 import { HandleGetLikesForPost, HandleLikeAndUnlike } from "./like";
@@ -53,6 +55,7 @@ import {
   HandleRemoveConnection,
   HandleSearches,
 } from "./networks";
+import { HandleGetExplore, HandleGetRecommendedUsers, HandleGetTrending } from "./explore";
 
 function NotificationRoutes(app: App): Router {
   const router = Router();
@@ -99,6 +102,16 @@ function ProfileRoutes(app: App): Router {
     app.InHandler(CheckAllowance),
     app.InHandler(HandleGetUserProfileInfo)
   );
+  router.get(
+    "/myPosts",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleGetUserPosts)
+  )
+  router.get(
+    "/myFavourites",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleGetUserStaredPosts)
+  )
   router.post(
     "/checkUsername",
     app.InHandler(CheckAllowance),
@@ -236,8 +249,24 @@ function ExploreRoutes(app: App): Router {
   router.get(
    "/stories",
    app.InHandler(CheckAllowance),
-  //  app.InHandler(HandleSearches)
+   app.InHandler(HandleSearches)
+  );
+  router.get(
+    "/recommendations",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleGetRecommendedUsers)
+  );
+  router.get(
+    "/trendingPosts",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleGetTrending)
+  );
+  router.get(
+    "/explore",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleGetExplore)
   )
+
   return router;
 }
 
