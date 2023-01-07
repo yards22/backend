@@ -56,7 +56,7 @@ export const HandleGetUserProfileInfo: RouteHandler = async (
   app
 ) => {
   var username :string 
-  username = req.query.user as string 
+  username = req.query.username as string 
   const user_id = Number(req.context.user_id);
   const limit = Number(req.query.limit || 10);
   const offset = Number(req.query.offset || 0);

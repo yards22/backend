@@ -43,7 +43,8 @@ import {
   HandleShareToTimeline,
   HandleUpdatePost,
 } from "./post";
-import { HandleGetPolls, HandlePostFeedback, HandlePostPolls } from "./misc";
+import { HandleReceiveFeedback } from "./misc";
+
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 import { App } from "./types";
@@ -102,6 +103,7 @@ function ProfileRoutes(app: App): Router {
     app.InHandler(CheckAllowance),
     app.InHandler(HandleGetUserProfileInfo)
   );
+
   router.get(
     "/myPosts",
     app.InHandler(CheckAllowance),
@@ -275,7 +277,10 @@ function MiscRoutes(app: App): Router {
   router.post(
     "/feedback",
     app.InHandler(CheckAllowance),
-    app.InHandler(HandlePostFeedback)
+
+    upload.single("image"),
+    app.InHandler(HandleReceiveFeedback)
+
   );
   router.post(
     "/poll",
