@@ -34,17 +34,17 @@ jobs:
       - run: git add .
       - run: git commit -m 'Github Actions Bot Build ${{ github.head_ref }}.${{ github.sha }}' --allow-empty
       - run: git push origin stage
-
-  deploy:
-    needs: build
-    runs-on: self-hosted
-
-    steps:
-      - uses: actions/checkout@v3
-      - run: pm2 stop all
-      - run: ls -la ../../../
-      - run: cp ../../../../.env ./
-      - run: yarn
-      - run: npx prisma generate --schema ./src/infra/db/schema.prisma
-      - run: npx prisma migrate deploy --schema ./src/infra/db/schema.prisma
-      - run: pm2 start dist/src/cmd/http_api/main.js
+      - run: |
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
+            
+            #Now we have got the access of EC2 and we will start the deploy .
+            cd backend
+            pm2 stop all
+            git checkout stage
+            git pull origin stage
+            yarn
+            npx prisma generate --schema ./src/infra/db/schema.prisma
+            npx prisma migrate deploy --schema ./src/infra/db/schema.prisma
+            pm2 start dist/src/cmd/http_api/main.js
+          '
