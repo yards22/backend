@@ -12,7 +12,6 @@ interface IResponse {
 
 const SEC_IN_YEAR = 31536000;
 
-
 export default class ProfileManager {
   private store: PrismaClient;
   private imageStorage: IFileStorage;
@@ -37,6 +36,56 @@ export default class ProfileManager {
       },
     });
   }
+
+  async GetUserByUsernameBulk(
+    username: string, 
+    offset:number,
+    limit:number
+    ) : Promise<EProfile|null>{
+      return await this.store.profile.findUnique({
+        where: {
+          username: username,
+        },
+        include: {
+          user: {
+            select: {
+              Post: {
+                take: limit,
+                skip: offset,
+                include: {
+                  _count: {
+                    select: {
+                      Likes: true,
+                      ParentComments: true,
+                    },
+                  },
+                },
+              },
+              Favourites: {
+                take: limit,
+                skip: offset,
+                include: {
+                  user: {
+                    select: {
+                      Post: {
+                        include: {
+                          _count: {
+                            select: {
+                              Likes: true,
+                              ParentComments: true,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+    }
 
   async GetUserPrimaryInfoById(user_id: number): Promise<EProfile | null> {
     return await this.store.profile.findUnique({
@@ -106,34 +155,11 @@ export default class ProfileManager {
     });
   }
 
-  UpdateProfile(
-    user_id: number,
-    username: string,
-    updated_at: Date,
-    profile_image_uri?: string,
-    bio?: string,
-    interests?: string
-  ): Promise<EProfile> {
-    return this.store.profile.update({
-      where: {
-        user_id: user_id,
-      },
-      data: {
-        username: username,
-        profile_image_uri: profile_image_uri,
-        bio: bio,
-        updated_at: updated_at,
-        interests,
-      },
-    });
-  }
-
   UpdateProfileDetails(
     user_id: number,
     username: string,
-    updated_at: Date,
     token: string,
-    rawImage: Buffer,
+    rawImage?: Buffer,
     bio?: string,
     interests?: string
   ): Promise<{
@@ -143,23 +169,36 @@ export default class ProfileManager {
     return new Promise(async (resolve, reject) => {
       try {
         const format = "jpg";
-        const filePath = username + "_dp." + format;
-        let resolvedImage = await this.imageResolver.Convert(
-          rawImage,
-          { h: 320, w: 512 },
-          format
-        );
-        await this.imageStorage.Put(filePath, resolvedImage);
-        const UpdatedProfile = await this.UpdateProfile(
-          user_id,
-          username,
-          updated_at,
-          filePath,
-          bio,
-          interests
-        );
+        let filePath: string | undefined = undefined;
 
-        const UpdatedProfileDetails: string = JSON.stringify(UpdatedProfile);
+        if (rawImage == undefined) console.log("no image");
+
+        // only if image is there
+        if (rawImage !== undefined) {
+          filePath = user_id + "_dp." + format;
+          let resolvedImage = await this.imageResolver.Convert(
+            rawImage,
+            { h: 320, w: 512 },
+            format
+          );
+          console.log(filePath);
+          await this.imageStorage.Put(filePath, resolvedImage);
+        }
+
+        // updating in database
+        const updatedProfile = await this.store.profile.update({
+          where: {
+            user_id: user_id,
+          },
+          data: {
+            username: username === "" ? undefined : username,
+            profile_image_uri: filePath,
+            bio: bio,
+            interests,
+          },
+        });
+
+        const UpdatedProfileDetails: string = JSON.stringify(updatedProfile);
         // also change the profile details in redis for this particular token .
         // but there a raises a problem with expiry TTL.
 
@@ -169,7 +208,7 @@ export default class ProfileManager {
             statusCode: HerrorStatus.StatusOK,
             message: "successful_Updation",
           },
-          profileData: UpdatedProfile,
+          profileData: updatedProfile,
         });
       } catch (err) {
         reject(err);
@@ -211,7 +250,7 @@ export default class ProfileManager {
           resolve({
             responseStatus: {
               statusCode: HerrorStatus.StatusOK,
-              message: "username_exists",
+              message: "u_can_pick_this",
             },
           });
         } else {
@@ -228,37 +267,76 @@ export default class ProfileManager {
     });
   }
 
-  GetMyPosts(user_id: number, limit: number, offset: number) {
-    new Promise(async (resolve, reject) => {
-      try {
-        const posts = await this.store.posts.findMany({
-          take: limit,
-          skip: offset,
-          where: {
-            user_id,
-          },
-        });
-        resolve(posts);
-      } catch (err) {
-        reject(err);
-      }
+   GetUserPostsById(user_id: number, limit: number, offset: number) {
+    return this.store.posts.findMany({
+       where:{
+        user_id
+       },
+       include: { _count: { select: { Likes: true } } },
     });
   }
 
-  GetBookmarkedPosts(user_id: number, limit: number, offset: number) {
-    new Promise(async (resolve, reject) => {
-      try {
-        const posts = await this.store.posts.findMany({
-          take: limit,
-          skip: offset,
-          where: {
-            user_id,
-          },
-        });
-        resolve(posts);
-      } catch (err) {
-        reject(err);
+   GetUserPostsByUsername(username:string,limit:number,offset:number){
+    return this.store.profile.findUnique({
+      where: {
+        username
+      },
+      include:{
+         user:{
+          select:{
+             Post:{
+              include:{
+                _count:{
+                  select:{
+                    Likes:true,
+                    ParentComments:true
+                  }
+                }
+              }
+             }
+          }
+         }
+      }
+    
+    });
+  }
+
+  GetStaredPostsById(user_id: number, limit: number, offset: number) {
+    return this.store.posts.findMany({
+      take: limit,
+      skip: offset,
+      where: {
+        user_id,
+      },
+    });
+  }
+
+  GetStaredPostsByUsername(username:string,limit:number,offset:number){
+    return this.store.profile.findUnique({
+      where: {
+        username
+      },
+      include:{
+         user:{
+          select:{
+             Favourites:{
+              include:{
+                post:{
+                   include:{
+                    _count:{
+                      select:{
+                        Likes:true,
+                        ParentComments:true
+                      }
+                    } 
+                   } 
+                }
+              }
+             }
+          }
+         }
       }
     });
   }
+  
 }

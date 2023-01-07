@@ -6,6 +6,7 @@ import { json } from "stream/consumers";
 import { IFileStorage } from "../../pkg/file_storage/file_storage";
 import { ImageResolver } from "../../pkg/image_resolver/image_resolver_";
 import { IKVStore } from "../../pkg/kv_store/kv_store";
+import EPost from "../entities/post";
 const prisma = new PrismaClient();
 
 const ALLOWED_IMAGES = 3;
@@ -46,9 +47,14 @@ export default class PostManager {
     });
   }
 
-  async Create(user_id: number, content: string, medias: Buffer[]) {
+  async Create(
+    user_id: number,
+    content: string,
+    medias: Buffer[]
+  ): Promise<EPost> {
     return new Promise(async (resolve, reject) => {
       try {
+        // creating post entry in db
         const post = await this.store.posts.create({
           data: {
             content,
@@ -58,6 +64,7 @@ export default class PostManager {
         });
 
         try {
+          // uploading media
           const removed_images: string = "";
           await this.UploadMedias(
             user_id,
@@ -67,19 +74,18 @@ export default class PostManager {
             removed_images,
             true // is_new
           );
-          resolve("post_uploaded_succesfully");
+          resolve(post);
         } catch (err) {
           // image upload failed, rollback: delete post
           try {
             await this.Delete(user_id, post.post_id);
-            resolve("unable_to_upload_media");
+            reject("unable_to_upload_media");
           } catch (err) {
-            throw err;
+            reject(err);
           }
-          throw err;
         }
       } catch (err) {
-        throw err;
+        reject(err);
       }
     });
   }
@@ -355,15 +361,20 @@ export default class PostManager {
 
         recommended_posts = JSON.parse(recommended_posts);
 
-        let rec_posts = await this.GetPostsById(
-          recommended_posts,
-          limit,
-          offset
-        );
+        console.log(recommended_posts);
 
-        rec_posts.forEach((post) => {
-          posts.push(post);
-        });
+        while(recommended_posts !== null){
+          const r_p = recommended_posts.split("-");
+          let rec_posts = await this.GetPostsById(
+            r_p,
+            limit,
+            offset
+          );
+  
+          rec_posts.forEach((post) => {
+            posts.push(post);
+          });
+        }
 
         // posts contains all the posts to be displayed
         resolve(posts);

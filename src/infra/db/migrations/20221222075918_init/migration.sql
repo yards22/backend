@@ -181,6 +181,14 @@ CREATE TABLE `polls_reaction` (
     UNIQUE INDEX `polls_reaction_poll_id_user_id_key`(`poll_id`, `user_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `admin_users` (
+    `mail_id` VARCHAR(191) NOT NULL,
+    `open_to` VARCHAR(191) NOT NULL,
+
+    UNIQUE INDEX `admin_users_mail_id_open_to_key`(`mail_id`, `open_to`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `notifications` ADD CONSTRAINT `notifications_for_id_fkey` FOREIGN KEY (`for_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
