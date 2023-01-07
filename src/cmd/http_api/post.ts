@@ -16,7 +16,7 @@ export const HandleCreatePost: RouteHandler = async (req, res, next, app) => {
   try {
     await app.postManager.Create(user_id, content, image_buffer);
     app.SendRes(res, {
-      status: 200,
+      status: 201,
     });
   } catch (err) {
     next(err);
