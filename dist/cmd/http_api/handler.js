@@ -16,10 +16,11 @@ var misc_1 = require("./misc");
 var storage = multer_1.default.memoryStorage();
 var upload = (0, multer_1.default)({ storage: storage });
 var networks_1 = require("./networks");
+var explore_1 = require("./explore");
 function NotificationRoutes(app) {
     var router = (0, express_1.Router)();
-    router.get("/", app.InHandler(notification_1.HandleGetNotification));
-    router.put("/", app.InHandler(notification_1.HandleUpdateNotificationStatus));
+    router.get("/", app.InHandler(middlewares_1.CheckAllowance), app.InHandler(notification_1.HandleGetNotification));
+    router.put("/", app.InHandler(middlewares_1.CheckAllowance), app.InHandler(notification_1.HandleUpdateNotificationStatus));
     return router;
 }
 function AuthRoutes(app) {
@@ -42,6 +43,9 @@ function ProfileRoutes(app) {
     router.put("/", app.InHandler(middlewares_1.CheckAllowance), upload.single("image"), app.InHandler(profile_1.HandleUpdateProfile));
     router.get("/editProfile", app.InHandler(middlewares_1.CheckAllowance), app.InHandler(profile_1.HandleGetUserPrimaryInfo));
     router.get("/", app.InHandler(middlewares_1.CheckAllowance), app.InHandler(profile_1.HandleGetUserProfileInfo));
+    router.get("/myPosts", app.InHandler(middlewares_1.CheckAllowance), app.InHandler(profile_1.HandleGetUserPosts));
+    router.get("/myFavourites", app.InHandler(middlewares_1.CheckAllowance), app.InHandler(profile_1.HandleGetUserStaredPosts));
+    router.post("/checkUsername", app.InHandler(middlewares_1.CheckAllowance), app.InHandler(profile_1.HandleGetCheckUsername));
     return router;
 }
 function LikeRoutes(app) {
@@ -81,11 +85,17 @@ function NetworkRoutes(app) {
 function ExploreRoutes(app) {
     var router = (0, express_1.Router)();
     router.get("/searchUsers", app.InHandler(middlewares_1.CheckAllowance), app.InHandler(networks_1.HandleSearches));
+    router.get("/stories", app.InHandler(middlewares_1.CheckAllowance), app.InHandler(networks_1.HandleSearches));
+    router.get("/recommendations", app.InHandler(middlewares_1.CheckAllowance), app.InHandler(explore_1.HandleGetRecommendedUsers));
+    router.get("/trendingPosts", app.InHandler(middlewares_1.CheckAllowance), app.InHandler(explore_1.HandleGetTrending));
+    router.get("/explore", app.InHandler(middlewares_1.CheckAllowance), app.InHandler(explore_1.HandleGetExplore));
     return router;
 }
 function MiscRoutes(app) {
     var router = (0, express_1.Router)();
-    router.post("/feedback", app.InHandler(middlewares_1.CheckAllowance), app.InHandler(misc_1.HandleRecieveFeedback));
+    router.post("/feedback", app.InHandler(middlewares_1.CheckAllowance), upload.single("image"), app.InHandler(misc_1.HandlePostFeedback));
+    router.post("/poll", app.InHandler(middlewares_1.CheckAllowance), app.InHandler(misc_1.HandlePostPolls));
+    router.get("/poll", app.InHandler(middlewares_1.CheckAllowance), app.InHandler(misc_1.HandleGetPolls));
     return router;
 }
 function HandleRoutesFor(app) {

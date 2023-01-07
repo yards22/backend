@@ -37,49 +37,53 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var status_codes_1 = require("../../pkg/herror/status_codes");
+var crypto_1 = require("crypto");
 var MiscManager = /** @class */ (function () {
     function MiscManager(store, imageResolver, imageStorage) {
         this.store = store;
         this.imageStorage = imageStorage;
         this.imageResolver = imageResolver;
     }
-    MiscManager.prototype.recieveFeedback = function (user_id, username, rawImage, content) {
+    MiscManager.prototype.receiveFeedback = function (user_id, content, rawImage) {
         var _this = this;
         return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-            var format, filePath, resolvedImage, err_1;
+            var filePath, format, resolvedImage, err_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 4, , 5]);
+                        _a.trys.push([0, 5, , 6]);
+                        filePath = undefined;
+                        if (!rawImage) return [3 /*break*/, 3];
                         format = "jpg";
-                        filePath = username + "_fb." + format;
+                        filePath = (0, crypto_1.randomUUID)() + "_fb." + format;
                         return [4 /*yield*/, this.imageResolver.Convert(rawImage, { h: 320, w: 512 }, format)];
                     case 1:
                         resolvedImage = _a.sent();
                         return [4 /*yield*/, this.imageStorage.Put(filePath, resolvedImage)];
                     case 2:
                         _a.sent();
-                        return [4 /*yield*/, this.store.feedback.create({
-                                data: {
-                                    content: content,
-                                    user_id: user_id,
-                                    image_uri: filePath,
-                                },
-                            })];
-                    case 3:
+                        _a.label = 3;
+                    case 3: return [4 /*yield*/, this.store.feedback.create({
+                            data: {
+                                content: content,
+                                user_id: user_id,
+                                image_uri: filePath,
+                            },
+                        })];
+                    case 4:
                         _a.sent();
                         resolve({
                             responseStatus: {
-                                statusCode: status_codes_1.HerrorStatus.StatusOK,
+                                statusCode: status_codes_1.HerrorStatus.StatusCreated,
                                 message: "feedback_received_successfully",
                             },
                         });
-                        return [3 /*break*/, 5];
-                    case 4:
+                        return [3 /*break*/, 6];
+                    case 5:
                         err_1 = _a.sent();
                         reject(err_1);
-                        return [3 /*break*/, 5];
-                    case 5: return [2 /*return*/];
+                        return [3 /*break*/, 6];
+                    case 6: return [2 /*return*/];
                 }
             });
         }); });
@@ -99,16 +103,16 @@ var MiscManager = /** @class */ (function () {
             skip: offset,
             orderBy: [
                 {
-                    created_at: 'desc',
+                    created_at: "desc",
                 },
-            ]
+            ],
         });
     };
     MiscManager.prototype.GetPollTypes = function (poll_id) {
         return this.store.polls.findUnique({
             where: {
-                poll_id: poll_id
-            }
+                poll_id: poll_id,
+            },
         });
     };
     //TODO: upsert polls reacn ...
@@ -117,11 +121,11 @@ var MiscManager = /** @class */ (function () {
             where: {
                 poll_id_user_id: {
                     poll_id: poll_id,
-                    user_id: user_id
-                }
+                    user_id: user_id,
+                },
             },
             update: {
-                type: type
+                type: type,
             },
             create: {
                 poll_id: poll_id,
