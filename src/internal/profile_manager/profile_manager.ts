@@ -281,7 +281,7 @@ export default class ProfileManager {
       where: {
         username
       },
-      include:{
+      select:{
          user:{
           select:{
              Post:{
@@ -316,7 +316,7 @@ export default class ProfileManager {
       where: {
         username
       },
-      include:{
+      select:{
          user:{
           select:{
              Favourites:{
