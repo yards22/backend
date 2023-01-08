@@ -7,6 +7,7 @@ import { IFileStorage } from "../../pkg/file_storage/file_storage";
 import { ImageResolver } from "../../pkg/image_resolver/image_resolver_";
 import { IKVStore } from "../../pkg/kv_store/kv_store";
 import EPost from "../entities/post";
+import { ReconnectStrategyError } from "redis";
 const prisma = new PrismaClient();
 
 const ALLOWED_IMAGES = 3;
@@ -322,7 +323,7 @@ export default class PostManager {
     });
   }
 
-  async GetPostsById(post_id: number, limit: number, offset: number) {
+  async GetPostsById(post_id: number[], limit: number, offset: number) {
     return this.store.posts.findMany({
       take: limit,
       skip: offset,
@@ -358,15 +359,17 @@ export default class PostManager {
         // recommendation of posts by lcm service..
 
         recommended_posts = await this.GetPostRecommendations(user_id);
+        const r_p = (recommended_posts.post_recommendations).split(",");
+        console.log(r_p);
 
-        recommended_posts = JSON.parse(recommended_posts);
 
-        console.log(recommended_posts);
-
-        while(recommended_posts !== null){
-          const r_p = recommended_posts.split("-");
+        if(recommended_posts !== null){
+          let r_p1: number[]  = []
+          r_p.forEach((id: any)=>{
+             r_p1.push(Number(id));
+          })
           let rec_posts = await this.GetPostsById(
-            r_p,
+            r_p1,
             limit,
             offset
           );
@@ -375,7 +378,6 @@ export default class PostManager {
             posts.push(post);
           });
         }
-
         // posts contains all the posts to be displayed
         resolve(posts);
       } catch (err) {
