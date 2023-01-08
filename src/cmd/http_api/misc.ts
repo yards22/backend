@@ -27,7 +27,7 @@ export const HandlePostFeedback: RouteHandler = async (req, res, next, app) => {
 
 export const HandleGetPolls: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
-  const limit = Number(req.query.limit || 1);
+  const limit = Number(req.query.limit || 10);
   const offset = Number(req.query.offset || 0);
 
   try {
@@ -48,7 +48,7 @@ export const HandlePostPolls: RouteHandler = async (req, res, next, app) => {
   try {
     await app.miscManager.PostPollReaction(poll_id, user_id, type);
     app.SendRes(res, {
-      status: 200,
+      status: 201,
     });
   } catch (err) {
     next(err);

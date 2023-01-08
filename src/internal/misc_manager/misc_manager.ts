@@ -98,18 +98,30 @@ export default class MiscManager {
     });
 
     const res: {
-      poll: EPoll;
+      poll: {
+        poll_id: number;
+        poll_question: string;
+        options: string[];
+      };
       hasPolled: boolean;
       reaction: { type: number; count: number }[];
     }[] = [];
 
     pollData.forEach((item) => {
       const temp: {
-        poll: EPoll;
+        poll: {
+          poll_id: number;
+          poll_question: string;
+          options: string[];
+        };
         hasPolled: boolean;
         reaction: { type: number; count: number }[];
       } = {
-        poll: item,
+        poll: {
+          poll_id: item.poll_id,
+          poll_question: item.poll_question,
+          options: JSON.parse(item.options),
+        },
         hasPolled: false,
         reaction: [],
       };
@@ -125,7 +137,6 @@ export default class MiscManager {
 
       res.push(temp);
     });
-
     return res;
   }
 
