@@ -29,11 +29,15 @@ jobs:
       - run: npx prisma
       - run: npx prisma generate --schema ./src/infra/db/schema.prisma
       - run: npm run build
-      - run: git config user.name "GitHub Actions Bot"
-      - run: git config user.email "<>"
-      - run: git add .
-      - run: git commit -m 'Github Actions Bot Build ${{ github.head_ref }}.${{ github.sha }}' --allow-empty
-      - run: git push origin stage
+      - run: rm -rf node_modules .git
+      - name: SCP and Copy code
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY  }}
+          HOSTNAME: ${{ secrets.HOSTNAME  }}
+          USER_NAME: ${{ secrets.USER_NAME  }}
+        run: |
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          scp -o StrictHostKeyChecking=no -i private_key -r ./* ${USER_NAME}@${HOSTNAME}:/home/ubuntu/backend
       - name: SSH and resolve
         env:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY  }}
