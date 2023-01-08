@@ -1,9 +1,11 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { IFileStorage } from "../../pkg/file_storage/file_storage";
 import { ImageResolver } from "../../pkg/image_resolver/image_resolver_";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 import { HandleGetPolls } from "../../cmd/http_api/misc";
 import { randomUUID } from "crypto";
+import EPoll from "../entities/poll";
+import { Herror } from "../../pkg/herror/herror";
 
 interface IResponse {
   statusCode: number;
@@ -75,61 +77,78 @@ export default class MiscManager {
     });
   }
 
-  GetPolls(limit: number, offset: number) {
-    return this.store.polls.findMany({
+  async GetPolls(user_id: number, limit: number, offset: number) {
+    const pollData = await this.store.polls.findMany({
       take: limit,
       skip: offset,
+      include: {
+        PollsReaction: {
+          select: {
+            user_id: true,
+            type: true,
+            poll_id: true,
+          },
+        },
+      },
       orderBy: [
         {
           created_at: "desc",
         },
       ],
     });
-  }
 
-  GetPollTypes(poll_id: number) {
-    return this.store.polls.findUnique({
-      where: {
-        poll_id,
-      },
+    const res: {
+      poll: EPoll;
+      hasPolled: boolean;
+      reaction: { type: number; count: number }[];
+    }[] = [];
+
+    pollData.forEach((item) => {
+      const temp: {
+        poll: EPoll;
+        hasPolled: boolean;
+        reaction: { type: number; count: number }[];
+      } = {
+        poll: item,
+        hasPolled: false,
+        reaction: [],
+      };
+
+      const reactionMap = new Map<number, number>();
+      item.PollsReaction.forEach((pr) => {
+        if (pr.user_id === user_id) temp.hasPolled = true;
+        reactionMap.set(pr.type, reactionMap.get(pr.type) || 0 + 1);
+      });
+      reactionMap.forEach((v, k) => {
+        temp.reaction.push({ type: k, count: v });
+      });
+
+      res.push(temp);
     });
+
+    return res;
   }
 
-  //TODO: upsert polls reacn ...
-
-  UpsertReactions(poll_id: number, user_id: number, type: number) {
-    return this.store.pollsReaction.upsert({
-      where: {
-        poll_id_user_id: {
+  async PostPollReaction(poll_id: number, user_id: number, type: number) {
+    try {
+      await this.store.pollsReaction.create({
+        data: {
+          type,
           poll_id,
           user_id,
         },
-      },
-      update: {
-        type,
-      },
-      create: {
-        poll_id: poll_id,
-        user_id: user_id,
-        type: type,
-      },
-    });
-  }
-
-  PostPollReactions(poll_id: number, user_id: number, type: number) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const poll = await this.GetPollTypes(poll_id);
-        if ((poll?.options_count as number) <= type && type > 0) {
-          // if type is valid  ...
-          await this.PostPollReactions(poll_id, user_id, type);
-          resolve("reaction_posted_successfully");
-        } else {
-          resolve("type_invalid");
-        }
-      } catch (err) {
-        reject(err);
+      });
+    } catch (err) {
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === "P2002"
+      ) {
+        throw new Herror(
+          "cannot post reaction to this poll again",
+          HerrorStatus.StatusMethodNotAllowed
+        );
       }
-    });
+      throw err;
+    }
   }
 }
