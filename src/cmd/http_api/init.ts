@@ -4,13 +4,8 @@ import { PrismaClient } from "@prisma/client";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 import { Herror } from "../../pkg/herror/herror";
 import cors from "cors";
-<<<<<<< HEAD
-import { RedisClientType,createClient } from "@redis/client";
-import cron from "node-cron";
-=======
 import { RedisClientType } from "@redis/client";
 import { createClient } from "redis";
->>>>>>> 07321f6d1ec2bb1e2fe7612ff718d5d018ab37b6
 import { S3FileStorage } from "../../pkg/file_storage/s3_file_storage";
 
 // server init
