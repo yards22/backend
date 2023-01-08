@@ -25,6 +25,7 @@ export function ServerInit(): Express {
   );
 
   srv.use(express.json());
+  
   srv.use(express.urlencoded({ extended: true }));
   return srv;
 }

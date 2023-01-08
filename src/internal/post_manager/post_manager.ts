@@ -7,6 +7,7 @@ import { IFileStorage } from "../../pkg/file_storage/file_storage";
 import { ImageResolver } from "../../pkg/image_resolver/image_resolver_";
 import { IKVStore } from "../../pkg/kv_store/kv_store";
 import EPost from "../entities/post";
+import { ReconnectStrategyError } from "redis";
 const prisma = new PrismaClient();
 
 const ALLOWED_IMAGES = 3;
@@ -303,8 +304,8 @@ export default class PostManager {
 
   async GetPostsOfUsers(users: any, limit: number, offset: number) {
     return this.store.posts.findMany({
-      take: limit,
-      skip: offset,
+      // take: limit,
+      // skip: offset,
       where: {
         user_id: {
           in: users,
@@ -322,7 +323,7 @@ export default class PostManager {
     });
   }
 
-  async GetPostsById(post_id: number, limit: number, offset: number) {
+  async GetPostsById(post_id: number[], limit: number, offset: number) {
     return this.store.posts.findMany({
       take: limit,
       skip: offset,
@@ -344,40 +345,55 @@ export default class PostManager {
         following_ = await this.GetFollowing(user_id);
 
         // xtraxt id's from following object array..
-
-        const following = following_.forEach((item) => {
-          item.following_id;
-        });
+        let following:any = [];
+        if(following_.length!== 0){
+          following = following_.forEach((item) => {
+            item.following_id;
+          });
+        }
 
         // get posts of these users.
-
+ 
         posts = await this.GetPostsOfUsers(following, limit, offset);
-
         let recommended_posts: any = [];
 
         // recommendation of posts by lcm service..
 
         recommended_posts = await this.GetPostRecommendations(user_id);
 
-        recommended_posts = JSON.parse(recommended_posts);
-
-        console.log(recommended_posts);
-
-        while(recommended_posts !== null){
-          const r_p = recommended_posts.split("-");
+        if(recommended_posts !== null){
+          const r_p = (recommended_posts.post_recommendations).split(",");
+          let r_p1: number[]  = []
+          r_p.forEach((id: any)=>{
+             r_p1.push(Number(id));
+          })
           let rec_posts = await this.GetPostsById(
-            r_p,
+            r_p1,
             limit,
             offset
           );
+
+          let distinct_posts = new Set();
+          
+          recommended_posts.forEach((post:any)=>{
+             distinct_posts.add(post)
+          })
+
+          rec_posts.forEach((post)=>{
+            distinct_posts.add(post)
+          })
+
+          let filtered_posts:any = []
   
-          rec_posts.forEach((post) => {
-            posts.push(post);
+          distinct_posts.forEach((post) => {
+            filtered_posts.push(post);
           });
+          resolve(filtered_posts);
         }
 
-        // posts contains all the posts to be displayed
         resolve(posts);
+        // posts contains all the posts to be displayed
+       
       } catch (err) {
         reject(err);
       }

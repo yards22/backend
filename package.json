@@ -22,6 +22,7 @@
     "dotenv": "^16.0.2",
     "email-validator": "^2.0.4",
     "express": "^4.18.1",
+    "express-form-data": "^2.0.19",
     "google-auth-library": "^8.1.1",
     "helmet": "^5.1.1",
     "http-errors": "^2.0.0",
