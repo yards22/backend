@@ -119,7 +119,7 @@ export default class MiscManager {
       } = {
         poll: {
           poll_id: item.poll_id,
-          poll_question: item.poll_question,
+          poll_question: item.poll_question as string,
           options: JSON.parse(item.options),
         },
         hasPolled: false,
