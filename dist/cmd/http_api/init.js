@@ -39,15 +39,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SinkInit = exports.TimerInit = exports.RemoteFileStorageInit = exports.RedisInit = exports.DBInit = exports.ServerInit = void 0;
+exports.SinkInit = exports.RemoteFileStorageInit = exports.RedisInit = exports.DBInit = exports.ServerInit = void 0;
 var express_1 = __importDefault(require("express"));
 var client_1 = require("@prisma/client");
 var status_codes_1 = require("../../pkg/herror/status_codes");
 var herror_1 = require("../../pkg/herror/herror");
-var config_1 = __importDefault(require("config"));
 var cors_1 = __importDefault(require("cors"));
 var redis_1 = require("redis");
-var node_cron_1 = __importDefault(require("node-cron"));
 var s3_file_storage_1 = require("../../pkg/file_storage/s3_file_storage");
 // server init
 function ServerInit() {
@@ -58,7 +56,7 @@ function ServerInit() {
     });
     srv.enable("trust proxy");
     srv.use((0, cors_1.default)({
-        origin: config_1.default.get("origin"),
+        origin: process.env.REACT_ORIGIN,
         credentials: true,
     }));
     srv.use(express_1.default.json());
@@ -101,7 +99,7 @@ function RedisInit() {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
                     store = (0, redis_1.createClient)({
-                        url: "redis://localhost:6379",
+                        url: process.env.REDIS_URL,
                     });
                     return [4 /*yield*/, store.connect()];
                 case 1:
@@ -120,25 +118,6 @@ function RemoteFileStorageInit() {
     return new s3_file_storage_1.S3FileStorage(process.env.S3_BUCKET, process.env.ACCESS_KEY_ID, process.env.ACCESS_KEY_SECRET, process.env.S3_REGION);
 }
 exports.RemoteFileStorageInit = RemoteFileStorageInit;
-function TimerInit() {
-    return __awaiter(this, void 0, void 0, function () {
-        var cronJob;
-        return __generator(this, function (_a) {
-            try {
-                cronJob = node_cron_1.default.schedule("0 0 0 * * *", function () {
-                    // perform db cleanup periodically.
-                    console.info("cron job in background");
-                });
-                cronJob.start();
-            }
-            catch (err) {
-                throw err;
-            }
-            return [2 /*return*/];
-        });
-    });
-}
-exports.TimerInit = TimerInit;
 // Sink init
 function SinkInit(app) {
     app.srv.use(function (req, res, next) {

@@ -36,37 +36,31 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.HandleGetLeaderBoard = exports.HandleGetCheckUsername = exports.HandleGetUserProfileInfo = exports.HandleGetUserPrimaryInfo = exports.HandleUpdateProfile = void 0;
+exports.HandleGetLeaderBoard = exports.HandleGetCheckUsername = exports.HandleGetUserStaredPosts = exports.HandleGetUserPosts = exports.HandleGetUserProfileInfo = exports.HandleGetUserPrimaryInfo = exports.HandleUpdateProfile = void 0;
 var herror_1 = require("../../pkg/herror/herror");
 var status_codes_1 = require("../../pkg/herror/status_codes");
 var HandleUpdateProfile = function (req, res, next, app) { return __awaiter(void 0, void 0, void 0, function () {
-    var user_id, token, bio, profile_buffer, updated_at, username, interests, _a, responseStatus, profileData;
-    var _b;
-    return __generator(this, function (_c) {
-        switch (_c.label) {
+    var user_id, token, bio, profile_buffer, username, interests, _a, responseStatus, profileData;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
             case 0:
                 user_id = Number(req.context.user_id);
                 token = req.context.token;
                 bio = req.body.bio;
-                profile_buffer = (_b = req.file) === null || _b === void 0 ? void 0 : _b.buffer;
-                updated_at = new Date();
+                profile_buffer = undefined;
+                if (req.file && req.file.buffer)
+                    profile_buffer = req.file.buffer;
                 username = req.body.username;
                 interests = req.body.interests;
-                console.log(user_id, token, bio, updated_at, username, profile_buffer);
-                if (!(username != undefined && user_id != undefined)) return [3 /*break*/, 2];
-                return [4 /*yield*/, app.profileManager.UpdateProfileDetails(user_id, username, updated_at, token, profile_buffer, bio, interests)];
+                return [4 /*yield*/, app.profileManager.UpdateProfileDetails(user_id, username, token, profile_buffer, bio, interests)];
             case 1:
-                _a = _c.sent(), responseStatus = _a.responseStatus, profileData = _a.profileData;
+                _a = _b.sent(), responseStatus = _a.responseStatus, profileData = _a.profileData;
                 app.SendRes(res, {
                     status: responseStatus.statusCode,
                     data: profileData,
                     message: responseStatus.message,
                 });
-                return [3 /*break*/, 3];
-            case 2:
-                next(new herror_1.Herror("BadRequest", status_codes_1.HerrorStatus.StatusBadRequest));
-                _c.label = 3;
-            case 3: return [2 /*return*/];
+                return [2 /*return*/];
         }
     });
 }); };
@@ -96,15 +90,16 @@ var HandleGetUserPrimaryInfo = function (req, res, next, app) { return __awaiter
 }); };
 exports.HandleGetUserPrimaryInfo = HandleGetUserPrimaryInfo;
 var HandleGetUserProfileInfo = function (req, res, next, app) { return __awaiter(void 0, void 0, void 0, function () {
-    var user_id, limit, offset, userProfile;
+    var username, user_id, limit, offset, userProfile, userProfile;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
+                username = req.query.username;
                 user_id = Number(req.context.user_id);
-                console.log(user_id);
                 limit = Number(req.query.limit || 10);
                 offset = Number(req.query.offset || 0);
-                if (!(user_id != undefined)) return [3 /*break*/, 2];
+                if (!(user_id != undefined)) return [3 /*break*/, 5];
+                if (!(username === undefined)) return [3 /*break*/, 2];
                 return [4 /*yield*/, app.profileManager.GetUserProfileById(user_id, offset, limit)];
             case 1:
                 userProfile = _a.sent();
@@ -112,15 +107,86 @@ var HandleGetUserProfileInfo = function (req, res, next, app) { return __awaiter
                     status: status_codes_1.HerrorStatus.StatusOK,
                     data: userProfile,
                 });
-                return [3 /*break*/, 3];
-            case 2:
+                return [3 /*break*/, 4];
+            case 2: return [4 /*yield*/, app.profileManager.GetUserByUsernameBulk(username, offset, limit)];
+            case 3:
+                userProfile = _a.sent();
+                app.SendRes(res, {
+                    status: status_codes_1.HerrorStatus.StatusOK,
+                    data: userProfile,
+                });
+                _a.label = 4;
+            case 4: return [3 /*break*/, 6];
+            case 5:
                 next(new herror_1.Herror("BadRequest", status_codes_1.HerrorStatus.StatusBadRequest));
-                _a.label = 3;
-            case 3: return [2 /*return*/];
+                _a.label = 6;
+            case 6: return [2 /*return*/];
         }
     });
 }); };
 exports.HandleGetUserProfileInfo = HandleGetUserProfileInfo;
+var HandleGetUserPosts = function (req, res, next, app) { return __awaiter(void 0, void 0, void 0, function () {
+    var username, limit, offset, user_id, userProfile_1, userProfile;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                username = req.query.username;
+                console.log(username);
+                limit = Number(req.query.limit || 10);
+                offset = Number(req.query.offset || 0);
+                user_id = req.context.user_id;
+                if (!(username === undefined)) return [3 /*break*/, 2];
+                return [4 /*yield*/, app.profileManager.GetUserPostsById(user_id, offset, limit)];
+            case 1:
+                userProfile_1 = _a.sent();
+                console.log(userProfile_1);
+                return [2 /*return*/, app.SendRes(res, {
+                        status: status_codes_1.HerrorStatus.StatusOK,
+                        data: userProfile_1,
+                    })];
+            case 2: return [4 /*yield*/, app.profileManager.GetUserPostsByUsername(username, offset, limit)];
+            case 3:
+                userProfile = _a.sent();
+                app.SendRes(res, {
+                    status: status_codes_1.HerrorStatus.StatusOK,
+                    data: userProfile,
+                });
+                return [2 /*return*/];
+        }
+    });
+}); };
+exports.HandleGetUserPosts = HandleGetUserPosts;
+var HandleGetUserStaredPosts = function (req, res, next, app) { return __awaiter(void 0, void 0, void 0, function () {
+    var username, limit, offset, user_id, userProfile_2, userProfile;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                username = req.query.username;
+                limit = Number(req.query.limit || 10);
+                offset = Number(req.query.offset || 0);
+                user_id = req.context.user_id;
+                if (!(username === undefined)) return [3 /*break*/, 2];
+                return [4 /*yield*/, app.profileManager.GetStaredPostsById(user_id, offset, limit)];
+            case 1:
+                userProfile_2 = _a.sent();
+                console.log(userProfile_2);
+                app.SendRes(res, {
+                    status: status_codes_1.HerrorStatus.StatusOK,
+                    data: userProfile_2,
+                });
+                return [2 /*return*/];
+            case 2: return [4 /*yield*/, app.profileManager.GetStaredPostsByUsername(username, offset, limit)];
+            case 3:
+                userProfile = _a.sent();
+                app.SendRes(res, {
+                    status: status_codes_1.HerrorStatus.StatusOK,
+                    data: userProfile,
+                });
+                return [2 /*return*/];
+        }
+    });
+}); };
+exports.HandleGetUserStaredPosts = HandleGetUserStaredPosts;
 var HandleGetCheckUsername = function (req, res, next, app) { return __awaiter(void 0, void 0, void 0, function () {
     var username, responseStatus, err_1;
     return __generator(this, function (_a) {

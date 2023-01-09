@@ -1,18 +1,15 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var config_1 = __importDefault(require("config"));
 var OAuth2Client = require("google-auth-library").OAuth2Client;
+var GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 // this function checks the integrity of the googleIdToken and outputs the user data
 function verifyGoogleIdTokenAndGetUserData(googleIdToken) {
     return new Promise(function (resolve, reject) {
-        var client = new OAuth2Client(config_1.default.get("googleClientId"));
+        var client = new OAuth2Client(GOOGLE_CLIENT_ID);
         return client
             .verifyIdToken({
             idToken: googleIdToken,
-            audience: config_1.default.get("googleClientId"),
+            audience: GOOGLE_CLIENT_ID,
         })
             .then(function (ticket) {
             // the integrity of the google id token has been confirmed and obtained data in payload

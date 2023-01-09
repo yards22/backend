@@ -52,6 +52,58 @@ var ProfileManager = /** @class */ (function () {
             },
         });
     };
+    ProfileManager.prototype.GetUserByUsernameBulk = function (username, offset, limit) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.store.profile.findUnique({
+                            where: {
+                                username: username,
+                            },
+                            include: {
+                                user: {
+                                    select: {
+                                        Post: {
+                                            take: limit,
+                                            skip: offset,
+                                            include: {
+                                                _count: {
+                                                    select: {
+                                                        Likes: true,
+                                                        ParentComments: true,
+                                                    },
+                                                },
+                                            },
+                                        },
+                                        Favourites: {
+                                            take: limit,
+                                            skip: offset,
+                                            include: {
+                                                user: {
+                                                    select: {
+                                                        Post: {
+                                                            include: {
+                                                                _count: {
+                                                                    select: {
+                                                                        Likes: true,
+                                                                        ParentComments: true,
+                                                                    },
+                                                                },
+                                                            },
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        })];
+                    case 1: return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
+    };
     ProfileManager.prototype.GetUserPrimaryInfoById = function (user_id) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -127,44 +179,46 @@ var ProfileManager = /** @class */ (function () {
             },
         });
     };
-    ProfileManager.prototype.UpdateProfile = function (user_id, username, updated_at, profile_image_uri, bio, interests) {
-        return this.store.profile.update({
-            where: {
-                user_id: user_id,
-            },
-            data: {
-                username: username,
-                profile_image_uri: profile_image_uri,
-                bio: bio,
-                updated_at: updated_at,
-                interests: interests,
-            },
-        });
-    };
-    ProfileManager.prototype.UpdateProfileDetails = function (user_id, username, updated_at, token, rawImage, bio, interests) {
+    ProfileManager.prototype.UpdateProfileDetails = function (user_id, username, token, rawImage, bio, interests) {
         var _this = this;
         return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-            var format, filePath, resolvedImage, UpdatedProfile, UpdatedProfileDetails, err_1;
+            var format, filePath, resolvedImage, updatedProfile, UpdatedProfileDetails, err_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        _a.trys.push([0, 5, , 6]);
+                        _a.trys.push([0, 6, , 7]);
                         format = "jpg";
-                        filePath = username + "_dp." + format;
+                        filePath = undefined;
+                        if (rawImage == undefined)
+                            console.log("no image");
+                        if (!(rawImage !== undefined)) return [3 /*break*/, 3];
+                        filePath = user_id + "_dp." + format;
                         return [4 /*yield*/, this.imageResolver.Convert(rawImage, { h: 320, w: 512 }, format)];
                     case 1:
                         resolvedImage = _a.sent();
+                        console.log(filePath);
                         return [4 /*yield*/, this.imageStorage.Put(filePath, resolvedImage)];
                     case 2:
                         _a.sent();
-                        return [4 /*yield*/, this.UpdateProfile(user_id, username, updated_at, filePath, bio, interests)];
-                    case 3:
-                        UpdatedProfile = _a.sent();
-                        UpdatedProfileDetails = JSON.stringify(UpdatedProfile);
+                        _a.label = 3;
+                    case 3: return [4 /*yield*/, this.store.profile.update({
+                            where: {
+                                user_id: user_id,
+                            },
+                            data: {
+                                username: username === "" ? undefined : username,
+                                profile_image_uri: filePath,
+                                bio: bio,
+                                interests: interests,
+                            },
+                        })];
+                    case 4:
+                        updatedProfile = _a.sent();
+                        UpdatedProfileDetails = JSON.stringify(updatedProfile);
                         // also change the profile details in redis for this particular token .
                         // but there a raises a problem with expiry TTL.
                         return [4 /*yield*/, this.cache.Set(token, UpdatedProfileDetails, SEC_IN_YEAR)];
-                    case 4:
+                    case 5:
                         // also change the profile details in redis for this particular token .
                         // but there a raises a problem with expiry TTL.
                         _a.sent();
@@ -173,14 +227,14 @@ var ProfileManager = /** @class */ (function () {
                                 statusCode: status_codes_1.HerrorStatus.StatusOK,
                                 message: "successful_Updation",
                             },
-                            profileData: UpdatedProfile,
+                            profileData: updatedProfile,
                         });
-                        return [3 /*break*/, 6];
-                    case 5:
+                        return [3 /*break*/, 7];
+                    case 6:
                         err_1 = _a.sent();
                         reject(err_1);
-                        return [3 /*break*/, 6];
-                    case 6: return [2 /*return*/];
+                        return [3 /*break*/, 7];
+                    case 7: return [2 /*return*/];
                 }
             });
         }); });
@@ -228,7 +282,7 @@ var ProfileManager = /** @class */ (function () {
                             resolve({
                                 responseStatus: {
                                     statusCode: status_codes_1.HerrorStatus.StatusOK,
-                                    message: "username_exists",
+                                    message: "u_can_pick_this",
                                 },
                             });
                         }
@@ -250,61 +304,72 @@ var ProfileManager = /** @class */ (function () {
             });
         }); });
     };
-    ProfileManager.prototype.GetMyPosts = function (user_id, limit, offset) {
-        var _this = this;
-        new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-            var posts, err_4;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, this.store.posts.findMany({
-                                take: limit,
-                                skip: offset,
-                                where: {
-                                    user_id: user_id,
-                                },
-                            })];
-                    case 1:
-                        posts = _a.sent();
-                        resolve(posts);
-                        return [3 /*break*/, 3];
-                    case 2:
-                        err_4 = _a.sent();
-                        reject(err_4);
-                        return [3 /*break*/, 3];
-                    case 3: return [2 /*return*/];
-                }
-            });
-        }); });
+    ProfileManager.prototype.GetUserPostsById = function (user_id, limit, offset) {
+        return this.store.posts.findMany({
+            where: {
+                user_id: user_id
+            },
+            include: { _count: { select: { Likes: true } } },
+        });
     };
-    ProfileManager.prototype.GetBookmarkedPosts = function (user_id, limit, offset) {
-        var _this = this;
-        new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-            var posts, err_5;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, this.store.posts.findMany({
-                                take: limit,
-                                skip: offset,
-                                where: {
-                                    user_id: user_id,
-                                },
-                            })];
-                    case 1:
-                        posts = _a.sent();
-                        resolve(posts);
-                        return [3 /*break*/, 3];
-                    case 2:
-                        err_5 = _a.sent();
-                        reject(err_5);
-                        return [3 /*break*/, 3];
-                    case 3: return [2 /*return*/];
+    ProfileManager.prototype.GetUserPostsByUsername = function (username, limit, offset) {
+        return this.store.profile.findUnique({
+            where: {
+                username: username
+            },
+            include: {
+                user: {
+                    select: {
+                        Post: {
+                            include: {
+                                _count: {
+                                    select: {
+                                        Likes: true,
+                                        ParentComments: true
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
-            });
-        }); });
+            }
+        });
+    };
+    ProfileManager.prototype.GetStaredPostsById = function (user_id, limit, offset) {
+        return this.store.posts.findMany({
+            take: limit,
+            skip: offset,
+            where: {
+                user_id: user_id,
+            },
+        });
+    };
+    ProfileManager.prototype.GetStaredPostsByUsername = function (username, limit, offset) {
+        return this.store.profile.findUnique({
+            where: {
+                username: username
+            },
+            include: {
+                user: {
+                    select: {
+                        Favourites: {
+                            include: {
+                                post: {
+                                    include: {
+                                        _count: {
+                                            select: {
+                                                Likes: true,
+                                                ParentComments: true
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
     };
     return ProfileManager;
 }());
