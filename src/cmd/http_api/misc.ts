@@ -54,3 +54,24 @@ export const HandlePostPolls: RouteHandler = async (req, res, next, app) => {
     next(err);
   }
 };
+
+export const HandleGetLeaderBoard: RouteHandler = async (
+  req,
+  res,
+  next,
+  app
+) => {
+  const limit = Number(req.query.limit || 10);
+  const offset = Number(req.query.offset || 0);
+  try {
+    const { responseStatus, leaderBoard } =
+      await app.profileManager.GetCommunityLeaderBoard(limit, offset);
+    app.SendRes(res, {
+      status: responseStatus.statusCode,
+      message: responseStatus.message,
+      data: leaderBoard,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
