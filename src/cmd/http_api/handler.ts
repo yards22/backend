@@ -41,6 +41,7 @@ import {
   HandleCreatePost,
   HandleDeletePost,
   HandleGetPosts,
+  HandlePostsMetaData,
   HandleShareToTimeline,
   HandleUpdatePost,
 } from "./post";
@@ -186,6 +187,11 @@ function CommentRoutes(app: App): Router {
 
 function PostRoutes(app: App): Router {
   const router = Router();
+  router.get(
+    "/postMeta",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandlePostsMetaData)
+  );
 
   router.post(
     "/",
