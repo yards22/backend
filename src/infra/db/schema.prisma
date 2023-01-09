@@ -33,6 +33,7 @@ model Users {
   PollsReaction       PollsReaction[]
   TrendingUsers       TrendingUsers[]
   Stories             Stories[]
+
   @@map("users")
 }
 
@@ -64,12 +65,12 @@ model Profile {
 }
 
 model Networks {
-  id           BigInt @id @default(autoincrement()) @db.BigInt
-  follower     Users  @relation("followers", fields: [follower_id], references: [user_id])
+  id           BigInt   @id @default(autoincrement()) @db.BigInt
+  follower     Users    @relation("followers", fields: [follower_id], references: [user_id])
   follower_id  Int
-  following    Users  @relation("following", fields: [following_id], references: [user_id])
+  following    Users    @relation("following", fields: [following_id], references: [user_id])
   following_id Int
-  created_at DateTime @default(now())
+  created_at   DateTime @default(now())
 
   @@unique([follower_id, following_id])
   @@map("networks")
@@ -89,7 +90,7 @@ model Token {
 
 model Posts {
   user           Users            @relation(fields: [user_id], references: [user_id])
-  user_id        Int            
+  user_id        Int
   post_id        BigInt           @id @default(autoincrement()) @db.BigInt
   content        String?
   media          String?
@@ -104,7 +105,6 @@ model Posts {
   ParentComments ParentComments[]
   Favourites     Favourites[]
   TrendingPosts  TrendingPosts[]
-  
 
   @@unique([user_id, post_id])
   @@map("posts")
@@ -171,20 +171,20 @@ model PostRecommendations {
   @@map("postRecommendations")
 }
 
-model TrendingUsers{
-    tu_id   BigInt @id @default(autoincrement()) @db.BigInt
-    user      Users  @relation(fields: [user_id], references: [user_id])
-    user_id   Int    
+model TrendingUsers {
+  tu_id   BigInt @id @default(autoincrement()) @db.BigInt
+  user    Users  @relation(fields: [user_id], references: [user_id])
+  user_id Int
 
-    @@map("trending_users")
+  @@map("trending_users")
 }
 
-model TrendingPosts{
-    tp_id   BigInt @id @default(autoincrement()) @db.BigInt
-    post      Posts  @relation(fields: [post_id], references: [post_id])
-    post_id   BigInt  
+model TrendingPosts {
+  tp_id   BigInt @id @default(autoincrement()) @db.BigInt
+  post    Posts  @relation(fields: [post_id], references: [post_id])
+  post_id BigInt
 
-    @@map("trending_posts")  
+  @@map("trending_posts")
 }
 
 model UserRecommendations {
@@ -196,59 +196,57 @@ model UserRecommendations {
 }
 
 model Feedback {
-  feedback_id   BigInt            @id @default(autoincrement()) @db.BigInt
-  user           Users            @relation(fields: [user_id], references: [user_id])
-  user_id        Int              
-  image_uri    String?  
-  content      String?
+  feedback_id BigInt  @id @default(autoincrement()) @db.BigInt
+  user        Users   @relation(fields: [user_id], references: [user_id])
+  user_id     Int
+  image_uri   String?
+  content     String?
 
   @@map("feedback")
 }
 
 model Polls {
-  poll_id   Int        @id @default(autoincrement()) @db.Int
-  poll_by   String     @default("Admin")
-  poll_question String?
+  poll_id       Int      @id @default(autoincrement()) @db.Int
+  poll_by       String   @default("Admin")
+  poll_question String
   options_count Int
   options       String
+  created_at    DateTime @default(now())
+
+  PollsReaction PollsReaction[]
+
+  @@map("polls")
+}
+
+model PollsReaction {
+  poll    Polls @relation(fields: [poll_id], references: [poll_id])
+  poll_id Int
+  user    Users @relation(fields: [user_id], references: [user_id])
+  user_id Int
+  type    Int
+
+  @@unique([poll_id, user_id])
+  @@map("polls_reaction")
+}
+
+model Stories {
+  story_id   Int      @id @default(autoincrement()) @db.Int
+  user       Users    @relation(fields: [user_id], references: [user_id])
+  user_id    Int
+  content    String
+  media      String
   created_at DateTime @default(now())
 
-  PollsReaction  PollsReaction[]
-
-  @@map("polls") 
+  @@map("stories")
 }
 
-model PollsReaction{
-   poll      Polls    @relation(fields: [poll_id], references: [poll_id])
-   poll_id   Int
-   user           Users            @relation(fields: [user_id], references: [user_id])
-   user_id        Int    
-   type      Int
+model AdminUsers {
+  mail_id String
+  open_to String
 
-
-   @@unique([poll_id,user_id])
-   @@map("polls_reaction")
+  @@unique([mail_id, open_to])
+  @@map("admin_users")
 }
-
-model Stories{
-  story_id Int   @id @default(autoincrement()) @db.Int
-  user           Users            @relation(fields: [user_id], references: [user_id])
-  user_id        Int    
-  content  String 
-  media String
-  created_at DateTime @default(now())
-
-  @@map("stories")    
-}
-
-model AdminUsers{
-   mail_id String 
-   open_to String 
-
-  @@unique([mail_id,open_to])
-   @@map("admin_users")
-}
-
 
 enum NotificationStatus {
   Unseen
