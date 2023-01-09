@@ -25,7 +25,6 @@ import {
   HandleGetCheckUsername,
   HandleGetUserPosts,
   HandleGetUserStaredPosts,
-  HandleGetLeaderBoard,
 } from "./profile";
 import { CheckAllowance } from "./middlewares";
 import { HandleGetLikesForPost, HandleLikeAndUnlike } from "./like";
@@ -44,7 +43,12 @@ import {
   HandleShareToTimeline,
   HandleUpdatePost,
 } from "./post";
-import { HandleGetPolls, HandlePostPolls, HandlePostFeedback } from "./misc";
+import {
+  HandleGetPolls,
+  HandlePostPolls,
+  HandlePostFeedback,
+  HandleGetLeaderBoard,
+} from "./misc";
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
