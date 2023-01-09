@@ -1,3 +1,4 @@
+require("dotenv").config();
 import express, { Express } from "express";
 import { App } from "./types";
 import { PrismaClient } from "@prisma/client";
@@ -24,6 +25,7 @@ export function ServerInit(): Express {
   );
 
   srv.use(express.json());
+  
   srv.use(express.urlencoded({ extended: true }));
   return srv;
 }

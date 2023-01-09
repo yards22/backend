@@ -40,10 +40,16 @@ import {
   HandleCreatePost,
   HandleDeletePost,
   HandleGetPosts,
+  HandlePostsMetaData,
   HandleShareToTimeline,
   HandleUpdatePost,
 } from "./post";
-import { HandleGetPolls, HandlePostPolls, HandlePostFeedback } from "./misc";
+import {
+  HandleGetPolls,
+  HandlePostPolls,
+  HandlePostFeedback,
+  HandleGetLeaderBoard,
+} from "./misc";
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -185,6 +191,11 @@ function CommentRoutes(app: App): Router {
 
 function PostRoutes(app: App): Router {
   const router = Router();
+  router.get(
+    "/postMeta",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandlePostsMetaData)
+  );
 
   router.post(
     "/",
@@ -301,6 +312,11 @@ function MiscRoutes(app: App): Router {
     "/poll",
     app.InHandler(CheckAllowance),
     app.InHandler(HandleGetPolls)
+  );
+  router.get(
+    "/leaderboard",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleGetLeaderBoard)
   );
   return router;
 }
