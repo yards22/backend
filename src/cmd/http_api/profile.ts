@@ -192,8 +192,8 @@ export const HandleGetLeaderBoard: RouteHandler = async (
   next,
   app
 ) => {
-  const limit = Number(req.query.limit ?? 10);
-  const offset = Number(req.query.offset ?? 0);
+  const limit = Number(req.query.limit || 10);
+  const offset = Number(req.query.offset || 0);
   try {
     const { responseStatus, leaderBoard } =
       await app.profileManager.GetCommunityLeaderBoard(limit, offset);

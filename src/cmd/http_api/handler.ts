@@ -25,6 +25,7 @@ import {
   HandleGetCheckUsername,
   HandleGetUserPosts,
   HandleGetUserStaredPosts,
+  HandleGetLeaderBoard,
 } from "./profile";
 import { CheckAllowance } from "./middlewares";
 import { HandleGetLikesForPost, HandleLikeAndUnlike } from "./like";
@@ -301,6 +302,11 @@ function MiscRoutes(app: App): Router {
     "/poll",
     app.InHandler(CheckAllowance),
     app.InHandler(HandleGetPolls)
+  );
+  router.get(
+    "/leaderboard",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleGetLeaderBoard)
   );
   return router;
 }

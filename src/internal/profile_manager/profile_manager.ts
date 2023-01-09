@@ -152,6 +152,10 @@ export default class ProfileManager {
       orderBy: {
         cric_index: "desc",
       },
+      select:{
+        username:true,
+        cric_index:true
+      }
     });
   }
 
@@ -225,7 +229,7 @@ export default class ProfileManager {
   }> {
     return new Promise(async (resolve, reject) => {
       try {
-        const leaderBoard = await this.GetCommunityLeaderBoard(limit, offset);
+        const leaderBoard = await this.GetLeaderBoard(limit, offset);
         resolve({
           responseStatus: {
             statusCode: HerrorStatus.StatusOK,
