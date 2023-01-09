@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { randomUUID } from "crypto";
 import { IFileStorage } from "../../pkg/file_storage/file_storage";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 import { ImageResolver } from "../../pkg/image_resolver/image_resolver_";
@@ -38,42 +39,41 @@ export default class ProfileManager {
   }
 
   async GetUserByUsernameBulk(
-    username: string, 
-    offset:number,
-    limit:number
-    ) : Promise<EProfile|null>{
-      return await this.store.profile.findUnique({
-        where: {
-          username: username,
-        },
-        include: {
-          user: {
-            select: {
-              Post: {
-                take: limit,
-                skip: offset,
-                include: {
-                  _count: {
-                    select: {
-                      Likes: true,
-                      ParentComments: true,
-                    },
+    username: string,
+    offset: number,
+    limit: number
+  ): Promise<EProfile | null> {
+    return await this.store.profile.findUnique({
+      where: {
+        username: username,
+      },
+      include: {
+        user: {
+          select: {
+            Post: {
+              take: limit,
+              skip: offset,
+              include: {
+                _count: {
+                  select: {
+                    Likes: true,
+                    ParentComments: true,
                   },
                 },
               },
-              Favourites: {
-                take: limit,
-                skip: offset,
-                include: {
-                  user: {
-                    select: {
-                      Post: {
-                        include: {
-                          _count: {
-                            select: {
-                              Likes: true,
-                              ParentComments: true,
-                            },
+            },
+            Favourites: {
+              take: limit,
+              skip: offset,
+              include: {
+                user: {
+                  select: {
+                    Post: {
+                      include: {
+                        _count: {
+                          select: {
+                            Likes: true,
+                            ParentComments: true,
                           },
                         },
                       },
@@ -84,8 +84,9 @@ export default class ProfileManager {
             },
           },
         },
-      });
-    }
+      },
+    });
+  }
 
   async GetUserPrimaryInfoById(user_id: number): Promise<EProfile | null> {
     return await this.store.profile.findUnique({
@@ -152,19 +153,19 @@ export default class ProfileManager {
       orderBy: {
         cric_index: "desc",
       },
-      select:{
-        username:true,
-        cric_index:true
-      }
+      select: {
+        username: true,
+        cric_index: true,
+      },
     });
   }
 
   UpdateProfileDetails(
     user_id: number,
-    username: string,
     token: string,
     rawImage?: Buffer,
     bio?: string,
+    username?: string,
     interests?: string
   ): Promise<{
     responseStatus: IResponse;
@@ -179,7 +180,7 @@ export default class ProfileManager {
 
         // only if image is there
         if (rawImage !== undefined) {
-          filePath = user_id + "_dp." + format;
+          filePath = `${user_id}_dp_${randomUUID()}.${format}`;
           let resolvedImage = await this.imageResolver.Convert(
             rawImage,
             { h: 320, w: 512 },
@@ -195,7 +196,7 @@ export default class ProfileManager {
             user_id: user_id,
           },
           data: {
-            username: username === "" ? undefined : username,
+            username: username,
             profile_image_uri: filePath,
             bio: bio,
             interests,
@@ -271,37 +272,36 @@ export default class ProfileManager {
     });
   }
 
-   GetUserPostsById(user_id: number, limit: number, offset: number) {
+  GetUserPostsById(user_id: number, limit: number, offset: number) {
     return this.store.posts.findMany({
-       where:{
-        user_id
-       },
-       include: { _count: { select: { Likes: true } } },
+      where: {
+        user_id,
+      },
+      include: { _count: { select: { Likes: true } } },
     });
   }
 
-   GetUserPostsByUsername(username:string,limit:number,offset:number){
+  GetUserPostsByUsername(username: string, limit: number, offset: number) {
     return this.store.profile.findUnique({
       where: {
-        username
+        username,
       },
-      select:{
-         user:{
-          select:{
-             Post:{
-              include:{
-                _count:{
-                  select:{
-                    Likes:true,
-                    ParentComments:true
-                  }
-                }
-              }
-             }
-          }
-         }
-      }
-    
+      select: {
+        user: {
+          select: {
+            Post: {
+              include: {
+                _count: {
+                  select: {
+                    Likes: true,
+                    ParentComments: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
   }
 
@@ -315,32 +315,31 @@ export default class ProfileManager {
     });
   }
 
-  GetStaredPostsByUsername(username:string,limit:number,offset:number){
+  GetStaredPostsByUsername(username: string, limit: number, offset: number) {
     return this.store.profile.findUnique({
       where: {
-        username
+        username,
       },
-      select:{
-         user:{
-          select:{
-             Favourites:{
-              include:{
-                post:{
-                   include:{
-                    _count:{
-                      select:{
-                        Likes:true,
-                        ParentComments:true
-                      }
-                    } 
-                   } 
-                }
-              }
-             }
-          }
-         }
-      }
+      select: {
+        user: {
+          select: {
+            Favourites: {
+              include: {
+                post: {
+                  include: {
+                    _count: {
+                      select: {
+                        Likes: true,
+                        ParentComments: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
   }
-  
 }

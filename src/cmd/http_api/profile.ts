@@ -2,7 +2,12 @@ import { Herror } from "../../pkg/herror/herror";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 import RouteHandler from "./types";
 
-export const HandleUpdateProfile: RouteHandler = async (req,res,next,app) => {
+export const HandleUpdateProfile: RouteHandler = async (
+  req,
+  res,
+  next,
+  app
+) => {
   const user_id: number = Number(req.context.user_id);
   const token: string = req.context.token;
   const bio: string = req.body.bio as string;
@@ -15,10 +20,10 @@ export const HandleUpdateProfile: RouteHandler = async (req,res,next,app) => {
   const { responseStatus, profileData } =
     await app.profileManager.UpdateProfileDetails(
       user_id,
-      username,
       token,
       profile_buffer,
       bio,
+      username,
       interests
     );
   app.SendRes(res, {
@@ -55,13 +60,13 @@ export const HandleGetUserProfileInfo: RouteHandler = async (
   next,
   app
 ) => {
-  var username :string 
-  username = req.query.username as string 
+  var username: string;
+  username = req.query.username as string;
   const user_id = Number(req.context.user_id);
   const limit = Number(req.query.limit || 10);
   const offset = Number(req.query.offset || 0);
   if (user_id != undefined) {
-    if(username === undefined){
+    if (username === undefined) {
       const userProfile = await app.profileManager.GetUserProfileById(
         user_id,
         offset,
@@ -71,96 +76,95 @@ export const HandleGetUserProfileInfo: RouteHandler = async (
         status: HerrorStatus.StatusOK,
         data: userProfile,
       });
-    }
-    else{
+    } else {
       const userProfile = await app.profileManager.GetUserByUsernameBulk(
         username,
         offset,
         limit
-        );
+      );
       app.SendRes(res, {
         status: HerrorStatus.StatusOK,
         data: userProfile,
       });
     }
-
   } else {
     next(new Herror("BadRequest", HerrorStatus.StatusBadRequest));
   }
 };
 
-export const HandleGetUserPosts:RouteHandler =async (req,res,next,app)=>{
-  var username :string 
-  username = req.query.username as string ;
+export const HandleGetUserPosts: RouteHandler = async (req, res, next, app) => {
+  var username: string;
+  username = req.query.username as string;
   console.log(username);
   const limit = Number(req.query.limit || 10);
   const offset = Number(req.query.offset || 0);
   const user_id = req.context.user_id;
   if (user_id != undefined) {
-    if(username === undefined){
+    if (username === undefined) {
       const userProfile = await app.profileManager.GetUserPostsById(
         user_id,
         offset,
         limit
       );
-      console.log(userProfile)
+      console.log(userProfile);
       app.SendRes(res, {
         status: HerrorStatus.StatusOK,
         data: userProfile,
       });
-    }
-    else{
+    } else {
       const userProfile = await app.profileManager.GetUserPostsByUsername(
         username,
         offset,
         limit
-        );
+      );
       app.SendRes(res, {
         status: HerrorStatus.StatusOK,
         data: userProfile?.user.Post,
       });
     }
-
   } else {
     next(new Herror("BadRequest", HerrorStatus.StatusBadRequest));
   }
-}
+};
 
-export const HandleGetUserStaredPosts:RouteHandler =async (req,res,next,app)=>{
-  var username :string 
-  username = req.query.username as string ;
+export const HandleGetUserStaredPosts: RouteHandler = async (
+  req,
+  res,
+  next,
+  app
+) => {
+  var username: string;
+  username = req.query.username as string;
   const limit = Number(req.query.limit || 10);
   const offset = Number(req.query.offset || 0);
   const user_id = req.context.user_id;
   if (user_id != undefined) {
-    if(username === undefined){
+    if (username === undefined) {
       const userProfile = await app.profileManager.GetStaredPostsById(
         user_id,
         offset,
         limit
       );
-      console.log(userProfile)
+      console.log(userProfile);
       app.SendRes(res, {
         status: HerrorStatus.StatusOK,
         data: userProfile,
       });
-    }
-    else{
+    } else {
       const userProfile = await app.profileManager.GetStaredPostsByUsername(
         username,
         offset,
         limit
-        );
+      );
       app.SendRes(res, {
         status: HerrorStatus.StatusOK,
         data: userProfile?.user.Favourites,
       });
     }
-
   } else {
     next(new Herror("BadRequest", HerrorStatus.StatusBadRequest));
   }
-}
+};
 
 export const HandleGetCheckUsername: RouteHandler = async (
   req,
@@ -183,26 +187,5 @@ export const HandleGetCheckUsername: RouteHandler = async (
     }
   } else {
     next(new Herror("BadRequest", HerrorStatus.StatusBadRequest));
-  }
-};
-
-export const HandleGetLeaderBoard: RouteHandler = async (
-  req,
-  res,
-  next,
-  app
-) => {
-  const limit = Number(req.query.limit || 10);
-  const offset = Number(req.query.offset || 0);
-  try {
-    const { responseStatus, leaderBoard } =
-      await app.profileManager.GetCommunityLeaderBoard(limit, offset);
-    app.SendRes(res, {
-      status: responseStatus.statusCode,
-      message: responseStatus.message,
-      data: leaderBoard,
-    });
-  } catch (err) {
-    next(err);
   }
 };
