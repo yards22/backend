@@ -286,6 +286,8 @@ export default class ProfileManager {
         username
       },
       select:{
+        username:true,
+        profile_image_uri:true,
          user:{
           select:{
              Post:{
@@ -297,6 +299,7 @@ export default class ProfileManager {
                   }
                 }
               }
+              
              }
           }
          }
