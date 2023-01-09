@@ -8,6 +8,7 @@ import { ImageResolver } from "../../pkg/image_resolver/image_resolver_";
 import { IKVStore } from "../../pkg/kv_store/kv_store";
 import EPost from "../entities/post";
 import { ReconnectStrategyError } from "redis";
+import { HerrorStatus } from "../../pkg/herror/status_codes";
 const prisma = new PrismaClient();
 
 const ALLOWED_IMAGES = 3;
@@ -15,6 +16,40 @@ const MAX_WIDTH = 1080;
 
 interface IFollower {
   following_id: number;
+}
+interface IResponse {
+  statusCode: number;
+  message?: string;
+}
+interface ILikedData {
+  postId :number;
+  likeStatus :bool;   
+}
+interface IFavouriteData{
+  postId : number;
+  favouriteStatus:bool;
+}
+interface IFavouritesData {
+  postId :number;
+  likeStatus :bool;   
+}
+
+interface ILikedUsers{
+  postId : number;
+  username :string
+}
+
+interface IFeedDetails{
+    user_id : number;
+    post_id : bigint;
+    content : string|null;
+    media : string|null;
+    original_id : bigint|null;
+    username : string;
+    profile_pic_ref:string;
+    likes :number;
+    created_at :Date;
+    updated_at:Date;
 }
 
 export default class PostManager {
@@ -311,7 +346,20 @@ export default class PostManager {
           in: users,
         },
       },
-      include: { _count: { select: { Likes: true } } },
+      include: {
+          user:{
+            select:{
+              mail_id:true,
+              Profile:{
+                select:{
+                  username:true,
+                  profile_image_uri:true,
+                }
+              }
+            }
+          },
+         _count: { select: { Likes: true } }
+         },
     });
   }
 
@@ -332,7 +380,20 @@ export default class PostManager {
           in: post_id,
         },
       },
-      include: { _count: { select: { Likes: true } } },
+      include:{
+        user:{
+          select:{
+            mail_id:true,
+            Profile:{
+               select:{
+                username:true,
+                profile_image_uri:true
+               }
+            }
+          }
+        },
+        _count: { select: { Likes: true } },
+      },
     });
   }
 
@@ -346,9 +407,9 @@ export default class PostManager {
 
         // xtraxt id's from following object array..
         let following:any = [];
-        if(following_.length!== 0){
-          following = following_.forEach((item) => {
-            item.following_id;
+        if(following_.length !== 0){
+          following_.forEach((item) => {
+            following.push(item.following_id);
           });
         }
 
@@ -358,9 +419,8 @@ export default class PostManager {
         let recommended_posts: any = [];
 
         // recommendation of posts by lcm service..
-
         recommended_posts = await this.GetPostRecommendations(user_id);
-
+        console.log(recommended_posts)
         if(recommended_posts !== null){
           const r_p = (recommended_posts.post_recommendations).split(",");
           let r_p1: number[]  = []
@@ -375,7 +435,7 @@ export default class PostManager {
 
           let distinct_posts = new Set();
           
-          recommended_posts.forEach((post:any)=>{
+          posts.forEach((post:any)=>{
              distinct_posts.add(post)
           })
 
@@ -388,10 +448,11 @@ export default class PostManager {
           distinct_posts.forEach((post) => {
             filtered_posts.push(post);
           });
-          resolve(filtered_posts);
+          const posts_ : IFeedDetails[]= this.formatFeedResponse(filtered_posts)
+          resolve(posts_);
         }
-
-        resolve(posts);
+        const posts_ : IFeedDetails[]= this.formatFeedResponse(posts)
+        resolve(posts_);
         // posts contains all the posts to be displayed
        
       } catch (err) {
@@ -399,4 +460,145 @@ export default class PostManager {
       }
     });
   }
+
+  formatFeedResponse(allPosts:any):IFeedDetails[]{
+    let posts_:IFeedDetails[] = [];
+    allPosts.forEach((post: any)=>{
+       let feed:IFeedDetails = {
+        user_id:post.user_id,
+        post_id:post.post_id,
+        content:post.content,
+        media:post.content,
+        original_id:post.original_id,
+        created_at:post.created_at,
+        updated_at:post.updated_at,
+        likes:post._count.Likes,
+        username:post.user.Profile.username,
+        profile_pic_ref:post.user.Profile.profile_image_uri
+       }  
+       posts_.push(feed);
+    })
+    return posts_
+  }
+
+   isLiked(post_ids:any, user_id:number){
+    return this.store.likes.findMany({
+      where:{
+        AND:[
+          {user_id},
+          {post_id:{
+            in:post_ids
+          }}
+        ]
+      },
+      select:{
+         post_id:true,
+      }
+    }
+    );
+  }
+
+  isFavourite(post_ids:any, user_id:number){
+    return this.store.favourites.findMany({
+      where:{
+        AND:[
+          {user_id},
+          {post_id:{
+            in:post_ids
+          }}
+        ]
+      },
+      select:{
+         post_id:true,
+      }
+    }
+    );
+  }
+
+  likedUsers(post_ids:number[]){
+    return this.store.likes.findMany({
+        where:{
+          post_id:{
+            in:post_ids
+          }
+        },
+        include:{
+           user:{
+             select:{
+              Profile:{
+                select:{
+                  username:true
+                }
+              }
+             }
+           }
+        }
+    });
+  }
+
+ 
+ async GetPostMetadata(post_ids:number[], user_id:number):Promise<{
+  responseStatus : IResponse;
+  isLiked  : ILikedData[];
+  isFavourite : IFavouriteData[];
+  likedUsers  : ILikedUsers[];
+ }> {
+      return new Promise(async (resolve,reject)=>{
+         try{
+            // get is_liked,is_favourite arrays.
+            let liked_ : ILikedData[] = [];
+            const isLikedData =  await this.isLiked(post_ids,user_id);
+            post_ids.forEach((post_id)=>{
+               const isLiked : {post_id: bigint}[] = 
+                  isLikedData.filter(x=>Number(x.post_id) === post_id);
+                  if (isLiked.length === 0){
+                     liked_.push({postId:post_id,likeStatus:false})
+                  }
+                  else{
+                    liked_.push({postId:post_id,likeStatus:true})
+                  }
+            })
+            
+            let favourite_ : IFavouriteData[] = [];
+            const isFavouriteData =  await this.isLiked(post_ids,user_id);
+            post_ids.forEach((post_id)=>{
+               const isFavourite : {post_id: bigint}[] = 
+               isFavouriteData.filter(x=>Number(x.post_id) === post_id);
+                  if (isFavourite.length === 0){
+                    favourite_.push({postId:post_id,favouriteStatus:false})
+                  }
+                  else{
+                    favourite_.push({postId:post_id,favouriteStatus:true})
+                  }
+            })
+
+            // get liked users list.
+            let likedUsers_ : ILikedUsers[] = [];
+            const likedUsersResults = await this.likedUsers(post_ids);
+            post_ids.forEach(post_id=>{
+              const isLikedUsers =
+              likedUsersResults.filter(x=>Number(x.post_id) === post_id);
+              let isLikedUsers_: (string | undefined)[] = [];
+              isLikedUsers.forEach(x=>isLikedUsers_.push(x.user.Profile?.username));
+              likedUsers_.push({postId:post_id,username:isLikedUsers_.toString()})
+            })
+
+            resolve({
+              responseStatus:{
+                statusCode: HerrorStatus.StatusOK,
+                message: "successful_metadata_fetch", 
+              },
+              isLiked:liked_,
+              isFavourite:favourite_,
+              likedUsers:likedUsers_
+
+            })
+   
+         }
+         catch(err){
+            reject(err)
+         }
+      })
+ }
+
 }
