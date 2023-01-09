@@ -53,7 +53,7 @@ model Profile {
   user_id           Int      @unique
   username          String   @unique
   email_id          String
-  profile_image_uri String?  @default("https://22yards-image-bucket.s3.ap-south-1.amazonaws.com/sjFmewfzjI.webp")
+  profile_image_uri String?
   bio               String?
   cric_index        Int      @default(0)
   updated_at        DateTime @updatedAt
