@@ -183,6 +183,7 @@ model TrendingPosts {
   tp_id   BigInt @id @default(autoincrement()) @db.BigInt
   post    Posts  @relation(fields: [post_id], references: [post_id])
   post_id BigInt
+  created_at DateTime @default(now())
 
   @@map("trending_posts")
 }

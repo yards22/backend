@@ -1,10 +1,11 @@
-import { Networks, PrismaClient, TrendingUsers, UserRecommendations } from "@prisma/client";
+import { Networks, PrismaClient, TrendingUsers, UserRecommendations, prisma } from "@prisma/client";
 import { Network } from "aws-sdk/clients/securityhub";
 import { bool } from "aws-sdk/clients/signer";
 import { memoryStorage } from "multer";
 import { ImageResolver } from "../../pkg/image_resolver/image_resolver_";
 import { IFileStorage } from "../../pkg/file_storage/file_storage";
-import { userInfo } from "os";
+import EFeeditem from "../entities/feeditem";
+import {formatTrendingFeedResponse} from "../../util/responseFormat";
 
 
 const ALLOWED_IMAGES = 4;
@@ -19,12 +20,47 @@ export default class ExploreManager {
       this.imageStorage= imageStorage
     }
 
-    async GetTrendingPosts(limit:number,offset:number){
+    async GetTrendingPosts_(limit:number,offset:number){
         return this.store.trendingPosts.findMany({
           take:limit,
-          skip:offset
+          skip:offset,
+          include:{
+            post:{
+              include:{
+                user:{
+                  select:{
+                    Profile:{
+                      select:{
+                        username:true,
+                        profile_image_uri:true,
+                      }
+                    }
+                  }
+                },
+                _count: { select: { Likes: true } },
+              },
+            }
+          }
         })
     }
+
+    async GetTrendingPosts(limit:number,offset:number){
+       return new Promise(async(resolve,reject)=>{
+        try{
+           console.log("Iam here");
+           const res = await this.GetTrendingPosts_(limit,offset);
+           console.log(res);
+           const posts : EFeeditem[] = formatTrendingFeedResponse(res);
+           console.log(posts);
+           resolve(posts);
+        }
+        catch(err){
+          reject(err);
+        }
+       })
+    }
+
+
 
     async GetTrendingUsers(limit:number, offset:number){
        return this.store.trendingUsers.findMany({

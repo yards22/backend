@@ -27,7 +27,7 @@ CREATE TABLE `profiles` (
     `user_id` INTEGER NOT NULL,
     `username` VARCHAR(191) NOT NULL,
     `email_id` VARCHAR(191) NOT NULL,
-    `profile_image_uri` VARCHAR(191) NULL DEFAULT 'https://22yards-image-bucket.s3.ap-south-1.amazonaws.com/sjFmewfzjI.webp',
+    `profile_image_uri` VARCHAR(191) NULL,
     `bio` VARCHAR(191) NULL,
     `cric_index` INTEGER NOT NULL DEFAULT 0,
     `updated_at` DATETIME(3) NOT NULL,
@@ -138,6 +138,7 @@ CREATE TABLE `trending_users` (
 CREATE TABLE `trending_posts` (
     `tp_id` BIGINT NOT NULL AUTO_INCREMENT,
     `post_id` BIGINT NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     PRIMARY KEY (`tp_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -164,7 +165,7 @@ CREATE TABLE `feedback` (
 CREATE TABLE `polls` (
     `poll_id` INTEGER NOT NULL AUTO_INCREMENT,
     `poll_by` VARCHAR(191) NOT NULL DEFAULT 'Admin',
-    `poll_question` VARCHAR(191) NULL,
+    `poll_question` VARCHAR(191) NOT NULL,
     `options_count` INTEGER NOT NULL,
     `options` VARCHAR(191) NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -179,6 +180,18 @@ CREATE TABLE `polls_reaction` (
     `type` INTEGER NOT NULL,
 
     UNIQUE INDEX `polls_reaction_poll_id_user_id_key`(`poll_id`, `user_id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `stories` (
+    `story_id` INTEGER NOT NULL AUTO_INCREMENT,
+    `user_id` INTEGER NOT NULL,
+    `title` VARCHAR(191) NOT NULL,
+    `content` VARCHAR(191) NOT NULL,
+    `media` VARCHAR(191) NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`story_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -254,3 +267,6 @@ ALTER TABLE `polls_reaction` ADD CONSTRAINT `polls_reaction_poll_id_fkey` FOREIG
 
 -- AddForeignKey
 ALTER TABLE `polls_reaction` ADD CONSTRAINT `polls_reaction_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `stories` ADD CONSTRAINT `stories_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
