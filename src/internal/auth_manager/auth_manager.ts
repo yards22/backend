@@ -7,6 +7,7 @@ import verifyGoogleIdTokenAndGetUserData from "../../cmd/http_api/helper";
 import { SendMail } from "../../util/mail_dependencies";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 import { nextTick } from "process";
+import { Herror } from "../../pkg/herror/herror";
 
 const SEC_IN_YEAR = 31536000;
 const Token_Length = 64;
@@ -163,13 +164,16 @@ export default class AuthManager {
   GoogleLogin(id_token: string): Promise<{
     responseStatus: IResponse;
     userData?: EAuth;
-    is_exists:boolean;
+    is_exists: boolean;
     accessToken?: string;
   }> {
     return new Promise(async (resolve, reject) => {
       try {
         const payload: any = await verifyGoogleIdTokenAndGetUserData(id_token);
-        const {user,already_exists} = await this.UpsertUser(payload.email, payload.sub);
+        const { user, already_exists } = await this.UpsertUser(
+          payload.email,
+          payload.sub
+        );
         const accessToken: string = await this.CreateSession(
           Token_Length,
           user
@@ -183,7 +187,7 @@ export default class AuthManager {
             message: "successful_login",
           },
           userData: user,
-          is_exists:already_exists,
+          is_exists: already_exists,
           accessToken,
         });
       } catch (err) {
@@ -192,14 +196,17 @@ export default class AuthManager {
     });
   }
 
-  UpsertUser(email: string, sub: string): Promise<{
-    user:EAuth;
-    already_exists:boolean
+  UpsertUser(
+    email: string,
+    sub: string
+  ): Promise<{
+    user: EAuth;
+    already_exists: boolean;
   }> {
     return new Promise(async (resolve, reject) => {
       try {
         let user = await this.GetUserByMail(email);
-        let already_exists :boolean  = true;
+        let already_exists: boolean = true;
         if (!user) {
           const username: string = GenerateUsername(email);
           console.log("in upsert user about to create user");
@@ -212,7 +219,7 @@ export default class AuthManager {
           );
           already_exists = false;
         }
-        resolve({user,already_exists});
+        resolve({ user, already_exists });
       } catch (err) {
         reject(err);
       }
@@ -230,44 +237,47 @@ export default class AuthManager {
     return new Promise(async (resolve, reject) => {
       try {
         const user = await this.GetUserByMail(mail_id);
-        if (user) {
-          const validPassword = await bcrypt.compare(
-            password,
-            user?.password as string
+        if (!user)
+          return reject(
+            new Herror("user_not_found", HerrorStatus.StatusNotFound)
           );
-          if (validPassword) {
-            const id: number = user?.user_id;
-            const accessToken: string = await this.CreateSession(
-              Token_Length,
-              user
-            );
-            const oneYearFromNow = new Date();
-            oneYearFromNow.setMonth(oneYearFromNow.getMonth() + 1);
-            await this.CreateScreen(user.user_id, accessToken, oneYearFromNow);
-            resolve({
-              responseStatus: {
-                statusCode: HerrorStatus.StatusOK,
-                message: "successful_login",
-              },
-              userData: user,
-              accessToken,
-            });
-          } else {
-            reject({
-              responseStatus: {
-                statusCode: HerrorStatus.StatusUnauthorized,
-                message: "password_invalid",
-              },
-            });
-          }
-        } else {
-          reject({
+        if (
+          user.password === "" ||
+          user.password === null ||
+          user.password === undefined
+        ) {
+          return reject(
+            new Herror(
+              "oauth_user_account",
+              HerrorStatus.StatusMethodNotAllowed
+            )
+          );
+        }
+        const validPassword = await bcrypt.compare(
+          password,
+          user?.password || ""
+        );
+        if (validPassword) {
+          const id: number = user?.user_id;
+          const accessToken: string = await this.CreateSession(
+            Token_Length,
+            user
+          );
+          const oneYearFromNow = new Date();
+          oneYearFromNow.setMonth(oneYearFromNow.getMonth() + 1);
+          await this.CreateScreen(user.user_id, accessToken, oneYearFromNow);
+          return resolve({
             responseStatus: {
-              statusCode: HerrorStatus.StatusForbidden,
-              message: "no_user_with_given_mail_exists",
+              statusCode: HerrorStatus.StatusOK,
+              message: "successful_login",
             },
+            userData: user,
+            accessToken,
           });
         }
+        return reject(
+          new Herror("invalid_password", HerrorStatus.StatusUnauthorized)
+        );
       } catch (err) {
         reject(err);
       }

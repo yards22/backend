@@ -50,11 +50,11 @@ const HandleGoogleOauth: RouteHandler = async (req, res, next, app) => {
   const id_token = req.body.id_token;
   if (id_token != undefined) {
     try {
-      const { responseStatus, userData,is_exists, accessToken } =
+      const { responseStatus, userData, is_exists, accessToken } =
         await app.authManager.GoogleLogin(id_token);
       app.SendRes(res, {
         status: responseStatus.statusCode,
-        data: { user_data: userData, token: accessToken,is_exists },
+        data: { user_data: userData, token: accessToken, is_exists },
         message: responseStatus.message,
       });
     } catch (err) {
