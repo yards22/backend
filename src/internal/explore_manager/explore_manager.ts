@@ -1,10 +1,11 @@
-import { Networks, PrismaClient, TrendingUsers, UserRecommendations } from "@prisma/client";
+import { Networks, PrismaClient, TrendingUsers, UserRecommendations, prisma } from "@prisma/client";
 import { Network } from "aws-sdk/clients/securityhub";
 import { bool } from "aws-sdk/clients/signer";
 import { memoryStorage } from "multer";
 import { ImageResolver } from "../../pkg/image_resolver/image_resolver_";
 import { IFileStorage } from "../../pkg/file_storage/file_storage";
-import { userInfo } from "os";
+import {EFeeditem} from "../entities/feeditem";
+import {formatTrendingFeedResponse} from "../../util/responseFormat";
 
 
 const ALLOWED_IMAGES = 4;
@@ -18,14 +19,7 @@ export default class ExploreManager {
       this.imageResolver= imageResolver,
       this.imageStorage= imageStorage
     }
-
-    async GetTrendingPosts(limit:number,offset:number){
-        return this.store.trendingPosts.findMany({
-          take:limit,
-          skip:offset
-        })
-    }
-
+    
     async GetTrendingUsers(limit:number, offset:number){
        return this.store.trendingUsers.findMany({
           take:limit,

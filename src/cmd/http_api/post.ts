@@ -71,14 +71,66 @@ export const HandleDeletePost: RouteHandler = async (req, res, next, app) => {
 
 export const HandleGetPosts: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
-  const limit: number = Number(req.query.limit);
-  const offset: number = Number(req.query.offset);
+  const limit: number = Number(req.query.limit||10);
+  const offset: number = Number(req.query.offset||0);
+  const type : string  = req.params.type
+  const username:string = req.query.username as string;
   try {
-    const posts = await app.postManager.GetUsersFeed(user_id, limit, offset);
-    app.SendRes(res, {
-      status: 200,
-      data: posts,
-    });
+    if(type === "feed"){
+      const posts = await app.postManager.GetUsersFeed(user_id, limit, offset);
+      app.SendRes(res, {
+        status: 200,
+        data: posts,
+      });
+      return ;
+    }
+    if (type === "trending"){
+      const posts = await app.postManager.GetTrendingPosts(limit, offset);
+      app.SendRes(res, {
+        status: 200,
+        data: posts,
+      });
+      return ;
+    }
+
+    if (type === "mine"){
+      if(username===undefined){
+         const userPosts = await app.postManager.GetUserPostsById(user_id,limit,offset);
+         app.SendRes(res,{
+          status:HerrorStatus.StatusOK,
+          data:userPosts
+         });
+         return ;
+      }
+      else{
+        const userPosts = await app.postManager.GetUserPostsByUsername(username,limit,offset); 
+        app.SendRes(res,{
+          status:HerrorStatus.StatusOK,
+          data:userPosts
+         });
+         return;
+      }
+    }
+
+    if(type === "fav"){
+      if(username===undefined){
+        const userPosts = await app .postManager.GetStaredPostsById(user_id,limit,offset);
+        app.SendRes(res,{
+         status:HerrorStatus.StatusOK,
+         data:userPosts
+        });
+        return ;
+     }
+     else{
+       const userPosts = await app .postManager.GetStaredPostsByUsername(username,limit,offset);
+        app.SendRes(res,{
+         status:HerrorStatus.StatusOK,
+         data:userPosts
+        });
+        return ;
+     }
+    }
+    
   } catch (err) {
     next(err);
   }
@@ -135,13 +187,14 @@ export const HandlePostsMetaData: RouteHandler = async (
 ) => {
   const user_id: number = Number(req.context.user_id);
   const post_ids = req.body.post_ids as bigint[];
+  console.log(post_ids);
   try {
-    const { responseStatus, isLiked, isFavourite, likedUsers } =
+    const { isLiked, isFavourite, likedUsers } =
       await app.postManager.GetPostMetadata(post_ids, user_id);
     app.SendRes(res, {
-      status: responseStatus.statusCode,
+      status: 200,
       data: { isLiked, isFavourite, likedUsers },
-      message: responseStatus.message,
+      message: "OK",
     });
   } catch (err) {
     next(err);

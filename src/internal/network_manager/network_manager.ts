@@ -1,5 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { parse } from "path";
+import { Herror } from "../../pkg/herror/herror";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 import ERecommends from "../entities/recommends";
 const prisma = new PrismaClient();
@@ -205,20 +206,31 @@ export default class NetworkManager {
         ]);
 
         // Recommendations Table updates .....
-        const prevRecommends = await this.PickAndParseRecommends(user_id);
-        const newRecommends = prevRecommends.filter(
-          (user_id) => user_id !== following_id
-        );
-        const newStringifiedRecommends = JSON.stringify(newRecommends);
-        await this.UpdateRecommendations(user_id, newStringifiedRecommends);
+        // const prevRecommends = await this.PickAndParseRecommends(user_id);
+        // const newRecommends = prevRecommends.filter(
+        //   (user_id) => user_id !== following_id
+        // );
+        // const newStringifiedRecommends = JSON.stringify(newRecommends);
+        // await this.UpdateRecommendations(user_id, newStringifiedRecommends);
 
         resolve({
           responseStatus: {
-            statusCode: HerrorStatus.StatusOK,
+            statusCode: HerrorStatus.StatusCreated,
             message: "started_following",
           },
         });
       } catch (err) {
+        if (
+          err instanceof Prisma.PrismaClientKnownRequestError &&
+          err.code === "P2002"
+        ) {
+          resolve({
+            responseStatus: {
+              statusCode: HerrorStatus.StatusCreated,
+              message: "started_following",
+            },
+          });
+        }
         reject(err);
       }
     });
@@ -230,6 +242,12 @@ export default class NetworkManager {
         await this.DeleteConnection(user_id, following_id);
         resolve("successfully_deleted");
       } catch (err) {
+        if (
+          err instanceof Prisma.PrismaClientKnownRequestError &&
+          err.code === "P2025"
+        ) {
+          resolve("already  not following");
+        }
         reject(err);
       }
     });
