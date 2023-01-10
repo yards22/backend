@@ -127,7 +127,6 @@ export const HandleAddToFavourites: RouteHandler = async (
   }
 };
 
-
 export const HandlePostsMetaData: RouteHandler = async (
   req,
   res,
@@ -135,22 +134,16 @@ export const HandlePostsMetaData: RouteHandler = async (
   app
 ) => {
   const user_id: number = Number(req.context.user_id);
-  const post_ids = req.body.post_ids;
-  try{
-    const {
-      responseStatus,
-      isLiked,
-      isFavourite,
-      likedUsers
-    } = await app.postManager.GetPostMetadata(post_ids,user_id);
-    app.SendRes(res,{
-      status:responseStatus.statusCode,
-      data:{isLiked,isFavourite,likedUsers},
-      message:responseStatus.message
+  const post_ids = req.body.post_ids as bigint[];
+  try {
+    const { responseStatus, isLiked, isFavourite, likedUsers } =
+      await app.postManager.GetPostMetadata(post_ids, user_id);
+    app.SendRes(res, {
+      status: responseStatus.statusCode,
+      data: { isLiked, isFavourite, likedUsers },
+      message: responseStatus.message,
     });
+  } catch (err) {
+    next(err);
   }
-  catch(err){
-     next(err)
-  }
-}
-
+};
