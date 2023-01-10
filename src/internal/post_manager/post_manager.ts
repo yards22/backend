@@ -600,12 +600,17 @@ export default class PostManager {
     })
 }
 
-async GetTrendingPosts(limit:number,offset:number){
+async GetTrendingPosts(user_id:number,limit:number,offset:number){
    return new Promise(async(resolve,reject)=>{
     try{
        const res = await this.GetTrendingPosts_(limit,offset);
+       //extract post_ids ...
+       let post_ids:bigint [] = []
+       res.forEach((post:any)=>post_ids.push(BigInt(post.post_id)));
+       const Metadata: EFeedMeta = await this.GetPostMetadata(post_ids,user_id);
        const posts : EFeeditem[] = formatTrendingFeedResponse(res);
-       resolve(posts);
+       const finalPosts:EPostFinal[] = detailsMixers(posts,Metadata);
+       resolve(finalPosts);
     }
     catch(err){
       reject(err);
@@ -634,38 +639,16 @@ GetUserPostsById_(user_id: number, limit: number, offset: number) {
   });
 }
 
-GetUserPostsByUsername_(username: string, limit: number, offset: number) {
-  return this.store.profile.findUnique({
-    where: {
-      username,
-    },
-    select:{
-      username:true,
-      profile_image_uri:true,
-       user:{
-        select:{
-           Post:{
-            include:{
-              _count:{
-                select:{
-                  Likes:true,
-                }
-              }
-            }
-            
-           }
-        }
-       }
-    }
-  });
-}
-
 async GetUserPostsById(user_id:number,limit:number,offset:number){
   return new Promise(async(resolve,reject)=>{
    try{
       const res = await this.GetUserPostsById_(user_id,limit,offset);
+      let post_ids:bigint [] = []
+      res.forEach((post:any)=>post_ids.push(BigInt(post.post_id)));
+      const Metadata: EFeedMeta = await this.GetPostMetadata(post_ids,user_id);
       const posts : EFeeditem[] = formatFeedResponse(res);
-      resolve(posts);
+      const finalPosts:EPostFinal[] = detailsMixers(posts,Metadata)
+      resolve(finalPosts);
    }
    catch(err){
      reject(err);
@@ -673,13 +656,42 @@ async GetUserPostsById(user_id:number,limit:number,offset:number){
   })
 }
 
-async GetUserPostsByUsername(username:string,limit:number,offset:number){
+GetStaredPostsById_(user_id: number, limit: number, offset: number) {
+  return this.store.favourites.findMany({
+    where: {
+      user_id
+    },
+    include:{
+      post:{
+        include: { 
+          user:{
+            select:{
+              Profile:{
+                select:{
+                  username:true,
+                  profile_image_uri:true
+                }
+              }
+            }
+          },
+          _count: { select: { Likes: true } }
+         },
+      }
+    }
+    
+  });
+}
+
+async GetStaredPostsById(user_id:number,limit:number,offset:number){
   return new Promise(async(resolve,reject)=>{
    try{
-      const res = await this.GetUserPostsByUsername_(username,limit,offset);
-      console.log(res);
-      const posts : EFeeditem[] = formatFeedResponseUsername(res?.user.Post,res?.profile_image_uri as string,res?.username as string);
-      resolve(posts);
+      const res = await this.GetStaredPostsById_(user_id,limit,offset);
+      let post_ids:bigint [] = []
+      res.forEach((post:any)=>post_ids.push(BigInt(post.post_id)));
+      const Metadata: EFeedMeta = await this.GetPostMetadata(post_ids,user_id);
+      const posts : EFeeditem[] = formatFeedResponse(res);
+      const finalPosts:EPostFinal[] = detailsMixers(posts,Metadata)
+      resolve(finalPosts);
    }
    catch(err){
      reject(err);
@@ -687,41 +699,5 @@ async GetUserPostsByUsername(username:string,limit:number,offset:number){
   })
 }
 
-GetStaredPostsById(user_id: number, limit: number, offset: number) {
-  return this.store.posts.findMany({
-    take: limit,
-    skip: offset,
-    where: {
-      user_id,
-    },
-  });
-}
 
-GetStaredPostsByUsername(username: string, limit: number, offset: number) {
-  return this.store.profile.findUnique({
-    where: {
-      username,
-    },
-    select: {
-      user: {
-        select: {
-          Favourites: {
-            include: {
-              post: {
-                include: {
-                  _count: {
-                    select: {
-                      Likes: true,
-                      ParentComments: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  });
-}
 }

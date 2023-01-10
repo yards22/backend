@@ -85,7 +85,7 @@ export const HandleGetPosts: RouteHandler = async (req, res, next, app) => {
       return ;
     }
     if (type === "trending"){
-      const posts = await app.postManager.GetTrendingPosts(limit, offset);
+      const posts = await app.postManager.GetTrendingPosts(user_id,limit, offset);
       app.SendRes(res, {
         status: 200,
         data: posts,
@@ -94,41 +94,21 @@ export const HandleGetPosts: RouteHandler = async (req, res, next, app) => {
     }
 
     if (type === "mine"){
-      if(username===undefined){
-         const userPosts = await app.postManager.GetUserPostsById(user_id,limit,offset);
+      const userPosts = await app.postManager.GetUserPostsById(user_id,limit,offset);
          app.SendRes(res,{
           status:HerrorStatus.StatusOK,
           data:userPosts
          });
          return ;
-      }
-      else{
-        const userPosts = await app.postManager.GetUserPostsByUsername(username,limit,offset); 
-        app.SendRes(res,{
-          status:HerrorStatus.StatusOK,
-          data:userPosts
-         });
-         return;
-      }
     }
 
     if(type === "fav"){
-      if(username===undefined){
-        const userPosts = await app .postManager.GetStaredPostsById(user_id,limit,offset);
-        app.SendRes(res,{
-         status:HerrorStatus.StatusOK,
-         data:userPosts
-        });
-        return ;
-     }
-     else{
-       const userPosts = await app .postManager.GetStaredPostsByUsername(username,limit,offset);
-        app.SendRes(res,{
-         status:HerrorStatus.StatusOK,
-         data:userPosts
-        });
-        return ;
-     }
+      const userPosts = await app .postManager.GetStaredPostsById(user_id,limit,offset);
+      app.SendRes(res,{
+       status:HerrorStatus.StatusOK,
+       data:userPosts
+      });
+      return ;
     }
     
   } catch (err) {
