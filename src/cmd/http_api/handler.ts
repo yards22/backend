@@ -23,8 +23,6 @@ import {
   HandleGetUserPrimaryInfo,
   HandleGetUserProfileInfo,
   HandleGetCheckUsername,
-  HandleGetUserPosts,
-  HandleGetUserStaredPosts,
 } from "./profile";
 import { CheckAllowance } from "./middlewares";
 import { HandleGetLikesForPost, HandleLikeAndUnlike } from "./like";
@@ -65,7 +63,6 @@ import {
 import {
   HandleGetExplore,
   HandleGetRecommendedUsers,
-  HandleGetTrending,
 } from "./explore";
 
 function NotificationRoutes(app: App): Router {
@@ -122,16 +119,6 @@ function ProfileRoutes(app: App): Router {
     app.InHandler(HandleGetUserProfileInfo)
   );
 
-  router.get(
-    "/myPosts",
-    app.InHandler(CheckAllowance),
-    app.InHandler(HandleGetUserPosts)
-  );
-  router.get(
-    "/myFavourites",
-    app.InHandler(CheckAllowance),
-    app.InHandler(HandleGetUserStaredPosts)
-  );
   router.post(
     "/checkUsername",
     app.InHandler(CheckAllowance),
@@ -217,7 +204,7 @@ function PostRoutes(app: App): Router {
     app.InHandler(HandleDeletePost)
   );
 
-  router.get("/", app.InHandler(CheckAllowance), app.InHandler(HandleGetPosts));
+  router.get("/:type", app.InHandler(CheckAllowance), app.InHandler(HandleGetPosts));
 
   router.post(
     "/shareToTimeline",
@@ -280,11 +267,6 @@ function ExploreRoutes(app: App): Router {
     "/recommendations",
     app.InHandler(CheckAllowance),
     app.InHandler(HandleGetRecommendedUsers)
-  );
-  router.get(
-    "/trendingPosts",
-    app.InHandler(CheckAllowance),
-    app.InHandler(HandleGetTrending)
   );
   router.get(
     "/explore",

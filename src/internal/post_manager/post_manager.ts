@@ -9,8 +9,9 @@ import { IKVStore } from "../../pkg/kv_store/kv_store";
 import EPost from "../entities/post";
 import { ReconnectStrategyError } from "redis";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
-import EFeeditem from "../entities/feeditem";
-import {formatFeedResponse} from "../../util/responseFormat"
+import {EFeedMeta, EFeeditem, EPostFinal} from "../entities/feeditem";
+import {formatFeedResponse, formatFeedResponseUsername, formatTrendingFeedResponse} from "../../util/responseFormat"
+import { detailsMixers } from "../../util/postDetailsMixer";
 
 const prisma = new PrismaClient();
 
@@ -35,19 +36,6 @@ interface IFavouriteData {
 interface ILikedUsers {
   postId: bigint;
   username: string[];
-}
-
-interface IFeedDetails {
-  user_id: number;
-  post_id: bigint;
-  content: string | null;
-  media: string | null;
-  original_id: bigint | null;
-  username: string;
-  profile_pic_ref: string;
-  likes: number;
-  created_at: Date;
-  updated_at: Date;
 }
 
 export default class PostManager {
@@ -418,7 +406,6 @@ export default class PostManager {
 
         // recommendation of posts by lcm service..
         recommended_posts = await this.GetPostRecommendations(user_id);
-        console.log(recommended_posts);
         if (recommended_posts !== null) {
           const r_p = recommended_posts.post_recommendations.split(",");
           let r_p1: number[] = [];
@@ -442,12 +429,25 @@ export default class PostManager {
           distinct_posts.forEach((post) => {
             filtered_posts.push(post);
           });
+  
+          // collect post_ids and send it to. 
+          let post_ids:bigint [] = []
+          filtered_posts.forEach((post:any)=>post_ids.push(BigInt(post.post_id)))
+          // call GetPostMetaData.
+          const Metadata: EFeedMeta = await this.GetPostMetadata(post_ids,user_id);
           const posts_ : EFeeditem[]= formatFeedResponse(filtered_posts)
-          resolve(posts_);
+          const finalPosts:EPostFinal[] = detailsMixers(posts_,Metadata)
+          resolve(finalPosts);
+          return ;
         }
+        let post_ids:bigint [] = []
+        posts.forEach((post:any)=>post_ids.push(BigInt(post.post_id)))
+        // call GetPostMetaData.
+        const Metadata: EFeedMeta = await this.GetPostMetadata(post_ids,user_id);
         const posts_ : EFeeditem[]= formatFeedResponse(posts)
-        resolve(posts_);
-        // posts contains all the posts to be displayed
+        const finalPosts:EPostFinal[] = detailsMixers(posts_,Metadata)
+        resolve(finalPosts);
+        return ;
       } catch (err) {
         reject(err);
       }
@@ -515,7 +515,6 @@ export default class PostManager {
     post_ids: bigint[],
     user_id: number
   ): Promise<{
-    responseStatus: IResponse;
     isLiked: ILikedData[];
     isFavourite: IFavouriteData[];
     likedUsers: ILikedUsers[];
@@ -567,10 +566,6 @@ export default class PostManager {
         });
 
         resolve({
-          responseStatus: {
-            statusCode: HerrorStatus.StatusOK,
-            message: "successful_metadata_fetch",
-          },
           isLiked: liked_,
           isFavourite: favourite_,
           likedUsers: likedUsers_,
@@ -580,4 +575,153 @@ export default class PostManager {
       }
     });
   }
+
+  async GetTrendingPosts_(limit:number,offset:number){
+    return this.store.trendingPosts.findMany({
+      take:limit,
+      skip:offset,
+      include:{
+        post:{
+          include:{
+            user:{
+              select:{
+                Profile:{
+                  select:{
+                    username:true,
+                    profile_image_uri:true,
+                  }
+                }
+              }
+            },
+            _count: { select: { Likes: true } },
+          },
+        }
+      }
+    })
+}
+
+async GetTrendingPosts(limit:number,offset:number){
+   return new Promise(async(resolve,reject)=>{
+    try{
+       const res = await this.GetTrendingPosts_(limit,offset);
+       const posts : EFeeditem[] = formatTrendingFeedResponse(res);
+       resolve(posts);
+    }
+    catch(err){
+      reject(err);
+    }
+   })
+}
+
+GetUserPostsById_(user_id: number, limit: number, offset: number) {
+  return this.store.posts.findMany({
+    where: {
+      user_id,
+    },
+    include: { 
+      user:{
+        select:{
+          Profile:{
+            select:{
+              username:true,
+              profile_image_uri:true
+            }
+          }
+        }
+      },
+      _count: { select: { Likes: true } }
+     },
+  });
+}
+
+GetUserPostsByUsername_(username: string, limit: number, offset: number) {
+  return this.store.profile.findUnique({
+    where: {
+      username,
+    },
+    select:{
+      username:true,
+      profile_image_uri:true,
+       user:{
+        select:{
+           Post:{
+            include:{
+              _count:{
+                select:{
+                  Likes:true,
+                }
+              }
+            }
+            
+           }
+        }
+       }
+    }
+  });
+}
+
+async GetUserPostsById(user_id:number,limit:number,offset:number){
+  return new Promise(async(resolve,reject)=>{
+   try{
+      const res = await this.GetUserPostsById_(user_id,limit,offset);
+      const posts : EFeeditem[] = formatFeedResponse(res);
+      resolve(posts);
+   }
+   catch(err){
+     reject(err);
+   }
+  })
+}
+
+async GetUserPostsByUsername(username:string,limit:number,offset:number){
+  return new Promise(async(resolve,reject)=>{
+   try{
+      const res = await this.GetUserPostsByUsername_(username,limit,offset);
+      console.log(res);
+      const posts : EFeeditem[] = formatFeedResponseUsername(res?.user.Post,res?.profile_image_uri as string,res?.username as string);
+      resolve(posts);
+   }
+   catch(err){
+     reject(err);
+   }
+  })
+}
+
+GetStaredPostsById(user_id: number, limit: number, offset: number) {
+  return this.store.posts.findMany({
+    take: limit,
+    skip: offset,
+    where: {
+      user_id,
+    },
+  });
+}
+
+GetStaredPostsByUsername(username: string, limit: number, offset: number) {
+  return this.store.profile.findUnique({
+    where: {
+      username,
+    },
+    select: {
+      user: {
+        select: {
+          Favourites: {
+            include: {
+              post: {
+                include: {
+                  _count: {
+                    select: {
+                      Likes: true,
+                      ParentComments: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+}
 }

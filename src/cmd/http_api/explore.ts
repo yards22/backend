@@ -19,21 +19,6 @@ export const HandleGetStories:RouteHandler=async (req,res,next,app)=>{
     }
 }
 
-export const HandleGetTrending:RouteHandler=async (req,res,next,app)=>{
-    const user_id:number = Number(req.context.user_id);
-    const limit = Number(req.body.limit || 10);
-    const offset = Number(req.body.offset || 0);
-    if(user_id !== undefined){
-        const stories = await app.exploreManager.GetTrendingPosts(limit,offset);
-        app.SendRes(res,{
-            status:HerrorStatus.StatusOK,
-            data: stories
-        });
-    }
-    else{
-        next(new Herror("BadRequest", HerrorStatus.StatusBadRequest));
-    }
-}
 
 export const HandleGetRecommendedUsers:RouteHandler=async (req,res,next,app)=>{
     const user_id:number = Number(req.context.user_id);
@@ -62,6 +47,7 @@ export const HandleGetExplore:RouteHandler=async (req,res,next,app)=>{
         });
     }
     else{
+        
         next(new Herror("BadRequest", HerrorStatus.StatusBadRequest));
     }
 }
