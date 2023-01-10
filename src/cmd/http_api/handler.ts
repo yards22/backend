@@ -191,7 +191,7 @@ function CommentRoutes(app: App): Router {
 
 function PostRoutes(app: App): Router {
   const router = Router();
-  router.get(
+  router.post(
     "/postMeta",
     app.InHandler(CheckAllowance),
     app.InHandler(HandlePostsMetaData)
