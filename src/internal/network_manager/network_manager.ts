@@ -224,9 +224,12 @@ export default class NetworkManager {
           err instanceof Prisma.PrismaClientKnownRequestError &&
           err.code === "P2002"
         ) {
-          reject(
-            new Herror("already following", HerrorStatus.StatusMethodNotAllowed)
-          );
+          resolve({
+            responseStatus: {
+              statusCode: HerrorStatus.StatusCreated,
+              message: "started_following",
+            },
+          });
         }
         reject(err);
       }
@@ -239,6 +242,12 @@ export default class NetworkManager {
         await this.DeleteConnection(user_id, following_id);
         resolve("successfully_deleted");
       } catch (err) {
+        if (
+          err instanceof Prisma.PrismaClientKnownRequestError &&
+          err.code === "P2025"
+        ) {
+          resolve("already  not following");
+        }
         reject(err);
       }
     });
