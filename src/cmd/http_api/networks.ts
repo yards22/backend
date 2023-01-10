@@ -53,14 +53,16 @@ export const HandleRemoveConnection: RouteHandler = async (
 ) => {
   const user_id = Number(req.context.user_id);
   const following_id = Number(req.body.following_id);
-  if (user_id !== undefined && following_id !== undefined) {
+  if (following_id === undefined)
+    return next(new Herror("BadRequest", HerrorStatus.StatusBadRequest));
+  try {
     await app.networkManager.UnfollowUser(user_id, following_id);
     app.SendRes(res, {
       status: 200,
       message: "connection_deleted_successfully",
     });
-  } else {
-    next(new Herror("BadRequest", HerrorStatus.StatusBadRequest));
+  } catch (err) {
+    next(err);
   }
 };
 
