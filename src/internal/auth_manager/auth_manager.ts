@@ -241,7 +241,18 @@ export default class AuthManager {
           return reject(
             new Herror("user_not_found", HerrorStatus.StatusNotFound)
           );
-
+        if (
+          user.password === "" ||
+          user.password === null ||
+          user.password === undefined
+        ) {
+          return reject(
+            new Herror(
+              "oauth_user_account",
+              HerrorStatus.StatusMethodNotAllowed
+            )
+          );
+        }
         const validPassword = await bcrypt.compare(
           password,
           user?.password || ""
