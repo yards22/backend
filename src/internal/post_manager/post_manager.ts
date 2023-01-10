@@ -9,9 +9,12 @@ import { IKVStore } from "../../pkg/kv_store/kv_store";
 import EPost from "../entities/post";
 import { ReconnectStrategyError } from "redis";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
+import EFeeditem from "../entities/feeditem";
+import {formatFeedResponse} from "../../util/responseFormat"
+
 const prisma = new PrismaClient();
 
-const ALLOWED_IMAGES = 3;
+const ALLOWED_IMAGES = 4;
 const MAX_WIDTH = 1080;
 
 interface IFollower {
@@ -448,10 +451,10 @@ export default class PostManager {
           distinct_posts.forEach((post) => {
             filtered_posts.push(post);
           });
-          const posts_ : IFeedDetails[]= this.formatFeedResponse(filtered_posts)
+          const posts_ : EFeeditem[]= formatFeedResponse(filtered_posts)
           resolve(posts_);
         }
-        const posts_ : IFeedDetails[]= this.formatFeedResponse(posts)
+        const posts_ : EFeeditem[]= formatFeedResponse(posts)
         resolve(posts_);
         // posts contains all the posts to be displayed
        
@@ -461,25 +464,25 @@ export default class PostManager {
     });
   }
 
-  formatFeedResponse(allPosts:any):IFeedDetails[]{
-    let posts_:IFeedDetails[] = [];
-    allPosts.forEach((post: any)=>{
-       let feed:IFeedDetails = {
-        user_id:post.user_id,
-        post_id:post.post_id,
-        content:post.content,
-        media:post.content,
-        original_id:post.original_id,
-        created_at:post.created_at,
-        updated_at:post.updated_at,
-        likes:post._count.Likes,
-        username:post.user.Profile.username,
-        profile_pic_ref:post.user.Profile.profile_image_uri
-       }  
-       posts_.push(feed);
-    })
-    return posts_
-  }
+  // formatFeedResponse(allPosts:any):EFeeditem[]{
+  //   let posts_:EFeeditem[] = [];
+  //   allPosts.forEach((post: any)=>{
+  //      let feed:EFeeditem = {
+  //       user_id:post.user_id,
+  //       post_id:post.post_id,
+  //       content:post.content,
+  //       media:post.content,
+  //       original_id:post.original_id,
+  //       created_at:post.created_at,
+  //       updated_at:post.updated_at,
+  //       likes:post._count.Likes,
+  //       username:post.user.Profile.username,
+  //       profile_pic_ref:post.user.Profile.profile_image_uri
+  //      }  
+  //      posts_.push(feed);
+  //   })
+  //   return posts_
+  // }
 
    isLiked(post_ids:any, user_id:number){
     return this.store.likes.findMany({
