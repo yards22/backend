@@ -253,11 +253,6 @@ function NetworkRoutes(app: App): Router {
 function ExploreRoutes(app: App): Router {
   const router = Router();
   router.get(
-    "/searchUsers",
-    app.InHandler(CheckAllowance),
-    app.InHandler(HandleSearches)
-  );
-  router.get(
     "/stories",
     app.InHandler(CheckAllowance),
     app.InHandler(HandleSearches)
@@ -293,6 +288,11 @@ function MiscRoutes(app: App): Router {
     "/leaderboard",
     app.InHandler(CheckAllowance),
     app.InHandler(HandleGetLeaderBoard)
+  );
+  router.post(
+    "/search",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleSearches)
   );
   return router;
 }

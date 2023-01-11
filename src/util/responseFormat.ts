@@ -1,4 +1,5 @@
 import {EFeeditem} from "../internal/entities/feeditem";
+import { ENetworkitem } from "../internal/entities/networkitem";
 
 export function formatTrendingFeedResponse(allPosts:any):EFeeditem[]{
     let posts_:EFeeditem[] = [];
@@ -58,6 +59,26 @@ export function formatFeedResponseUsername(allPosts:any,profile_image_uri:string
        posts_.push(feed);
     });
     return posts_
+}
+
+export function formatNetworkResponseRecommended(networkDetails:any):ENetworkitem{
+    const networkItem_ : ENetworkitem = {
+        user_id:networkDetails.Profile.user_id,
+        username:networkDetails.Profile.username,
+        profile_image_uri:networkDetails.Profile.profile_image_uri,
+        cric_index:networkDetails.Profile.cric_index
+    }
+    return networkItem_;
+}
+
+export function formatNetworkResponseTrending(networkDetails:any):ENetworkitem{
+    const networkItem_ : ENetworkitem = {
+        user_id:networkDetails.user.Profile.user_id,
+        username:networkDetails.user.Profile.username,
+        profile_image_uri:networkDetails.user.Profile.profile_image_uri,
+        cric_index:networkDetails.user.Profile.cric_index
+    }
+    return networkItem_;
 }
 
 

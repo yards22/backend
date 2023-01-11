@@ -3,6 +3,8 @@ import { parse } from "path";
 import { Herror } from "../../pkg/herror/herror";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 import ERecommends from "../entities/recommends";
+import { formatNetworkResponseRecommended, formatNetworkResponseTrending } from "../../util/responseFormat";
+import { ENetworkitem } from "../entities/networkitem";
 const prisma = new PrismaClient();
 
 interface IResponse {
@@ -227,18 +229,39 @@ export default class NetworkManager {
           offset
         );
         const trendingUsers = await this.GetTrendingUsers(limit,offset);
+        const followingUsers:any  = await this.GetFollowing(user_id);
+        let filteredUsers: ENetworkitem[] = [];
         let uniqueR_ = new Set();
         truncatedRecommends.forEach(r=>{
-            uniqueR_.add(r);
+            if(!uniqueR_.has(r.Profile?.user_id) && user_id!=r.Profile?.user_id){
+              let flag = true
+              followingUsers.forEach((x: any)=>{
+                   if(x.user_id === r.Profile?.user_id){
+                      flag=false;
+                   }
+              });
+              if(flag){
+                filteredUsers.push(formatNetworkResponseRecommended(r));
+                uniqueR_.add(r.Profile?.user_id);
+              }
+            }
         })
         trendingUsers.forEach(r=>{
-          uniqueR_.add(r);
+          if(!uniqueR_.has(r.user.Profile?.user_id) && user_id!=r.user.Profile?.user_id){
+            let flag = true;
+            followingUsers.forEach((x: any)=>{
+              if(x.user_id === r.user.Profile?.user_id){
+                 flag=false;
+              }
+            });
+            if(flag){
+              filteredUsers.push(formatNetworkResponseTrending(r));
+              uniqueR_.add(r.user.Profile?.user_id);
+            }
+        }
         });
 
-        let filteredUsers: any = [];
-        uniqueR_.forEach(item=>{
-          filteredUsers.push(item);
-        })
+
         resolve({
           responseStatus: {
             statusCode: HerrorStatus.StatusOK,
@@ -267,15 +290,6 @@ export default class NetworkManager {
 
           this.FollowersUpdate(following_id),
         ]);
-
-        // Recommendations Table updates .....
-        // const prevRecommends = await this.PickAndParseRecommends(user_id);
-        // const newRecommends = prevRecommends.filter(
-        //   (user_id) => user_id !== following_id
-        // );
-        // const newStringifiedRecommends = JSON.stringify(newRecommends);
-        // await this.UpdateRecommendations(user_id, newStringifiedRecommends);
-
         resolve({
           responseStatus: {
             statusCode: HerrorStatus.StatusCreated,
