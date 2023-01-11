@@ -203,7 +203,11 @@ function PostRoutes(app: App): Router {
     app.InHandler(HandleDeletePost)
   );
 
-  router.get("/:type", app.InHandler(CheckAllowance), app.InHandler(HandleGetPosts));
+  router.get(
+    "/:type",
+    app.InHandler(CheckAllowance), 
+    app.InHandler(HandleGetPosts)
+  );
 
   router.post(
     "/shareToTimeline",
@@ -212,7 +216,7 @@ function PostRoutes(app: App): Router {
   );
 
   router.post(
-    "addToFavorites",
+    "/favourite",
     app.InHandler(CheckAllowance),
     app.InHandler(HandleAddToFavourites)
   );
