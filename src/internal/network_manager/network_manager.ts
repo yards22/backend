@@ -91,14 +91,40 @@ export default class NetworkManager {
     });
   }
 
-  FollowersUpdate(user_id: number) {
+  FollowingUpdateDelete(user_id :number){
     return this.store.profile.update({
+      where: {
+        user_id,
+      },
+      data: {
+        following: {
+          decrement: 1,
+        },
+      },
+    });
+  }
+
+  FollowersUpdate(user_id: number) {
+     return this.store.profile.update({
       where: {
         user_id,
       },
       data: {
         followers: {
           increment: 1,
+        },
+      },
+    });
+  }
+
+  FollowersUpdateDelete(user_id:number){
+    return this.store.profile.update({
+      where: {
+        user_id,
+      },
+      data: {
+        followers: {
+          decrement: 1,
         },
       },
     });
@@ -200,9 +226,9 @@ export default class NetworkManager {
         await prisma.$transaction([
           this.CreateConnection(user_id, following_id),
 
-          this.FollowingUpdate(following_id),
+          this.FollowingUpdate(user_id),
 
-          this.FollowersUpdate(user_id),
+          this.FollowersUpdate(following_id),
         ]);
 
         // Recommendations Table updates .....
@@ -239,14 +265,23 @@ export default class NetworkManager {
   UnfollowUser(user_id: number, following_id: number) {
     return new Promise(async (resolve, reject) => {
       try {
-        await this.DeleteConnection(user_id, following_id);
+
+        await prisma.$transaction([
+          this.DeleteConnection(user_id, following_id),
+
+          this.FollowingUpdateDelete(user_id),
+
+          this.FollowersUpdateDelete(following_id),
+        ]);
+
+        
         resolve("successfully_deleted");
       } catch (err) {
         if (
           err instanceof Prisma.PrismaClientKnownRequestError &&
           err.code === "P2025"
         ) {
-          resolve("already  not following");
+          resolve("already_not_following");
         }
         reject(err);
       }
