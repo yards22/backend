@@ -281,7 +281,7 @@ export default class PostManager {
     }
   }
 
-  async BookmarkPosts(user_id: number, post_id: bigint) {
+  async createStarredPosts(user_id: number, post_id: bigint) {
     return new Promise(async (resolve, reject) => {
       try {
         const data = await this.store.favourites.create({
@@ -289,6 +289,21 @@ export default class PostManager {
             user_id,
             post_id,
           },
+        });
+        resolve(data);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
+
+  async deleteStarredPosts(user_id:number, post_id:bigint){
+    return new Promise(async (resolve, reject) => {
+      try {
+        const data = await this.store.favourites.deleteMany({
+          where: {
+            AND: [{ user_id: user_id }, { post_id: post_id }]
+          }
         });
         resolve(data);
       } catch (err) {
@@ -656,7 +671,7 @@ async GetUserPostsById(user_id:number,limit:number,offset:number){
   })
 }
 
-GetStaredPostsById_(user_id: number, limit: number, offset: number) {
+GetStarredPostsById_(user_id: number, limit: number, offset: number) {
   return this.store.favourites.findMany({
     where: {
       user_id
@@ -682,10 +697,10 @@ GetStaredPostsById_(user_id: number, limit: number, offset: number) {
   });
 }
 
-async GetStaredPostsById(user_id:number,limit:number,offset:number){
+async GetStarredPostsById(user_id:number,limit:number,offset:number){
   return new Promise(async(resolve,reject)=>{
    try{
-      const res = await this.GetStaredPostsById_(user_id,limit,offset);
+      const res = await this.GetStarredPostsById_(user_id,limit,offset);
       let post_ids:bigint [] = []
       res.forEach((post:any)=>post_ids.push(BigInt(post.post_id)));
       const Metadata: EFeedMeta = await this.GetPostMetadata(post_ids,user_id);
