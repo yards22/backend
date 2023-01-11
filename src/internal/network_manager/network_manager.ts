@@ -130,7 +130,7 @@ export default class NetworkManager {
     });
   }
 
-  GetComputedRecommendations(user_id: number): Promise<ERecommends | null> {
+  async GetComputedRecommendations(user_id: number): Promise<ERecommends | null> {
     return this.store.userRecommendations.findUnique({
       where: {
         user_id,
@@ -138,8 +138,30 @@ export default class NetworkManager {
     });
   }
 
-  UpdateRecommendations(user_id: number, new_recommends: string): void {
-    this.store.userRecommendations.update({
+  async GetTrendingUsers(limit:number, offset:number){
+    return this.store.trendingUsers.findMany({
+       take:limit,
+       skip:offset,
+       include:{
+         user:{
+          select:{
+            mail_id:true,
+            Profile:{
+              select:{
+                username:true,
+                profile_image_uri:true,
+                user_id:true,
+                cric_index:true
+              }
+            }
+          }
+         }
+       }
+    })
+ }
+
+  async UpdateRecommendations(user_id: number, new_recommends: string){
+    return this.store.userRecommendations.update({
       where: {
         user_id,
       },
@@ -173,11 +195,13 @@ export default class NetworkManager {
         },
       },
       select: {
+        mail_id:true,
         Profile: {
           select: {
             username: true,
             profile_image_uri: true,
             user_id: true,
+            cric_index:true
           },
         },
       },
@@ -194,7 +218,7 @@ export default class NetworkManager {
   }> {
     return new Promise(async (resolve, reject) => {
       try {
-        const parsedRecommendations: Array<number> =
+        const parsedRecommendations: number[] =
           await this.PickAndParseRecommends(user_id);
 
         let truncatedRecommends = await this.GetRecommendedUsers(
@@ -202,12 +226,25 @@ export default class NetworkManager {
           limit,
           offset
         );
+        const trendingUsers = await this.GetTrendingUsers(limit,offset);
+        let uniqueR_ = new Set();
+        truncatedRecommends.forEach(r=>{
+            uniqueR_.add(r);
+        })
+        trendingUsers.forEach(r=>{
+          uniqueR_.add(r);
+        });
+
+        let filteredUsers: any = [];
+        uniqueR_.forEach(item=>{
+          filteredUsers.push(item);
+        })
         resolve({
           responseStatus: {
             statusCode: HerrorStatus.StatusOK,
             message: "recommendations",
           },
-          recommended: truncatedRecommends,
+          recommended: filteredUsers,
         });
       } catch (err) {
         reject(err);
@@ -347,15 +384,20 @@ export default class NetworkManager {
     });
   }
 
-  PickAndParseRecommends(user_id: number): Promise<Array<number>> {
+  PickAndParseRecommends(user_id: number) : Promise<number[]>{
     return new Promise(async (resolve, reject) => {
       try {
         const recommendations: any = await this.GetComputedRecommendations(
           user_id
         );
-        const parsedRecommendations: Array<number> =
-          JSON.parse(recommendations);
-        resolve(parsedRecommendations);
+        let parsedRecommendations :string[] = [];
+        let parsedRecommendations_ :number[] = [];
+        if (recommendations !== null ){
+            parsedRecommendations = (recommendations.recommend).split("-");
+            parsedRecommendations_= parsedRecommendations.map(x=>
+              Number(x))
+        }
+        resolve(parsedRecommendations_);
       } catch (err) {
         reject(err);
       }

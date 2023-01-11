@@ -62,7 +62,6 @@ import {
 } from "./networks";
 import {
   HandleGetExplore,
-  HandleGetRecommendedUsers,
 } from "./explore";
 
 function NotificationRoutes(app: App): Router {
@@ -262,11 +261,6 @@ function ExploreRoutes(app: App): Router {
     "/stories",
     app.InHandler(CheckAllowance),
     app.InHandler(HandleSearches)
-  );
-  router.get(
-    "/recommendations",
-    app.InHandler(CheckAllowance),
-    app.InHandler(HandleGetRecommendedUsers)
   );
   router.get(
     "/explore",
