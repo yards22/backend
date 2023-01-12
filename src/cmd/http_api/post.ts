@@ -94,7 +94,7 @@ export const HandleGetPosts: RouteHandler = async (req, res, next, app) => {
     }
 
     if (type === "mine"){
-      const user_id_ :number = Number(req.query.user_id);
+      const user_id_ :number = Number(req.query.user_id|| user_id);
       const userPosts = await app.postManager.GetUserPostsById(user_id_,limit,offset);
          app.SendRes(res,{
           status:HerrorStatus.StatusOK,
