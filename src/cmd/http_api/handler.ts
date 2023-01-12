@@ -62,7 +62,6 @@ import {
 } from "./networks";
 import {
   HandleGetExplore,
-  HandleGetRecommendedUsers,
 } from "./explore";
 
 function NotificationRoutes(app: App): Router {
@@ -204,7 +203,11 @@ function PostRoutes(app: App): Router {
     app.InHandler(HandleDeletePost)
   );
 
-  router.get("/:type", app.InHandler(CheckAllowance), app.InHandler(HandleGetPosts));
+  router.get(
+    "/:type",
+    app.InHandler(CheckAllowance), 
+    app.InHandler(HandleGetPosts)
+  );
 
   router.post(
     "/shareToTimeline",
@@ -213,7 +216,7 @@ function PostRoutes(app: App): Router {
   );
 
   router.post(
-    "addToFavorites",
+    "/favourite",
     app.InHandler(CheckAllowance),
     app.InHandler(HandleAddToFavourites)
   );
@@ -254,19 +257,9 @@ function NetworkRoutes(app: App): Router {
 function ExploreRoutes(app: App): Router {
   const router = Router();
   router.get(
-    "/searchUsers",
-    app.InHandler(CheckAllowance),
-    app.InHandler(HandleSearches)
-  );
-  router.get(
     "/stories",
     app.InHandler(CheckAllowance),
     app.InHandler(HandleSearches)
-  );
-  router.get(
-    "/recommendations",
-    app.InHandler(CheckAllowance),
-    app.InHandler(HandleGetRecommendedUsers)
   );
   router.get(
     "/explore",
@@ -299,6 +292,11 @@ function MiscRoutes(app: App): Router {
     "/leaderboard",
     app.InHandler(CheckAllowance),
     app.InHandler(HandleGetLeaderBoard)
+  );
+  router.post(
+    "/search",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleSearches)
   );
   return router;
 }

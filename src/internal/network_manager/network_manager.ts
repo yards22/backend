@@ -3,6 +3,8 @@ import { parse } from "path";
 import { Herror } from "../../pkg/herror/herror";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 import ERecommends from "../entities/recommends";
+import { formatNetworkResponseRecommended, formatNetworkResponseTrending } from "../../util/responseFormat";
+import { ENetworkitem } from "../entities/networkitem";
 const prisma = new PrismaClient();
 
 interface IResponse {
@@ -91,8 +93,21 @@ export default class NetworkManager {
     });
   }
 
-  FollowersUpdate(user_id: number) {
+  FollowingUpdateDelete(user_id :number){
     return this.store.profile.update({
+      where: {
+        user_id,
+      },
+      data: {
+        following: {
+          decrement: 1,
+        },
+      },
+    });
+  }
+
+  FollowersUpdate(user_id: number) {
+     return this.store.profile.update({
       where: {
         user_id,
       },
@@ -104,7 +119,20 @@ export default class NetworkManager {
     });
   }
 
-  GetComputedRecommendations(user_id: number): Promise<ERecommends | null> {
+  FollowersUpdateDelete(user_id:number){
+    return this.store.profile.update({
+      where: {
+        user_id,
+      },
+      data: {
+        followers: {
+          decrement: 1,
+        },
+      },
+    });
+  }
+
+  async GetComputedRecommendations(user_id: number): Promise<ERecommends | null> {
     return this.store.userRecommendations.findUnique({
       where: {
         user_id,
@@ -112,8 +140,30 @@ export default class NetworkManager {
     });
   }
 
-  UpdateRecommendations(user_id: number, new_recommends: string): void {
-    this.store.userRecommendations.update({
+  async GetTrendingUsers(limit:number, offset:number){
+    return this.store.trendingUsers.findMany({
+       take:limit,
+       skip:offset,
+       include:{
+         user:{
+          select:{
+            mail_id:true,
+            Profile:{
+              select:{
+                username:true,
+                profile_image_uri:true,
+                user_id:true,
+                cric_index:true
+              }
+            }
+          }
+         }
+       }
+    })
+ }
+
+  async UpdateRecommendations(user_id: number, new_recommends: string){
+    return this.store.userRecommendations.update({
       where: {
         user_id,
       },
@@ -147,11 +197,13 @@ export default class NetworkManager {
         },
       },
       select: {
+        mail_id:true,
         Profile: {
           select: {
             username: true,
             profile_image_uri: true,
             user_id: true,
+            cric_index:true
           },
         },
       },
@@ -168,7 +220,7 @@ export default class NetworkManager {
   }> {
     return new Promise(async (resolve, reject) => {
       try {
-        const parsedRecommendations: Array<number> =
+        const parsedRecommendations: number[] =
           await this.PickAndParseRecommends(user_id);
 
         let truncatedRecommends = await this.GetRecommendedUsers(
@@ -176,12 +228,46 @@ export default class NetworkManager {
           limit,
           offset
         );
+        const trendingUsers = await this.GetTrendingUsers(limit,offset);
+        const followingUsers:any  = await this.GetFollowing(user_id);
+        let filteredUsers: ENetworkitem[] = [];
+        let uniqueR_ = new Set();
+        truncatedRecommends.forEach(r=>{
+            if(!uniqueR_.has(r.Profile?.user_id) && user_id!=r.Profile?.user_id){
+              let flag = true
+              followingUsers.forEach((x: any)=>{
+                   if(x.user_id === r.Profile?.user_id){
+                      flag=false;
+                   }
+              });
+              if(flag){
+                filteredUsers.push(formatNetworkResponseRecommended(r));
+                uniqueR_.add(r.Profile?.user_id);
+              }
+            }
+        })
+        trendingUsers.forEach(r=>{
+          if(!uniqueR_.has(r.user.Profile?.user_id) && user_id!=r.user.Profile?.user_id){
+            let flag = true;
+            followingUsers.forEach((x: any)=>{
+              if(x.user_id === r.user.Profile?.user_id){
+                 flag=false;
+              }
+            });
+            if(flag){
+              filteredUsers.push(formatNetworkResponseTrending(r));
+              uniqueR_.add(r.user.Profile?.user_id);
+            }
+        }
+        });
+
+
         resolve({
           responseStatus: {
             statusCode: HerrorStatus.StatusOK,
             message: "recommendations",
           },
-          recommended: truncatedRecommends,
+          recommended: filteredUsers,
         });
       } catch (err) {
         reject(err);
@@ -200,19 +286,10 @@ export default class NetworkManager {
         await prisma.$transaction([
           this.CreateConnection(user_id, following_id),
 
-          this.FollowingUpdate(following_id),
+          this.FollowingUpdate(user_id),
 
-          this.FollowersUpdate(user_id),
+          this.FollowersUpdate(following_id),
         ]);
-
-        // Recommendations Table updates .....
-        // const prevRecommends = await this.PickAndParseRecommends(user_id);
-        // const newRecommends = prevRecommends.filter(
-        //   (user_id) => user_id !== following_id
-        // );
-        // const newStringifiedRecommends = JSON.stringify(newRecommends);
-        // await this.UpdateRecommendations(user_id, newStringifiedRecommends);
-
         resolve({
           responseStatus: {
             statusCode: HerrorStatus.StatusCreated,
@@ -239,14 +316,23 @@ export default class NetworkManager {
   UnfollowUser(user_id: number, following_id: number) {
     return new Promise(async (resolve, reject) => {
       try {
-        await this.DeleteConnection(user_id, following_id);
+
+        await prisma.$transaction([
+          this.DeleteConnection(user_id, following_id),
+
+          this.FollowingUpdateDelete(user_id),
+
+          this.FollowersUpdateDelete(following_id),
+        ]);
+
+        
         resolve("successfully_deleted");
       } catch (err) {
         if (
           err instanceof Prisma.PrismaClientKnownRequestError &&
           err.code === "P2025"
         ) {
-          resolve("already  not following");
+          resolve("already_not_following");
         }
         reject(err);
       }
@@ -312,15 +398,20 @@ export default class NetworkManager {
     });
   }
 
-  PickAndParseRecommends(user_id: number): Promise<Array<number>> {
+  PickAndParseRecommends(user_id: number) : Promise<number[]>{
     return new Promise(async (resolve, reject) => {
       try {
         const recommendations: any = await this.GetComputedRecommendations(
           user_id
         );
-        const parsedRecommendations: Array<number> =
-          JSON.parse(recommendations);
-        resolve(parsedRecommendations);
+        let parsedRecommendations :string[] = [];
+        let parsedRecommendations_ :number[] = [];
+        if (recommendations !== null ){
+            parsedRecommendations = (recommendations.recommend).split("-");
+            parsedRecommendations_= parsedRecommendations.map(x=>
+              Number(x))
+        }
+        resolve(parsedRecommendations_);
       } catch (err) {
         reject(err);
       }

@@ -85,7 +85,7 @@ export const HandleGetPosts: RouteHandler = async (req, res, next, app) => {
       return ;
     }
     if (type === "trending"){
-      const posts = await app.postManager.GetTrendingPosts(limit, offset);
+      const posts = await app.postManager.GetTrendingPosts(user_id,limit, offset);
       app.SendRes(res, {
         status: 200,
         data: posts,
@@ -94,41 +94,22 @@ export const HandleGetPosts: RouteHandler = async (req, res, next, app) => {
     }
 
     if (type === "mine"){
-      if(username===undefined){
-         const userPosts = await app.postManager.GetUserPostsById(user_id,limit,offset);
+      const user_id_ :number = Number(req.query.user_id|| user_id);
+      const userPosts = await app.postManager.GetUserPostsById(user_id_,limit,offset);
          app.SendRes(res,{
           status:HerrorStatus.StatusOK,
           data:userPosts
          });
          return ;
-      }
-      else{
-        const userPosts = await app.postManager.GetUserPostsByUsername(username,limit,offset); 
-        app.SendRes(res,{
-          status:HerrorStatus.StatusOK,
-          data:userPosts
-         });
-         return;
-      }
     }
 
     if(type === "fav"){
-      if(username===undefined){
-        const userPosts = await app .postManager.GetStaredPostsById(user_id,limit,offset);
-        app.SendRes(res,{
-         status:HerrorStatus.StatusOK,
-         data:userPosts
-        });
-        return ;
-     }
-     else{
-       const userPosts = await app .postManager.GetStaredPostsByUsername(username,limit,offset);
-        app.SendRes(res,{
-         status:HerrorStatus.StatusOK,
-         data:userPosts
-        });
-        return ;
-     }
+      const userPosts = await app .postManager.GetStarredPostsById(user_id,limit,offset);
+      app.SendRes(res,{
+       status:HerrorStatus.StatusOK,
+       data:userPosts
+      });
+      return ;
     }
     
   } catch (err) {
@@ -136,12 +117,7 @@ export const HandleGetPosts: RouteHandler = async (req, res, next, app) => {
   }
 };
 
-export const HandleShareToTimeline: RouteHandler = async (
-  req,
-  res,
-  next,
-  app
-) => {
+export const HandleShareToTimeline: RouteHandler = async (req,res,next,app) => {
   const user_id: number = Number(req.context.user_id);
   const post_id: bigint = BigInt(req.body.post_id);
   const content: string = String(req.body.content);
@@ -155,12 +131,7 @@ export const HandleShareToTimeline: RouteHandler = async (
   }
 };
 
-export const HandleAddToFavourites: RouteHandler = async (
-  req,
-  res,
-  next,
-  app
-) => {
+export const HandleAddToFavourites: RouteHandler = async (req,res,next,app) => {
   const user_id: number = Number(req.context.user_id);
   const post_id: bigint = BigInt(req.body.post_id);
 
@@ -168,7 +139,7 @@ export const HandleAddToFavourites: RouteHandler = async (
     next(new Herror("post_id missing", HerrorStatus.StatusBadRequest));
   } else {
     try {
-      const data = await app.postManager.BookmarkPosts(user_id, post_id);
+      const data = await app.postManager.createStarredPosts(user_id, post_id);
       app.SendRes(res, {
         status: 200,
         data,
@@ -179,12 +150,26 @@ export const HandleAddToFavourites: RouteHandler = async (
   }
 };
 
-export const HandlePostsMetaData: RouteHandler = async (
-  req,
-  res,
-  next,
-  app
-) => {
+export const HandleDeleteFromFavourites:RouteHandler = async(req,res,next,app)=>{
+  const user_id: number = Number(req.context.user_id);
+  const post_id: bigint = BigInt(req.body.post_id);
+
+  if (post_id === undefined || post_id === null) {
+    next(new Herror("post_id missing", HerrorStatus.StatusBadRequest));
+  } else {
+    try {
+      const data = await app.postManager.deleteStarredPosts(user_id, post_id);
+      app.SendRes(res, {
+        status: 200,
+        data,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+}
+
+export const HandlePostsMetaData: RouteHandler = async (req,res,next,app) => {
   const user_id: number = Number(req.context.user_id);
   const post_ids = req.body.post_ids as bigint[];
   console.log(post_ids);
