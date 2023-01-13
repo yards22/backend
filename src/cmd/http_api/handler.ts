@@ -215,7 +215,7 @@ function PostRoutes(app: App): Router {
     app.InHandler(HandleShareToTimeline)
   );
 
-  router.post(
+  router.put(
     "/favourite",
     app.InHandler(CheckAllowance),
     app.InHandler(HandleAddToFavourites)
