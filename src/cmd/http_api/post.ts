@@ -71,53 +71,69 @@ export const HandleDeletePost: RouteHandler = async (req, res, next, app) => {
 
 export const HandleGetPosts: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
-  const limit: number = Number(req.query.limit||10);
-  const offset: number = Number(req.query.offset||0);
-  const type : string  = req.params.type
-  const username:string = req.query.username as string;
+  const limit: number = Number(req.query.limit || 10);
+  const offset: number = Number(req.query.offset || 0);
+  const type: string = req.params.type;
+  const username: string = req.query.username as string;
   try {
-    if(type === "feed"){
+    if (type === "feed") {
       const posts = await app.postManager.GetUsersFeed(user_id, limit, offset);
       app.SendRes(res, {
         status: 200,
         data: posts,
       });
-      return ;
+      return;
     }
-    if (type === "trending"){
-      const posts = await app.postManager.GetTrendingPosts(user_id,limit, offset);
+    if (type === "trending") {
+      const posts = await app.postManager.GetTrendingPosts(
+        user_id,
+        limit,
+        offset
+      );
       app.SendRes(res, {
         status: 200,
         data: posts,
       });
-      return ;
+      return;
     }
 
-    if (type === "mine"){
-      const user_id_ :number = Number(req.query.user_id|| user_id);
-      const userPosts = await app.postManager.GetUserPostsById(user_id_,limit,offset);
-         app.SendRes(res,{
-          status:HerrorStatus.StatusOK,
-          data:userPosts
-         });
-         return ;
-    }
-
-    if(type === "fav"){
-      const userPosts = await app .postManager.GetStarredPostsById(user_id,limit,offset);
-      app.SendRes(res,{
-       status:HerrorStatus.StatusOK,
-       data:userPosts
+    if (type === "mine") {
+      const user_id_: number = Number(req.query.user_id || user_id);
+      const userPosts = await app.postManager.GetUserPostsById(
+        user_id_,
+        limit,
+        offset
+      );
+      app.SendRes(res, {
+        status: HerrorStatus.StatusOK,
+        data: userPosts,
       });
-      return ;
+      return;
     }
-    
+
+    if (type === "fav") {
+      const userPosts = await app.postManager.GetStarredPostsById(
+        user_id,
+        limit,
+        offset
+      );
+      app.SendRes(res, {
+        status: HerrorStatus.StatusOK,
+        data: userPosts,
+      });
+      return;
+    }
   } catch (err) {
     next(err);
   }
 };
 
-export const HandleShareToTimeline: RouteHandler = async (req,res,next,app) => {
+export const HandleShareToTimeline: RouteHandler = async (
+  req,
+  res,
+  next,
+  app
+) => {
   const user_id: number = Number(req.context.user_id);
   const post_id: bigint = BigInt(req.body.post_id);
   const content: string = String(req.body.content);
@@ -131,18 +147,24 @@ export const HandleShareToTimeline: RouteHandler = async (req,res,next,app) => {
   }
 };
 
-export const HandleAddToFavourites: RouteHandler = async (req,res,next,app) => {
+export const HandleAddToFavourites: RouteHandler = async (
+  req,
+  res,
+  next,
+  app
+) => {
   const user_id: number = Number(req.context.user_id);
   const post_id: bigint = BigInt(req.body.post_id);
+  const is_fav = req.body.is_fav;
 
   if (post_id === undefined || post_id === null) {
     next(new Herror("post_id missing", HerrorStatus.StatusBadRequest));
   } else {
     try {
-      const data = await app.postManager.createStarredPosts(user_id, post_id);
+      if (is_fav) await app.postManager.createStarredPosts(user_id, post_id);
+      else await app.postManager.deleteStarredPosts(user_id, post_id);
       app.SendRes(res, {
         status: 200,
-        data,
       });
     } catch (err) {
       next(err);
@@ -150,26 +172,12 @@ export const HandleAddToFavourites: RouteHandler = async (req,res,next,app) => {
   }
 };
 
-export const HandleDeleteFromFavourites:RouteHandler = async(req,res,next,app)=>{
-  const user_id: number = Number(req.context.user_id);
-  const post_id: bigint = BigInt(req.body.post_id);
-
-  if (post_id === undefined || post_id === null) {
-    next(new Herror("post_id missing", HerrorStatus.StatusBadRequest));
-  } else {
-    try {
-      const data = await app.postManager.deleteStarredPosts(user_id, post_id);
-      app.SendRes(res, {
-        status: 200,
-        data,
-      });
-    } catch (err) {
-      next(err);
-    }
-  }
-}
-
-export const HandlePostsMetaData: RouteHandler = async (req,res,next,app) => {
+export const HandlePostsMetaData: RouteHandler = async (
+  req,
+  res,
+  next,
+  app
+) => {
   const user_id: number = Number(req.context.user_id);
   const post_ids = req.body.post_ids as bigint[];
   console.log(post_ids);
