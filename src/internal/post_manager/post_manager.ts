@@ -551,7 +551,7 @@ export default class PostManager {
         });
 
         let favourite_: IFavouriteData[] = [];
-        const isFavouriteData = await this.isLiked(post_ids, user_id);
+        const isFavouriteData = await this.isFavourite(post_ids, user_id);
         post_ids.forEach((post_id) => {
           const isFavourite: { post_id: bigint }[] = isFavouriteData.filter(
             (x) => BigInt(x.post_id) === post_id
