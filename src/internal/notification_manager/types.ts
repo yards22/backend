@@ -1,4 +1,5 @@
 import { NotificationStatus } from "@prisma/client";
+import { ToJson } from "../../util/json";
 export type ENotificationStatus = NotificationStatus;
 
 export abstract class BaseNotification {
@@ -18,7 +19,7 @@ export class LikeNotification extends BaseNotification {
     this.post_id = post_id;
   }
   ToJson(): string {
-    return JSON.stringify({
+    return ToJson({
       post_id: this.post_id,
       type: this.type,
       by: this.by,
@@ -34,7 +35,7 @@ export class CommentNotification extends BaseNotification {
     this.post_id = post_id;
   }
   ToJson(): string {
-    return JSON.stringify({
+    return ToJson({
       post_id: this.post_id,
       type: this.type,
       by: this.by,
@@ -48,7 +49,7 @@ export class FollowNotification extends BaseNotification {
     this.by = by;
   }
   ToJson(): string {
-    return JSON.stringify({ type: this.type, by: this.by });
+    return ToJson({ type: this.type, by: this.by });
   }
 }
 
