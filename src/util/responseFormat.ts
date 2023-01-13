@@ -41,6 +41,27 @@ export function formatFeedResponse(allPosts:any):EFeeditem[]{
     return posts_
 }
 
+export function formatFavResponse(allPosts:any):EFeeditem[]{
+    let posts_:EFeeditem[] = [];
+    allPosts.forEach((x: any)=>{
+       let feed:EFeeditem = {
+        user_id:x.post.user_id,
+        post_id:x.post.post_id,
+        content:x.post.content,
+        media:JSON.parse(x.post.media),
+        original_id:x.original_id,
+        created_at:x.post.created_at,
+        updated_at:x.post.updated_at,
+        likes:x.post._count.Likes,
+        username:x.post.user.Profile.username,
+        profile_pic_ref:x.post.user.Profile.profile_image_uri
+       }  
+       posts_.push(feed);
+    });
+    return posts_
+}
+
+
 export function formatFeedResponseUsername(allPosts:any,profile_image_uri:string,username:string):EFeeditem[]{
     let posts_:EFeeditem[] = [];
     allPosts.forEach((x: any)=>{

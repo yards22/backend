@@ -10,7 +10,7 @@ import EPost from "../entities/post";
 import { ReconnectStrategyError } from "redis";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 import {EFeedMeta, EFeeditem, EPostFinal} from "../entities/feeditem";
-import {formatFeedResponse, formatFeedResponseUsername, formatTrendingFeedResponse} from "../../util/responseFormat"
+import {formatFavResponse, formatFeedResponse, formatFeedResponseUsername, formatTrendingFeedResponse} from "../../util/responseFormat"
 import { detailsMixers } from "../../util/postDetailsMixer";
 
 const prisma = new PrismaClient();
@@ -704,7 +704,7 @@ async GetStarredPostsById(user_id:number,limit:number,offset:number){
       let post_ids:bigint [] = []
       res.forEach((post:any)=>post_ids.push(BigInt(post.post_id)));
       const Metadata: EFeedMeta = await this.GetPostMetadata(post_ids,user_id);
-      const posts : EFeeditem[] = formatFeedResponse(res);
+      const posts : EFeeditem[] = formatFavResponse(res);
       const finalPosts:EPostFinal[] = detailsMixers(posts,Metadata)
       resolve(finalPosts);
    }
