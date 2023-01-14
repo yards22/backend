@@ -211,7 +211,7 @@ export default class NetworkManager {
         const recommendAndTrendingUsersMap = new Map<number, ENetworkItem>();
 
         recommendUsers.forEach((v) => {
-          if (v.Profile?.user_id)
+          if (v.Profile?.user_id && v.Profile.user_id !== user_id)
             recommendAndTrendingUsersMap.set(v.Profile?.user_id, {
               user_id: v.Profile?.user_id,
               username: v.Profile?.username,
@@ -221,7 +221,7 @@ export default class NetworkManager {
         });
 
         trendingUsers.forEach((v) => {
-          if (v.user.Profile?.user_id)
+          if (v.user.Profile?.user_id && v.user.Profile.user_id !== user_id)
             recommendAndTrendingUsersMap.set(v.user.Profile.user_id, {
               user_id: v.user.Profile?.user_id,
               username: v.user.Profile?.username,
