@@ -49,6 +49,7 @@ export default class NetworkManager {
                 user_id: true,
                 profile_image_uri: true,
                 username: true,
+                cric_index: true,
               },
             },
           },
@@ -332,17 +333,13 @@ export default class NetworkManager {
   GetFollowing(user_id: number) {
     return new Promise(async (resolve, reject) => {
       try {
-        const _followingList = await this.GetWhoAmIFollowing(user_id);
-        const followingList: {
-          username: string;
-          profile_pic_uri: string | null;
-          user_id: number;
-        }[] = [];
-        _followingList.forEach((item, index) => {
+        const followingList: ENetworkItem[] = [];
+        (await this.GetWhoAmIFollowing(user_id)).forEach((item, index) => {
           if (item.following.Profile?.username)
             followingList.push({
               username: item.following.Profile.username,
-              profile_pic_uri: item.following.Profile.profile_image_uri,
+              cric_index: item.following.Profile.cric_index,
+              profile_image_uri: item.following.Profile.profile_image_uri,
               user_id: item.following.Profile.user_id,
             });
         });
