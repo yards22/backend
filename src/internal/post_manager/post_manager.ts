@@ -71,8 +71,8 @@ export default class PostManager {
 
   async Create(
     user_id: number,
-    content: string,
-    medias: Buffer[]
+    medias: Buffer[],
+    content?: string,
   ): Promise<EPost> {
     return new Promise(async (resolve, reject) => {
       try {
