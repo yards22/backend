@@ -373,7 +373,11 @@ export default class NetworkManager {
         );
         if (!recommendations) return resolve([]);
         if (recommendations.recommend === "null") return resolve([]);
-        resolve(JSON.parse(recommendations.recommend) as number[]);
+        resolve(
+          (JSON.parse(recommendations.recommend) as string[]).map((v) =>
+            Number(v)
+          )
+        );
       } catch (err) {
         reject(err);
       }

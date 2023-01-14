@@ -172,17 +172,18 @@ model PostRecommendations {
 }
 
 model TrendingUsers {
-  tu_id   BigInt @id @default(autoincrement()) @db.BigInt
-  user    Users  @relation(fields: [user_id], references: [user_id])
-  user_id Int
+  tu_id      BigInt   @id @default(autoincrement()) @db.BigInt
+  user       Users    @relation(fields: [user_id], references: [user_id])
+  user_id    Int
+  created_at DateTime @default(now())
 
   @@map("trending_users")
 }
 
 model TrendingPosts {
-  tp_id   BigInt @id @default(autoincrement()) @db.BigInt
-  post    Posts  @relation(fields: [post_id], references: [post_id])
-  post_id BigInt
+  tp_id      BigInt   @id @default(autoincrement()) @db.BigInt
+  post       Posts    @relation(fields: [post_id], references: [post_id])
+  post_id    BigInt
   created_at DateTime @default(now())
 
   @@map("trending_posts")
