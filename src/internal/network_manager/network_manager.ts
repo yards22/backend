@@ -1,13 +1,6 @@
 import { Prisma, PrismaClient } from "@prisma/client";
-import { parse } from "path";
-import { Herror } from "../../pkg/herror/herror";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
-import {
-  formatNetworkResponseRecommended,
-  formatNetworkResponseTrending,
-} from "../../util/responseFormat";
 import { ENetworkItem } from "../entities/networkitem";
-import EUserRecommendations from "../entities/recommends";
 const prisma = new PrismaClient();
 
 interface IResponse {
