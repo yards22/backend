@@ -6,16 +6,18 @@ export const GetRecommendations: RouteHandler = async (req, res, next, app) => {
   const user_id = Number(req.context.user_id);
   const offset = Number(req.body.offset || 0);
   const limit = Number(req.body.limit || 10);
-  if (user_id !== undefined) {
-    const { responseStatus, recommended } =
-      await app.networkManager.GetRecommendations(user_id, offset, limit);
+  try {
+    const recommended = await app.networkManager.GetRecommendations(
+      user_id,
+      offset,
+      limit
+    );
     app.SendRes(res, {
-      status: responseStatus.statusCode,
+      status: 200,
       data: recommended,
-      message: responseStatus.message,
     });
-  } else {
-    next(new Herror("BadRequest", HerrorStatus.StatusBadRequest));
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -70,7 +72,6 @@ export const HandleGetFollowers: RouteHandler = async (req, res, next, app) => {
   const user_id = Number(req.context.user_id);
   if (user_id !== undefined) {
     const followerList = await app.networkManager.GetFollowers(user_id);
-    console.log(followerList);
     app.SendRes(res, {
       status: 200,
       data: followerList,
