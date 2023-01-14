@@ -15,8 +15,11 @@ export const HandleUpdateProfile: RouteHandler = async (
   if (req.file && req.file.buffer) profile_buffer = req.file.buffer;
 
   const username: string = req.body.username;
-  const interests: string = req.body.interests;
+  if (!validateUsername(username)) {
+    return next(new Herror("invalid username", HerrorStatus.StatusBadRequest));
+  }
 
+  const interests: string = req.body.interests;
   const { responseStatus, profileData } =
     await app.profileManager.UpdateProfileDetails(
       user_id,
@@ -92,7 +95,6 @@ export const HandleGetUserProfileInfo: RouteHandler = async (
   }
 };
 
-
 export const HandleGetCheckUsername: RouteHandler = async (
   req,
   res,
@@ -100,7 +102,7 @@ export const HandleGetCheckUsername: RouteHandler = async (
   app
 ) => {
   const username = req.body.username;
-  if (username != undefined) {
+  if (validateUsername(username)) {
     try {
       const { responseStatus } = await app.profileManager.CheckUsername(
         username
@@ -116,3 +118,8 @@ export const HandleGetCheckUsername: RouteHandler = async (
     next(new Herror("BadRequest", HerrorStatus.StatusBadRequest));
   }
 };
+
+function validateUsername(username: string | undefined | null): boolean {
+  if (!username) return false;
+  return new RegExp("^[A-Za-z][A-Za-z0-9_]{7,29}$").test(username);
+}

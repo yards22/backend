@@ -6,7 +6,7 @@ import RouteHandler from "./types";
 
 export const HandleCreatePost: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
-  const content: string = String(req.body.content);
+  const content: string = req.body.content;
   const images = req.files as Array<any>;
   let image_buffer: Buffer[] = [];
   for (let i = 0; i < images?.length; i++) {
@@ -14,7 +14,7 @@ export const HandleCreatePost: RouteHandler = async (req, res, next, app) => {
   }
 
   try {
-    const post = await app.postManager.Create(user_id, content, image_buffer);
+    const post = await app.postManager.Create(user_id, image_buffer, content);
     app.SendRes(res, {
       status: 201,
       data: post,

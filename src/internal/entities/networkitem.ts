@@ -1,6 +1,6 @@
-export interface ENetworkitem{
-    user_id :number;
-    username :string;
-    profile_image_uri:string;
-    cric_index : number;
+export interface ENetworkItem {
+  user_id: number;
+  username: string;
+  profile_image_uri: string | null;
+  cric_index: number;
 }
