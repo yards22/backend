@@ -101,6 +101,16 @@ function AuthRoutes(app: App): Router {
 
 function ProfileRoutes(app: App): Router {
   const router = Router();
+  router.get(
+    "/following",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleGetFollowing)
+  )
+  router.get(
+    "/followers",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleGetFollowers)
+  )
   router.put(
     "/",
     app.InHandler(CheckAllowance),

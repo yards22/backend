@@ -71,7 +71,7 @@ export const HandleRemoveConnection: RouteHandler = async (
 export const HandleGetFollowers: RouteHandler = async (req, res, next, app) => {
   const user_id = Number(req.context.user_id);
   if (user_id !== undefined) {
-    const followerList = await app.networkManager.GetFollowers(user_id);
+    const followerList = await app.networkManager.GetFollowersUsername(user_id);
     app.SendRes(res, {
       status: 200,
       data: followerList,
@@ -84,7 +84,8 @@ export const HandleGetFollowers: RouteHandler = async (req, res, next, app) => {
 export const HandleGetFollowing: RouteHandler = async (req, res, next, app) => {
   const user_id = Number(req.context.user_id);
   if (user_id !== undefined) {
-    const followingList = await app.networkManager.GetFollowing(user_id);
+    const followingList = await app.networkManager.GetFollowingUsername(user_id);
+    console.log(followingList)
     app.SendRes(res, {
       status: 200,
       data: followingList,

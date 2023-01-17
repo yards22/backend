@@ -36,6 +36,41 @@ export default class NetworkManager {
     });
   }
 
+  async GetFollowingUsername(user_id: number){
+   return  new Promise(async (resolve,reject)=>{
+      try{
+        const followingList = await this.GetWhoAmIFollowing(user_id);
+        console.log("This is the One",followingList)
+        let finalList:string [] = [];
+        followingList.forEach(item=>{
+          if(item.following.Profile?.username)
+          finalList.push(item.following.Profile?.username)
+        })
+        resolve(finalList);
+      }
+      catch(err){
+        reject(err);
+      }
+    })
+  }
+
+  async GetFollowersUsername(user_id: number){
+    return new Promise(async (resolve,reject)=>{
+      try{
+        const followersList = await this.GetMyFollowers(user_id);
+        let finalList:string[] = [];
+        followersList.forEach(item=>{
+          if(item.follower.Profile?.username)
+          finalList.push(item.follower.Profile?.username)
+        })
+        resolve(finalList);
+      }
+      catch(err){
+        reject(err);
+      }
+    })
+  }
+
   GetWhoAmIFollowing(user_id: number) {
     return this.store.networks.findMany({
       where: {
