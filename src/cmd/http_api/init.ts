@@ -17,15 +17,24 @@ export function ServerInit(): Express {
     next();
   });
   srv.enable("trust proxy");
-  srv.use(
-    cors({
-      origin: process.env.REACT_ORIGIN,
-      credentials: true,
-    })
+  const origins = (process.env.REACT_ORIGIN || "http://localhost:3000").split(
+    ","
   );
 
+  console.log(origins);
+
+  const corsOptions = {
+    origin: function (origin: any, callback: any) {
+      if (origins.indexOf(origin) !== -1 || !origin) {
+        callback(null, true);
+      } else {
+        callback(new Herror("CORS blocked", HerrorStatus.StatusNotAcceptable));
+      }
+    },
+  };
+  srv.use(cors(corsOptions));
+
   srv.use(express.json());
-  
   srv.use(express.urlencoded({ extended: true }));
   return srv;
 }
