@@ -4,6 +4,7 @@ import ProfileManager from "../../internal/profile_manager/profile_manager";
 import HandleRoutesFor from "./handler";
 import {
   DBInit,
+  MailerInit,
   RedisInit,
   RemoteFileStorageInit,
   ServerInit,
@@ -19,6 +20,7 @@ import CommentManager from "../../internal/comment_manager/comment_manager";
 import NetworkManager from "../../internal/network_manager/network_manager";
 import MiscManager from "../../internal/misc_manager/misc_manager";
 import ExploreManager from "../../internal/explore_manager/explore_manager";
+import Mailer from "../../pkg/mailer/mailer";
 
 async function Init() {
   const srv = ServerInit();
@@ -28,9 +30,10 @@ async function Init() {
   const imageResolver = new ImageResolver({ h: 400, w: 400 }, "jpg");
   const localFileStorage = new LocalFileStorage();
   const remoteFileStorage = RemoteFileStorageInit();
+  const mailer = MailerInit();
   // managers
   const notificationManager = new NotificationManager(db);
-  const authManager = new AuthManager(db, redis);
+  const authManager = new AuthManager(db, redis, mailer);
   const profileManager = new ProfileManager(
     db,
     imageResolver,
@@ -51,7 +54,8 @@ async function Init() {
     db,
     imageResolver,
     remoteFileStorage
-    );
+  );
+
   const app = new App(
     srv,
     authManager,
@@ -67,7 +71,8 @@ async function Init() {
     db,
     imageResolver,
     localFileStorage,
-    remoteFileStorage
+    remoteFileStorage,
+    mailer
   );
   HandleRoutesFor(app);
   SinkInit(app);

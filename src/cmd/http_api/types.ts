@@ -14,6 +14,7 @@ import CommentManager from "../../internal/comment_manager/comment_manager";
 import NetworkManager from "../../internal/network_manager/network_manager";
 import MiscManager from "../../internal/misc_manager/misc_manager";
 import ExploreManager from "../../internal/explore_manager/explore_manager";
+import Mailer from "../../pkg/mailer/mailer";
 interface CustomRequest extends Request {
   context: any;
 }
@@ -41,6 +42,7 @@ export class App {
   imageResolver: ImageResolver;
   localFileStorage: IFileStorage;
   remoteFileStorage: IFileStorage;
+  mailer: Mailer;
   constructor(
     srv: Express,
     authManager: AuthManager,
@@ -56,7 +58,8 @@ export class App {
     db: any,
     imageResolver: ImageResolver,
     localFileStore: IFileStorage,
-    remoteFileStorage: IFileStorage
+    remoteFileStorage: IFileStorage,
+    mailer: Mailer
   ) {
     this.srv = srv;
     this.notificationManager = notificationManager;
@@ -73,6 +76,7 @@ export class App {
     this.imageResolver = imageResolver;
     this.localFileStorage = localFileStore;
     this.remoteFileStorage = remoteFileStorage;
+    this.mailer = mailer;
   }
   InHandler(handler: RouteHandler) {
     return (req: Request, res: Response, next: NextFunction) => {

@@ -8,6 +8,7 @@ import cors from "cors";
 import { RedisClientType } from "@redis/client";
 import { createClient } from "redis";
 import { S3FileStorage } from "../../pkg/file_storage/s3_file_storage";
+import Mailer from "../../pkg/mailer/mailer";
 
 // server init
 export function ServerInit(): Express {
@@ -64,6 +65,20 @@ export async function RedisInit() {
   } catch (err) {
     throw err;
   }
+}
+
+export function MailerInit() {
+  const MAIL_HOST = process.env.MAIL_HOST;
+  const MAIL_ID = process.env.MAIL_ID;
+  const MAIL_PASSWORD = process.env.MAIL_PASSWORD;
+  const MAIL_PORT = process.env.MAIL_PORT;
+
+  return new Mailer(
+    MAIL_HOST || "",
+    Number(MAIL_PORT),
+    MAIL_ID || "",
+    MAIL_PASSWORD || ""
+  );
 }
 
 export function RemoteFileStorageInit() {
