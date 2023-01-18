@@ -1,11 +1,11 @@
-import nodemailer from "nodemailer";
+import { createTransport, Transporter } from "nodemailer";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
 export default class Mailer {
   private host: string;
   private port: number;
   private id: string;
   private password: string;
-  private transporter: nodemailer.Transporter<SMTPTransport.SentMessageInfo>;
+  private transporter: Transporter<SMTPTransport.SentMessageInfo>;
 
   constructor(host: string, port: number, id: string, password: string) {
     this.host = host;
@@ -13,8 +13,9 @@ export default class Mailer {
     this.id = id;
     this.port = port;
 
-    this.transporter = nodemailer.createTransport({
+    const options = {
       host: this.host,
+      pool: true,
       port: port,
       secure: false,
       requireTLS: false,
@@ -22,7 +23,8 @@ export default class Mailer {
         user: this.id,
         pass: this.password,
       },
-    });
+    };
+    this.transporter = createTransport(options);
   }
 
   Send(to: string, subject: string, body: string): Promise<void> {
