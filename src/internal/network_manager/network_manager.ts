@@ -36,6 +36,41 @@ export default class NetworkManager {
     });
   }
 
+  async GetFollowingUsername(user_id: number){
+   return  new Promise(async (resolve,reject)=>{
+      try{
+        const followingList = await this.GetWhoAmIFollowing(user_id);
+        console.log("This is the One",followingList)
+        let finalList:string [] = [];
+        followingList.forEach(item=>{
+          if(item.following.Profile?.username)
+          finalList.push(item.following.Profile?.username)
+        })
+        resolve(finalList);
+      }
+      catch(err){
+        reject(err);
+      }
+    })
+  }
+
+  async GetFollowersUsername(user_id: number){
+    return new Promise(async (resolve,reject)=>{
+      try{
+        const followersList = await this.GetMyFollowers(user_id);
+        let finalList:string[] = [];
+        followersList.forEach(item=>{
+          if(item.follower.Profile?.username)
+          finalList.push(item.follower.Profile?.username)
+        })
+        resolve(finalList);
+      }
+      catch(err){
+        reject(err);
+      }
+    })
+  }
+
   GetWhoAmIFollowing(user_id: number) {
     return this.store.networks.findMany({
       where: {
@@ -137,7 +172,6 @@ export default class NetworkManager {
       include: {
         user: {
           select: {
-            mail_id: true,
             Profile: {
               select: {
                 username: true,
@@ -341,6 +375,94 @@ export default class NetworkManager {
               cric_index: item.following.Profile.cric_index,
               profile_image_uri: item.following.Profile.profile_image_uri,
               user_id: item.following.Profile.user_id,
+            });
+        });
+        resolve(followingList);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
+
+  GetFollowingByUsername(username: string) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const followingList: ENetworkItem[] = [];
+        (
+          await this.store.networks.findMany({
+            where: {
+              follower: {
+                Profile: {
+                  username: username,
+                },
+              },
+            },
+            include: {
+              following: {
+                include: {
+                  Profile: {
+                    select: {
+                      username: true,
+                      profile_image_uri: true,
+                      user_id: true,
+                      cric_index: true,
+                    },
+                  },
+                },
+              },
+            },
+          })
+        ).forEach((item, index) => {
+          if (item.following.Profile?.username)
+            followingList.push({
+              username: item.following.Profile.username,
+              cric_index: item.following.Profile.cric_index,
+              profile_image_uri: item.following.Profile.profile_image_uri,
+              user_id: item.following.Profile.user_id,
+            });
+        });
+        resolve(followingList);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
+
+  GetFollowersByUsername(username: string) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const followingList: ENetworkItem[] = [];
+        (
+          await this.store.networks.findMany({
+            where: {
+              following: {
+                Profile: {
+                  username: username,
+                },
+              },
+            },
+            include: {
+              follower: {
+                include: {
+                  Profile: {
+                    select: {
+                      username: true,
+                      profile_image_uri: true,
+                      user_id: true,
+                      cric_index: true,
+                    },
+                  },
+                },
+              },
+            },
+          })
+        ).forEach((item, index) => {
+          if (item.follower.Profile?.username)
+            followingList.push({
+              username: item.follower.Profile.username,
+              cric_index: item.follower.Profile.cric_index,
+              profile_image_uri: item.follower.Profile.profile_image_uri,
+              user_id: item.follower.Profile.user_id,
             });
         });
         resolve(followingList);

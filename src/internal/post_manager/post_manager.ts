@@ -327,15 +327,44 @@ export default class PostManager {
     });
   }
 
-  async GetFollowing(user_id: number) {
+  GetFollowing(user_id:number){
     return this.store.networks.findMany({
-      where: {
-        follower_id: user_id,
+      where:{
+        follower_id:user_id
       },
-      select: {
-        following_id: true,
-      },
+      select:{
+         following_id:true
+      }
     });
+  }
+
+  async GetFollowingUsername(user_id: number){
+    new Promise(async (resolve,reject)=>{
+      try{
+        const followingList = await this.store.networks.findMany({
+          where: {
+            follower_id: user_id,
+          },
+          include: {
+            following:{
+               include:{
+                Profile:{
+                  select:{
+                    username:true
+                  }
+                }
+               }
+            }
+          },
+        });
+        let finalList:string[];
+        followingList.forEach(item=>finalList.push(item.following.Profile?.username as string))
+        resolve(followingList);
+      }
+      catch(err){
+        reject(err);
+      }
+    })
   }
 
   async GetPostsOfUsers(users: any, limit: number, offset: number) {
@@ -528,7 +557,7 @@ export default class PostManager {
 
   async GetPostMetadata(
     post_ids: bigint[],
-    user_id: number
+    user_id :number
   ): Promise<{
     isLiked: ILikedData[];
     isFavourite: IFavouriteData[];
@@ -654,10 +683,10 @@ GetUserPostsById_(user_id: number, limit: number, offset: number) {
   });
 }
 
-async GetUserPostsById(user_id:number,limit:number,offset:number){
+async GetUserPostsById(user_id_:number,user_id:number,limit:number,offset:number){
   return new Promise(async(resolve,reject)=>{
    try{
-      const res = await this.GetUserPostsById_(user_id,limit,offset);
+      const res = await this.GetUserPostsById_(user_id_,limit,offset);
       let post_ids:bigint [] = []
       res.forEach((post:any)=>post_ids.push(BigInt(post.post_id)));
       const Metadata: EFeedMeta = await this.GetPostMetadata(post_ids,user_id);

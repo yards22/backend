@@ -186,7 +186,6 @@ CREATE TABLE `polls_reaction` (
 CREATE TABLE `stories` (
     `story_id` INTEGER NOT NULL AUTO_INCREMENT,
     `user_id` INTEGER NOT NULL,
-    `title` VARCHAR(191) NOT NULL,
     `content` VARCHAR(191) NOT NULL,
     `media` VARCHAR(191) NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),

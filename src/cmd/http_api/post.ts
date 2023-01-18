@@ -101,6 +101,7 @@ export const HandleGetPosts: RouteHandler = async (req, res, next, app) => {
       const user_id_: number = Number(req.query.user_id || user_id);
       const userPosts = await app.postManager.GetUserPostsById(
         user_id_,
+        user_id,
         limit,
         offset
       );
