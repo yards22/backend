@@ -38,6 +38,23 @@ export const HandleGetNotification: RouteHandler = (req, res, next, app) => {
     });
 };
 
+export const HandleGetNotificationUsernames: RouteHandler = async (
+  req,
+  res,
+  next,
+  app
+) => {
+  const user_ids = req.body.user_ids;
+  try {
+    const usernames = await app.notificationManager.UsernameForNotification(
+      user_ids
+    );
+    app.SendRes(res, { status: 200, data: usernames });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const HandleUpdateNotificationStatus: RouteHandler = (
   req,
   res,

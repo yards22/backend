@@ -12,7 +12,7 @@ export default class NotificationManager {
     return this.store.notifications.create({
       data: {
         for_id: creatorOfPost,
-        entity: "post",
+        entity: "POST",
         status: "Unseen",
         triggered_by_id: whoLiked,
         type: "LIKE",
@@ -24,7 +24,7 @@ export default class NotificationManager {
   async UnLikePost(whoUnLiked: number, postId: bigint) {
     return this.store.notifications.deleteMany({
       where: {
-        entity: "post",
+        entity: "POST",
         triggered_by_id: whoUnLiked,
         type: "LIKE",
         entity_identifier: postId.toString(),
@@ -40,7 +40,7 @@ export default class NotificationManager {
     return this.store.notifications.create({
       data: {
         for_id: creatorOfPost,
-        entity: "post",
+        entity: "POST",
         status: "Unseen",
         triggered_by_id: whoCommented,
         type: "COMMENT",
@@ -120,5 +120,15 @@ export default class NotificationManager {
     } catch (err) {
       throw err;
     }
+  }
+
+  async UsernameForNotification(user_ids: number) {
+    return this.store.profile.findMany({
+      where: { user_id: { in: user_ids } },
+      select: {
+        username: true,
+        user_id: true,
+      },
+    });
   }
 }
