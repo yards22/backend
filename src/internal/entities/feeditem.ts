@@ -1,13 +1,13 @@
 import { bool } from "aws-sdk/clients/signer";
 
-export interface EFeeditem {
+export interface EFeedItem {
   user_id: number;
   post_id: bigint;
   content: string | null;
   media: string[] | null;
   original_id: bigint | null;
   username: string;
-  profile_pic_ref: string;
+  profile_pic_ref: string | null;
   likes: number;
   created_at: Date;
   updated_at: Date;
