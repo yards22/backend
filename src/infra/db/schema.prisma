@@ -43,8 +43,8 @@ model Notifications {
   for    Users  @relation("for", fields: [for_id], references: [user_id])
   for_id Int
 
-  triggered_by    Users @relation("triggered_by", fields: [triggered_by_id], references: [user_id])
-  triggered_by_id Int
+  triggered_by    Users? @relation("triggered_by", fields: [triggered_by_id], references: [user_id])
+  triggered_by_id Int?
 
   entity            String
   entity_identifier String?
