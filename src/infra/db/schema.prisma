@@ -47,9 +47,10 @@ model Notifications {
   triggered_by_id Int
 
   entity            String
-  entity_identifier String
+  entity_identifier String?
   type              String
 
+  extra  String?
   status NotificationStatus
 
   created_at DateTime @default(now())
