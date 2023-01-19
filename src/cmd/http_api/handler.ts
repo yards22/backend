@@ -38,6 +38,7 @@ import {
   HandleAddToFavourites,
   HandleCreatePost,
   HandleDeletePost,
+  HandleGetPostById,
   HandleGetPosts,
   HandlePostsMetaData,
   HandleShareToTimeline,
@@ -221,6 +222,12 @@ function PostRoutes(app: App): Router {
     "/:type",
     app.InHandler(CheckAllowance),
     app.InHandler(HandleGetPosts)
+  );
+
+  router.get(
+    "/byID",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleGetPostById)
   );
 
   router.post(

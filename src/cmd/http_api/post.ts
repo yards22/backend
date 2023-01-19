@@ -194,3 +194,18 @@ export const HandlePostsMetaData: RouteHandler = async (
     next(err);
   }
 };
+
+export const HandleGetPostById: RouteHandler = async (req, res, next, app) => {
+  try {
+    const post_id = req.query.post_id;
+    if (!post_id || isNaN(Number(post_id)))
+      throw new Herror("invalid post id", HerrorStatus.StatusBadRequest);
+    const post = await app.postManager.GetPostByID(BigInt(post_id as string));
+    app.SendRes(res, {
+      status: 200,
+      data: post,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
