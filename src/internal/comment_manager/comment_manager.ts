@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { IKVStore } from "../../pkg/kv_store/kv_store";
 import NotificationManager from "../notification_manager/notification_manager";
-import { CommentNotification } from "../notification_manager/types";
 export default class CommentManager {
   private store: PrismaClient;
   private cache: IKVStore;
@@ -110,11 +109,8 @@ export default class CommentManager {
     });
 
     const creator = await this.store.posts.findUnique({ where: { post_id } });
-    if (creator)
-      this.notificationManager.Create(
-        creator.user_id,
-        new CommentNotification(post_id, user_id)
-      );
+    if (creator && creator.user_id !== user_id)
+      this.notificationManager.CommentPost(creator.user_id, user_id, post_id);
   }
 
   async DeleteComment(post_id: bigint, user_id: number, comment_id: bigint) {

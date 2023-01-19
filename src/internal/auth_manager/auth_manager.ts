@@ -4,10 +4,10 @@ import bcrypt from "bcrypt";
 import { GenerateOTP, RandomNumber, RandomString } from "../../util/random";
 import { IKVStore } from "../../pkg/kv_store/kv_store";
 import verifyGoogleIdTokenAndGetUserData from "../../cmd/http_api/helper";
-import { SendMail } from "../../util/mail_dependencies";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 import { nextTick } from "process";
 import { Herror } from "../../pkg/herror/herror";
+import Mailer from "../../pkg/mailer/mailer";
 
 const SEC_IN_YEAR = 31536000;
 const Token_Length = 64;
@@ -20,9 +20,11 @@ interface IResponse {
 export default class AuthManager {
   private store;
   private cache: IKVStore;
-  constructor(store: PrismaClient, cache: IKVStore) {
+  private mailer: Mailer;
+  constructor(store: PrismaClient, cache: IKVStore, mailer: Mailer) {
     this.store = store;
     this.cache = cache;
+    this.mailer = mailer;
   }
 
   CreateUser(
@@ -293,7 +295,7 @@ export default class AuthManager {
         if (!user) {
           const otp: string = GenerateOTP();
           await this.CreateOTPSession(mail_id, otp);
-          SendMail(mail_id, otp);
+          SendOTP(this.mailer, mail_id, otp);
           resolve({
             responseStatus: {
               statusCode: HerrorStatus.StatusOK,
@@ -324,7 +326,7 @@ export default class AuthManager {
         if (user) {
           const otp: string = GenerateOTP();
           await this.CreateOTPSession(mail_id, otp);
-          SendMail(mail_id, otp);
+          SendOTP(this.mailer, mail_id, otp);
           resolve({
             responseStatus: {
               statusCode: HerrorStatus.StatusOK,
@@ -596,4 +598,8 @@ function GenerateUsername(mail_id: string): string {
   const genRandomNumber: number = RandomNumber(100, 999);
   const username: string = prefixUsername + "_" + genRandomNumber.toString();
   return username;
+}
+
+function SendOTP(mailer: Mailer, to: string, otp: string) {
+  return mailer.Send(to, "22Yardz OTP", "Your OTP is " + otp);
 }

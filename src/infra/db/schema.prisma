@@ -11,39 +11,49 @@ datasource db {
 }
 
 model Users {
-  user_id             Int                  @id @default(autoincrement()) @db.Int
-  mail_id             String               @unique
-  password            String?
-  created_at          DateTime             @default(now())
-  identity_provider   String?
-  subject_id          String?
-  Notification        Notifications[]
-  Profile             Profile?
-  Token               Token[]
-  Post                Posts[]
-  Likes               Likes[]
-  ParentComments      ParentComments[]
-  ChildComments       ChildComments[]
-  Favourites          Favourites[]
-  PostRecommendations PostRecommendations?
-  Following           Networks[]           @relation("following")
-  Followers           Networks[]           @relation("followers")
-  Recommendations     UserRecommendations?
-  Feedback            Feedback[]
-  PollsReaction       PollsReaction[]
-  TrendingUsers       TrendingUsers[]
-  Stories             Stories[]
+  user_id                 Int                  @id @default(autoincrement()) @db.Int
+  mail_id                 String               @unique
+  password                String?
+  created_at              DateTime             @default(now())
+  identity_provider       String?
+  subject_id              String?
+  Profile                 Profile?
+  Token                   Token[]
+  Post                    Posts[]
+  Likes                   Likes[]
+  ParentComments          ParentComments[]
+  ChildComments           ChildComments[]
+  Favourites              Favourites[]
+  PostRecommendations     PostRecommendations?
+  Following               Networks[]           @relation("following")
+  Followers               Networks[]           @relation("followers")
+  Recommendations         UserRecommendations?
+  Feedback                Feedback[]
+  PollsReaction           PollsReaction[]
+  TrendingUsers           TrendingUsers[]
+  Stories                 Stories[]
+  ForNotificatoin         Notifications[]      @relation("for")
+  TriggeredByNotification Notifications[]      @relation("triggered_by")
 
   @@map("users")
 }
 
 model Notifications {
-  id         BigInt             @id @default(autoincrement()) @db.BigInt
-  for        Users              @relation(fields: [for_id], references: [user_id])
-  for_id     Int
-  status     NotificationStatus
-  metadata   Json
-  created_at DateTime           @default(now())
+  id     BigInt @id @default(autoincrement()) @db.BigInt
+  for    Users  @relation("for", fields: [for_id], references: [user_id])
+  for_id Int
+
+  triggered_by    Users? @relation("triggered_by", fields: [triggered_by_id], references: [user_id])
+  triggered_by_id Int?
+
+  entity            String
+  entity_identifier String?
+  type              String
+
+  extra  String?
+  status NotificationStatus
+
+  created_at DateTime @default(now())
 
   @@map("notifications")
 }

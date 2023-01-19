@@ -3,6 +3,7 @@ import multer from "multer";
 
 import {
   HandleGetNotification,
+  HandleGetNotificationUsernames,
   HandleUpdateNotificationStatus,
 } from "./notification";
 import {
@@ -37,6 +38,7 @@ import {
   HandleAddToFavourites,
   HandleCreatePost,
   HandleDeletePost,
+  HandleGetPostById,
   HandleGetPosts,
   HandlePostsMetaData,
   HandleShareToTimeline,
@@ -60,9 +62,7 @@ import {
   HandleRemoveConnection,
   HandleSearches,
 } from "./networks";
-import {
-  HandleGetExplore,
-} from "./explore";
+import { HandleGetExplore } from "./explore";
 
 function NotificationRoutes(app: App): Router {
   const router = Router();
@@ -75,6 +75,11 @@ function NotificationRoutes(app: App): Router {
     "/",
     app.InHandler(CheckAllowance),
     app.InHandler(HandleUpdateNotificationStatus)
+  );
+  router.post(
+    "/username",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleGetNotificationUsernames)
   );
   return router;
 }
@@ -105,12 +110,12 @@ function ProfileRoutes(app: App): Router {
     "/following",
     app.InHandler(CheckAllowance),
     app.InHandler(HandleGetFollowing)
-  )
+  );
   router.get(
     "/followers",
     app.InHandler(CheckAllowance),
     app.InHandler(HandleGetFollowers)
-  )
+  );
   router.put(
     "/",
     app.InHandler(CheckAllowance),
@@ -215,8 +220,14 @@ function PostRoutes(app: App): Router {
 
   router.get(
     "/:type",
-    app.InHandler(CheckAllowance), 
+    app.InHandler(CheckAllowance),
     app.InHandler(HandleGetPosts)
+  );
+
+  router.get(
+    "/byID",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleGetPostById)
   );
 
   router.post(

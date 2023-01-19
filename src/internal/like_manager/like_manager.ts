@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { IKVStore } from "../../pkg/kv_store/kv_store";
 import NotificationManager from "../notification_manager/notification_manager";
-import { LikeNotification } from "../notification_manager/types";
 
 export default class LikeManager {
   private store: PrismaClient;
@@ -76,11 +75,8 @@ export default class LikeManager {
     });
 
     const creator = await this.store.posts.findUnique({ where: { post_id } });
-    if (creator)
-      this.notificationManager.Create(
-        creator.user_id,
-        new LikeNotification(post_id, user_id)
-      );
+    if (creator && creator.user_id !== user_id)
+      this.notificationManager.LikePost(creator.user_id, user_id, post_id);
   }
 
   async Unlike(post_id: bigint, user_id: number) {
@@ -89,6 +85,7 @@ export default class LikeManager {
         await this.store.likes.delete({
           where: { user_id_post_id: { user_id, post_id } },
         });
+        this.notificationManager.UnLikePost(user_id, post_id);
         resolve("Succesful_deletetion");
       } catch (err) {
         reject(err);
