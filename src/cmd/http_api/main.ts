@@ -48,7 +48,7 @@ async function Init() {
   );
   const likeManager = new LikeManager(db, redis, notificationManager);
   const commentManager = new CommentManager(db, redis, notificationManager);
-  const networkManager = new NetworkManager(db);
+  const networkManager = new NetworkManager(db, notificationManager);
   const miscManager = new MiscManager(db, imageResolver, remoteFileStorage);
   const exploreManager = new ExploreManager(
     db,

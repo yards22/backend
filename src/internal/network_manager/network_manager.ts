@@ -1,6 +1,7 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 import { ENetworkItem } from "../entities/networkitem";
+import NotificationManager from "../notification_manager/notification_manager";
 const prisma = new PrismaClient();
 
 interface IResponse {
@@ -10,8 +11,10 @@ interface IResponse {
 
 export default class NetworkManager {
   private store: PrismaClient;
-  constructor(store: PrismaClient) {
+  notificationManager: NotificationManager;
+  constructor(store: PrismaClient, nm: NotificationManager) {
     this.store = store;
+    this.notificationManager = nm;
   }
 
   GetMyFollowers(user_id: number) {
@@ -36,39 +39,37 @@ export default class NetworkManager {
     });
   }
 
-  async GetFollowingUsername(user_id: number){
-   return  new Promise(async (resolve,reject)=>{
-      try{
+  async GetFollowingUsername(user_id: number) {
+    return new Promise(async (resolve, reject) => {
+      try {
         const followingList = await this.GetWhoAmIFollowing(user_id);
-        console.log("This is the One",followingList)
-        let finalList:string [] = [];
-        followingList.forEach(item=>{
-          if(item.following.Profile?.username)
-          finalList.push(item.following.Profile?.username)
-        })
+        console.log("This is the One", followingList);
+        let finalList: string[] = [];
+        followingList.forEach((item) => {
+          if (item.following.Profile?.username)
+            finalList.push(item.following.Profile?.username);
+        });
         resolve(finalList);
-      }
-      catch(err){
+      } catch (err) {
         reject(err);
       }
-    })
+    });
   }
 
-  async GetFollowersUsername(user_id: number){
-    return new Promise(async (resolve,reject)=>{
-      try{
+  async GetFollowersUsername(user_id: number) {
+    return new Promise(async (resolve, reject) => {
+      try {
         const followersList = await this.GetMyFollowers(user_id);
-        let finalList:string[] = [];
-        followersList.forEach(item=>{
-          if(item.follower.Profile?.username)
-          finalList.push(item.follower.Profile?.username)
-        })
+        let finalList: string[] = [];
+        followersList.forEach((item) => {
+          if (item.follower.Profile?.username)
+            finalList.push(item.follower.Profile?.username);
+        });
         resolve(finalList);
-      }
-      catch(err){
+      } catch (err) {
         reject(err);
       }
-    })
+    });
   }
 
   GetWhoAmIFollowing(user_id: number) {
@@ -94,6 +95,7 @@ export default class NetworkManager {
   }
 
   CreateConnection(follower_id: number, following_id: number) {
+    this.notificationManager.Follow(following_id, follower_id);
     return this.store.networks.create({
       data: {
         follower_id,
@@ -103,6 +105,7 @@ export default class NetworkManager {
   }
 
   DeleteConnection(follower_id: number, following_id: number) {
+    this.notificationManager.UnFollow(following_id, follower_id);
     return this.store.networks.delete({
       where: {
         follower_id_following_id: {
