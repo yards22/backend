@@ -61,7 +61,7 @@ export const HandleUpdateNotificationStatus: RouteHandler = (
   next,
   app
 ) => {
-  const forId = Number(req.context.userId);
+  const forId = Number(req.context.user_id);
 
   const _ids = req.body.ids as string[];
   const ids = _ids.map((item) => {
