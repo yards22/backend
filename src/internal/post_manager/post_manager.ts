@@ -7,7 +7,7 @@ import { IFileStorage } from "../../pkg/file_storage/file_storage";
 import { ImageResolver } from "../../pkg/image_resolver/image_resolver_";
 import { IKVStore } from "../../pkg/kv_store/kv_store";
 import EPost from "../entities/post";
-import { EFeedMeta, EFeeditem, EPostFinal } from "../entities/feeditem";
+import { EFeedMeta, EFeedItem, EPostFinal } from "../entities/feeditem";
 import {
   formatFavResponse,
   formatFeedResponse,
@@ -165,8 +165,50 @@ export default class PostManager {
     });
   }
 
-  GetPostByID(post_id: bigint) {
-    return this.store.posts.findUnique({ where: { post_id } });
+  async GetPostByID(post_id: bigint) {
+    try {
+      const post = await this.store.posts.findUnique({
+        where: { post_id },
+        include: {
+          user: {
+            select: {
+              Profile: {
+                select: {
+                  username: true,
+                  profile_image_uri: true,
+                },
+              },
+            },
+          },
+          _count: { select: { Likes: true } },
+        },
+      });
+      if (post) {
+        const feedPost: EFeedItem = {
+          user_id: post.user_id,
+          post_id: post.post_id,
+          content: post.content,
+          media: JSON.parse(post.media || "[]"),
+          original_id: post.original_id,
+          created_at: post.created_at,
+          updated_at: post.updated_at,
+          likes: post._count.Likes,
+          username: post.user.Profile?.username || "",
+          profile_pic_ref:
+            post.user.Profile?.profile_image_uri || undefined || null,
+        };
+
+        const metadata: EFeedMeta = await this.GetPostMetadata(
+          [post.post_id],
+          feedPost.user_id
+        );
+        const finalPost: EPostFinal[] = detailsMixers([feedPost], metadata);
+        return finalPost[0];
+      }
+      return;
+    } catch (err) {
+      throw err;
+    }
   }
 
   async UpdateMediaRef(
@@ -490,7 +532,7 @@ export default class PostManager {
             post_ids,
             user_id
           );
-          const posts_: EFeeditem[] = formatFeedResponse(filtered_posts);
+          const posts_: EFeedItem[] = formatFeedResponse(filtered_posts);
           const finalPosts: EPostFinal[] = detailsMixers(posts_, Metadata);
           resolve(finalPosts);
           return;
@@ -502,7 +544,7 @@ export default class PostManager {
           post_ids,
           user_id
         );
-        const posts_: EFeeditem[] = formatFeedResponse(posts);
+        const posts_: EFeedItem[] = formatFeedResponse(posts);
         const finalPosts: EPostFinal[] = detailsMixers(posts_, Metadata);
         resolve(finalPosts);
         return;
@@ -670,7 +712,7 @@ export default class PostManager {
           post_ids,
           user_id
         );
-        const posts: EFeeditem[] = formatTrendingFeedResponse(res);
+        const posts: EFeedItem[] = formatTrendingFeedResponse(res);
         const finalPosts: EPostFinal[] = detailsMixers(posts, Metadata);
         resolve(finalPosts);
       } catch (err) {
@@ -715,7 +757,7 @@ export default class PostManager {
           post_ids,
           user_id
         );
-        const posts: EFeeditem[] = formatFeedResponse(res);
+        const posts: EFeedItem[] = formatFeedResponse(res);
         const finalPosts: EPostFinal[] = detailsMixers(posts, Metadata);
         resolve(finalPosts);
       } catch (err) {
@@ -759,7 +801,7 @@ export default class PostManager {
           post_ids,
           user_id
         );
-        const posts: EFeeditem[] = formatFavResponse(res);
+        const posts: EFeedItem[] = formatFavResponse(res);
         const finalPosts: EPostFinal[] = detailsMixers(posts, Metadata);
         resolve(finalPosts);
       } catch (err) {

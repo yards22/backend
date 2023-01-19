@@ -1,10 +1,10 @@
-import { EFeeditem } from "../internal/entities/feeditem";
+import { EFeedItem } from "../internal/entities/feeditem";
 import { ENetworkItem } from "../internal/entities/networkitem";
 
-export function formatTrendingFeedResponse(allPosts: any): EFeeditem[] {
-  let posts_: EFeeditem[] = [];
+export function formatTrendingFeedResponse(allPosts: any): EFeedItem[] {
+  let posts_: EFeedItem[] = [];
   allPosts.forEach((x: any) => {
-    let feed: EFeeditem = {
+    let feed: EFeedItem = {
       user_id: x.post.user_id,
       post_id: x.post_id,
       content: x.post.content,
@@ -21,10 +21,10 @@ export function formatTrendingFeedResponse(allPosts: any): EFeeditem[] {
   return posts_;
 }
 
-export function formatFeedResponse(allPosts: any): EFeeditem[] {
-  let posts_: EFeeditem[] = [];
+export function formatFeedResponse(allPosts: any): EFeedItem[] {
+  let posts_: EFeedItem[] = [];
   allPosts.forEach((x: any) => {
-    let feed: EFeeditem = {
+    let feed: EFeedItem = {
       user_id: x.user_id,
       post_id: x.post_id,
       content: x.content,
@@ -41,10 +41,10 @@ export function formatFeedResponse(allPosts: any): EFeeditem[] {
   return posts_;
 }
 
-export function formatFavResponse(allPosts: any): EFeeditem[] {
-  let posts_: EFeeditem[] = [];
+export function formatFavResponse(allPosts: any): EFeedItem[] {
+  let posts_: EFeedItem[] = [];
   allPosts.forEach((x: any) => {
-    let feed: EFeeditem = {
+    let feed: EFeedItem = {
       user_id: x.post.user_id,
       post_id: x.post.post_id,
       content: x.post.content,
@@ -65,10 +65,10 @@ export function formatFeedResponseUsername(
   allPosts: any,
   profile_image_uri: string,
   username: string
-): EFeeditem[] {
-  let posts_: EFeeditem[] = [];
+): EFeedItem[] {
+  let posts_: EFeedItem[] = [];
   allPosts.forEach((x: any) => {
-    let feed: EFeeditem = {
+    let feed: EFeedItem = {
       user_id: x.user_id,
       post_id: x.post_id,
       content: x.content,
