@@ -15,8 +15,12 @@ CREATE TABLE `users` (
 CREATE TABLE `notifications` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
     `for_id` INTEGER NOT NULL,
+    `triggered_by_id` INTEGER NOT NULL,
+    `entity` VARCHAR(191) NOT NULL,
+    `entity_identifier` VARCHAR(191) NULL,
+    `type` VARCHAR(191) NOT NULL,
+    `extra` VARCHAR(191) NULL,
     `status` ENUM('Unseen', 'Seen', 'Read') NOT NULL,
-    `metadata` JSON NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     PRIMARY KEY (`id`)
@@ -130,6 +134,7 @@ CREATE TABLE `postRecommendations` (
 CREATE TABLE `trending_users` (
     `tu_id` BIGINT NOT NULL AUTO_INCREMENT,
     `user_id` INTEGER NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     PRIMARY KEY (`tu_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -203,6 +208,9 @@ CREATE TABLE `admin_users` (
 
 -- AddForeignKey
 ALTER TABLE `notifications` ADD CONSTRAINT `notifications_for_id_fkey` FOREIGN KEY (`for_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `notifications` ADD CONSTRAINT `notifications_triggered_by_id_fkey` FOREIGN KEY (`triggered_by_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `profiles` ADD CONSTRAINT `profiles_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
