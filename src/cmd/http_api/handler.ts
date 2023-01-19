@@ -219,15 +219,15 @@ function PostRoutes(app: App): Router {
   );
 
   router.get(
-    "/:type",
+    "/get-by-id",
     app.InHandler(CheckAllowance),
-    app.InHandler(HandleGetPosts)
+    app.InHandler(HandleGetPostById)
   );
 
   router.get(
-    "/byID",
+    "/:type",
     app.InHandler(CheckAllowance),
-    app.InHandler(HandleGetPostById)
+    app.InHandler(HandleGetPosts)
   );
 
   router.post(
