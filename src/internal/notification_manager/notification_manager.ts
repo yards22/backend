@@ -1,10 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import ENotification from "../entities/notification";
-import {
-  ENotificationStatus,
-  LikeNotification,
-  NotificationMetadataType,
-} from "./types";
+import { ENotificationStatus } from "./types";
 
 export default class NotificationManager {
   private store: PrismaClient;
@@ -12,12 +8,67 @@ export default class NotificationManager {
     this.store = store;
   }
 
-  async Create(
-    forId: number,
-    metadata: NotificationMetadataType
-  ): Promise<ENotification> {
+  async LikePost(creatorOfPost: number, whoLiked: number, postId: bigint) {
     return this.store.notifications.create({
-      data: { for_id: forId, status: "Unseen", metadata: metadata.ToJson() },
+      data: {
+        for_id: creatorOfPost,
+        entity: "post",
+        status: "Unseen",
+        triggered_by_id: whoLiked,
+        type: "LIKE",
+        entity_identifier: postId.toString(),
+      },
+    });
+  }
+
+  async UnLikePost(whoUnLiked: number, postId: bigint) {
+    return this.store.notifications.deleteMany({
+      where: {
+        entity: "post",
+        triggered_by_id: whoUnLiked,
+        type: "LIKE",
+        entity_identifier: postId.toString(),
+      },
+    });
+  }
+
+  async CommentPost(
+    creatorOfPost: number,
+    whoCommented: number,
+    postId: bigint
+  ) {
+    return this.store.notifications.create({
+      data: {
+        for_id: creatorOfPost,
+        entity: "post",
+        status: "Unseen",
+        triggered_by_id: whoCommented,
+        type: "COMMENT",
+        entity_identifier: postId.toString(),
+      },
+    });
+  }
+
+  async Follow(whoIsBeingFollowed: number, whoFollowed: number) {
+    return this.store.notifications.create({
+      data: {
+        for_id: whoIsBeingFollowed,
+        entity: "FOLLOW",
+        status: "Unseen",
+        triggered_by_id: whoFollowed,
+        type: "FOLLOW",
+      },
+    });
+  }
+
+  async UnFollow(whoIsBeingUnFollowed: number, whoUnFollowed: number) {
+    return this.store.notifications.deleteMany({
+      where: {
+        for_id: whoIsBeingUnFollowed,
+        entity: "FOLLOW",
+        triggered_by_id: whoUnFollowed,
+        type: "FOLLOW",
+      },
     });
   }
 
