@@ -63,14 +63,14 @@ export default class CommentManager {
         comment_id: bigint;
         username: string;
         user_id: number;
-        profile_pic_uri: string | null;
+        profile_image_uri: string | null;
         content: string;
         replies: {
           created_at: Date;
           username: string;
           content: string;
           user_id: number;
-          profile_pic_uri: string | null;
+          profile_image_uri: string | null;
         }[];
         created_at: Date;
       }[] = [];
@@ -81,7 +81,7 @@ export default class CommentManager {
 
             username: item.user.Profile.username,
             user_id: item.user.Profile.user_id,
-            profile_pic_uri: item.user.Profile.profile_image_uri,
+            profile_image_uri: item.user.Profile.profile_image_uri,
 
             content: item.content,
             replies: item.ChildComments.map((repItem, repIndex) => {
@@ -90,7 +90,8 @@ export default class CommentManager {
                 created_at: repItem.created_at,
                 username: repItem.user.Profile?.username || "",
                 user_id: repItem.user.Profile?.user_id || 0,
-                profile_pic_uri: repItem.user.Profile?.profile_image_uri || "",
+                profile_image_uri:
+                  repItem.user.Profile?.profile_image_uri || "",
               };
             }),
             created_at: item.created_at,

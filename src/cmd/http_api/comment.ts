@@ -26,8 +26,8 @@ export const HandleCreateComment: RouteHandler = async (
 };
 
 export const HandleGetComments: RouteHandler = async (req, res, next, app) => {
-  const post_id: bigint = BigInt(req.body.post_id);
-  if (post_id == undefined || post_id == null) {
+  const post_id: bigint = BigInt(req.query.post_id as string);
+  if (!post_id) {
     return next(new Herror("post id missing", HerrorStatus.StatusBadRequest));
   }
   if (req.query.only_count) {
@@ -49,7 +49,7 @@ export const HandleGetComments: RouteHandler = async (req, res, next, app) => {
         limit,
         offset
       );
-      app.SendRes(res, { status: HerrorStatus.StatusOK, data: { comments } });
+      app.SendRes(res, { status: HerrorStatus.StatusOK, data: comments });
     } catch (err) {
       next(err);
     }
@@ -85,7 +85,7 @@ export const HandleCommentReply: RouteHandler = async (req, res, next, app) => {
   const comment_id: bigint = BigInt(req.body.comment_id);
   const content: string = String(req.body.content);
 
-  if (comment_id == undefined || comment_id == null) {
+  if (!comment_id) {
     return next(
       new Herror("comment id missing", HerrorStatus.StatusBadRequest)
     );
@@ -94,7 +94,7 @@ export const HandleCommentReply: RouteHandler = async (req, res, next, app) => {
     const reply = await app.commentManager.Reply(comment_id, user_id, content);
     app.SendRes(res, {
       status: HerrorStatus.StatusOK,
-      data: { reply },
+      data: reply,
       message: "replied_to_comment_succesfully",
     });
   } catch (err) {
