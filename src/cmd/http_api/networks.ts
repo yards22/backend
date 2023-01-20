@@ -101,7 +101,7 @@ export const HandleGetFollowing: RouteHandler = async (req, res, next, app) => {
 };
 
 export const HandleSearches: RouteHandler = async (req, res, next, app) => {
-  const search_content = String(req.body.search_content);
+  const search_content = String(req.query.search);
   if (search_content !== "" && search_content !== undefined) {
     const searchResults = await app.networkManager.GetSearchedUsers(
       search_content

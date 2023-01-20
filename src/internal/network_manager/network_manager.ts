@@ -475,15 +475,20 @@ export default class NetworkManager {
     });
   }
 
-  GetSearchedUsers(search_content: string) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const searchResults = await this.SearchResults(search_content);
-        resolve(searchResults);
-      } catch (err) {
-        reject(err);
-      }
-    });
+  async GetSearchedUsers(search_content: string): Promise<ENetworkItem[]> {
+    try {
+      const t = (await this.SearchResults(search_content)).map((v) => {
+        return {
+          cric_index: v.cric_index,
+          profile_image_uri: v.profile_image_uri,
+          user_id: v.user_id,
+          username: v.username,
+        };
+      });
+      return t;
+    } catch (err) {
+      throw err;
+    }
   }
 
   GetRecommendedUsersFromDB(user_id: number): Promise<number[]> {

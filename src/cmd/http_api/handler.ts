@@ -272,16 +272,16 @@ function NetworkRoutes(app: App): Router {
     app.InHandler(CheckAllowance),
     app.InHandler(HandleRemoveConnection)
   );
+  router.get(
+    "/search",
+    app.InHandler(CheckAllowance),
+    app.InHandler(HandleSearches)
+  );
   return router;
 }
 
 function ExploreRoutes(app: App): Router {
   const router = Router();
-  router.get(
-    "/stories",
-    app.InHandler(CheckAllowance),
-    app.InHandler(HandleSearches)
-  );
   router.get(
     "/explore",
     app.InHandler(CheckAllowance),
