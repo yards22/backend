@@ -45,7 +45,7 @@ export default class LikeManager {
       const likes: {
         create_at: Date;
         username: string;
-        profile_pic_uri: string | null;
+        profile_image_uri: string | null;
         user_id: number;
         type: number;
       }[] = [];
@@ -55,7 +55,7 @@ export default class LikeManager {
             create_at: item.created_at,
             username: item.user.Profile.username,
             type: item.type,
-            profile_pic_uri: item.user.Profile.profile_image_uri,
+            profile_image_uri: item.user.Profile.profile_image_uri,
             user_id: item.user.Profile.user_id,
           });
       });

@@ -63,14 +63,14 @@ export default class CommentManager {
         comment_id: bigint;
         username: string;
         user_id: number;
-        profile_pic_uri: string | null;
+        profile_image_uri: string | null;
         content: string;
         replies: {
           created_at: Date;
           username: string;
           content: string;
           user_id: number;
-          profile_pic_uri: string | null;
+          profile_image_uri: string | null;
         }[];
         created_at: Date;
       }[] = [];
@@ -81,7 +81,7 @@ export default class CommentManager {
 
             username: item.user.Profile.username,
             user_id: item.user.Profile.user_id,
-            profile_pic_uri: item.user.Profile.profile_image_uri,
+            profile_image_uri: item.user.Profile.profile_image_uri,
 
             content: item.content,
             replies: item.ChildComments.map((repItem, repIndex) => {
@@ -90,7 +90,8 @@ export default class CommentManager {
                 created_at: repItem.created_at,
                 username: repItem.user.Profile?.username || "",
                 user_id: repItem.user.Profile?.user_id || 0,
-                profile_pic_uri: repItem.user.Profile?.profile_image_uri || "",
+                profile_image_uri:
+                  repItem.user.Profile?.profile_image_uri || "",
               };
             }),
             created_at: item.created_at,
@@ -104,13 +105,14 @@ export default class CommentManager {
   }
 
   async Comment(post_id: bigint, user_id: number, content: string) {
-    await this.store.parentComments.create({
+    const comment = await this.store.parentComments.create({
       data: { content, user_id, post_id },
     });
 
     const creator = await this.store.posts.findUnique({ where: { post_id } });
     if (creator && creator.user_id !== user_id)
       this.notificationManager.CommentPost(creator.user_id, user_id, post_id);
+    return comment;
   }
 
   async DeleteComment(post_id: bigint, user_id: number, comment_id: bigint) {
@@ -120,9 +122,29 @@ export default class CommentManager {
   }
 
   async Reply(parent_comment_id: bigint, user_id: number, content: string) {
-    return await this.store.childComments.create({
+    const reply = await this.store.childComments.create({
       data: { content, user_id, parent_comment_id },
+      include: {
+        parentComment: {
+          include: {
+            user: { select: { user_id: true } },
+            post: {
+              select: {
+                post_id: true,
+              },
+            },
+          },
+        },
+      },
     });
+
+    if (reply.parentComment.user.user_id !== user_id)
+      this.notificationManager.ReplyComment(
+        reply.parentComment.user.user_id,
+        user_id,
+        reply.parentComment.post.post_id
+      );
+    return reply;
   }
 
   async DeleteReply(
