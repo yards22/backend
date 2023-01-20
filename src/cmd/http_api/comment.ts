@@ -18,8 +18,12 @@ export const HandleCreateComment: RouteHandler = async (
   }
 
   try {
-    await app.commentManager.Comment(BigInt(post_id), user_id, content);
-    app.SendRes(res, { status: HerrorStatus.StatusOK });
+    const comment = await app.commentManager.Comment(
+      BigInt(post_id),
+      user_id,
+      content
+    );
+    app.SendRes(res, { status: HerrorStatus.StatusOK, data: comment });
   } catch (err) {
     next(err);
   }

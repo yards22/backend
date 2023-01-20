@@ -49,6 +49,23 @@ export default class NotificationManager {
     });
   }
 
+  async ReplyComment(
+    creatorOfComment: number,
+    whoReplied: number,
+    postId: bigint
+  ) {
+    return this.store.notifications.create({
+      data: {
+        for_id: creatorOfComment,
+        entity: "POST",
+        status: "Unseen",
+        triggered_by_id: whoReplied,
+        type: "REPLY",
+        entity_identifier: postId.toString(),
+      },
+    });
+  }
+
   async Follow(whoIsBeingFollowed: number, whoFollowed: number) {
     return this.store.notifications.create({
       data: {
