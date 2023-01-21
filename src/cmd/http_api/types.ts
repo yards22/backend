@@ -128,14 +128,13 @@ export class AppRouter {
 
     const doAuthWith = specificAuthFn || this.authFn;
     if (withAuth && doAuthWith) fns.push(this.app.InHandler(doAuthWith));
-    fns.push(this.app.InHandler(handler));
-
     if (withFile) {
       const storage = multer.memoryStorage();
       const upload = multer({ storage: storage });
       if (withFile.multiple) fns.push(upload.array(withFile.fieldName));
       else fns.push(upload.single(withFile.fieldName));
     }
+    fns.push(this.app.InHandler(handler));
     return fns;
   }
 }
