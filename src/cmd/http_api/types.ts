@@ -64,7 +64,7 @@ export class AppRouter {
     },
     specificAuthFn?: RouteHandler
   ) {
-    this.router.get(
+    this.router.post(
       path,
       this.prepare(handler, withAuth, withFile, specificAuthFn)
     );
@@ -79,7 +79,7 @@ export class AppRouter {
     },
     specificAuthFn?: RouteHandler
   ) {
-    this.router.get(
+    this.router.put(
       path,
       this.prepare(handler, withAuth, withFile, specificAuthFn)
     );
@@ -94,7 +94,7 @@ export class AppRouter {
     },
     specificAuthFn?: RouteHandler
   ) {
-    this.router.get(
+    this.router.delete(
       path,
       this.prepare(handler, withAuth, withFile, specificAuthFn)
     );
@@ -109,7 +109,7 @@ export class AppRouter {
     },
     specificAuthFn?: RouteHandler
   ) {
-    this.router.get(
+    this.router.patch(
       path,
       this.prepare(handler, withAuth, withFile, specificAuthFn)
     );
