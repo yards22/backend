@@ -9,9 +9,8 @@ export function ProfileRoutes(app: App) {
     multiple: false,
     fieldName: "image",
   });
-  appRouter.Get("/editProfile", HandleGetUserPrimaryInfo);
   appRouter.Get("/", HandleGetUserProfileInfo);
-  appRouter.Post("/checkUsername", HandleGetCheckUsername);
+  appRouter.Get("/username/check-availability", HandleCheckUsername);
   return appRouter.NativeRouter();
 }
 
@@ -42,22 +41,6 @@ const HandleUpdateProfile: RouteHandler = async (req, res, next, app) => {
     data: profileData,
     message: responseStatus.message,
   });
-};
-
-const HandleGetUserPrimaryInfo: RouteHandler = async (req, res, next, app) => {
-  const user_id = Number(req.context.user_id);
-  console.log(user_id);
-  if (user_id != undefined) {
-    const userProfile = await app.profileManager.GetUserPrimaryInfoById(
-      user_id
-    );
-    app.SendRes(res, {
-      status: HerrorStatus.StatusOK,
-      data: userProfile,
-    });
-  } else {
-    next(new Herror("BadRequest", HerrorStatus.StatusBadRequest));
-  }
 };
 
 const HandleGetUserProfileInfo: RouteHandler = async (req, res, next, app) => {
@@ -93,8 +76,8 @@ const HandleGetUserProfileInfo: RouteHandler = async (req, res, next, app) => {
   }
 };
 
-const HandleGetCheckUsername: RouteHandler = async (req, res, next, app) => {
-  const username = req.body.username;
+const HandleCheckUsername: RouteHandler = async (req, res, next, app) => {
+  const username = req.query.username as string;
   if (validateUsername(username)) {
     try {
       const { responseStatus } = await app.profileManager.CheckUsername(
