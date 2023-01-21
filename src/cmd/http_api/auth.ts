@@ -7,16 +7,14 @@ import { CheckAllowance } from "./middleware";
 export function AuthRoutes(app: App) {
   const appRouter = new AppRouter(app, CheckAllowance);
   appRouter.Get("/", HandleMe);
-  appRouter.Delete("/logout", HandleLogout);
   appRouter.Post("/signup", HandleSignUp, false);
   appRouter.Post("/login", HandleLogin, false);
   appRouter.Post("/oauth", HandleGoogleOauth, false);
-  appRouter.Post("/sendOTP", HandleOTPGenerationForSignUp, false);
-  appRouter.Post("/verifyOTP", HandleOTPVerificationForSignUp, false);
-  appRouter.Post("/sendOTPforgot", HandleOTPGeneration, false);
-  appRouter.Post("/verifyOTPforgot", HandleOTPVerification, false);
-  appRouter.Post("/updPassword", HandlePasswordUpdate, false);
-  appRouter.Post("/logoutAllScreens", HandleLogoutAllScreen, false);
+  appRouter.Post("/otp/request/:for", HandleRequestOTP, false);
+  appRouter.Post("/otp/verify/:for", HandleOTPVerification, false);
+  appRouter.Put("/password/update", HandlePasswordUpdate, false);
+  appRouter.Delete("/logout", HandleLogout);
+  appRouter.Post("/logout/all", HandleLogoutAllScreen, false);
   return appRouter.NativeRouter();
 }
 
@@ -80,19 +78,13 @@ const HandleGoogleOauth: RouteHandler = async (req, res, next, app) => {
   }
 };
 
-const HandleOTPGenerationForSignUp: RouteHandler = async (
-  req,
-  res,
-  next,
-  app
-) => {
+const HandleRequestOTP: RouteHandler = async (req, res, next, app) => {
+  const type = req.params.for;
   const mail_id = req.body.mail_id;
-  console.log("Hello");
+  if (!MailValidator(mail_id))
+    return next(new Herror("invalid_mail", HerrorStatus.StatusBadRequest));
 
-  console.log(mail_id);
-
-  const valid: boolean = MailValidator(mail_id);
-  if (valid) {
+  if (type === "signup") {
     try {
       const { responseStatus, userData } =
         await app.authManager.OTPGenerationForSignUp(mail_id);
@@ -103,21 +95,29 @@ const HandleOTPGenerationForSignUp: RouteHandler = async (
     } catch (err) {
       next(err);
     }
-  } else {
-    next(new Herror("invalid_email", HerrorStatus.StatusBadRequest));
+  } else if (type === "password") {
+    try {
+      const { responseStatus } = await app.authManager.OTPGenerationForForgot(
+        mail_id
+      );
+      app.SendRes(res, {
+        status: responseStatus.statusCode,
+        message: responseStatus.message,
+      });
+    } catch (err) {
+      next(err);
+    }
   }
 };
 
-const HandleOTPVerificationForSignUp: RouteHandler = async (
-  req,
-  res,
-  next,
-  app
-) => {
+const HandleOTPVerification: RouteHandler = async (req, res, next, app) => {
   const mail_id: string = req.body.mail_id;
   const OTP: string = req.body.OTP;
+  const type = req.params.for;
   const valid: boolean = MailValidator(mail_id);
-  if (valid) {
+  if (!MailValidator(mail_id))
+    return next(new Herror("invalid_mail", HerrorStatus.StatusBadRequest));
+  if (type === "signup")
     try {
       const { responseStatus } = await app.authManager.OTPVerificationForSignup(
         mail_id,
@@ -130,16 +130,7 @@ const HandleOTPVerificationForSignUp: RouteHandler = async (
     } catch (err) {
       next(err);
     }
-  } else {
-    next(new Herror("BadRequest", HerrorStatus.StatusBadRequest));
-  }
-};
-
-const HandleOTPVerification: RouteHandler = async (req, res, next, app) => {
-  const mail_id: string = req.body.mail_id;
-  const OTP: string = req.body.OTP;
-  const valid: boolean = MailValidator(mail_id);
-  if (valid) {
+  else if (type === "password")
     try {
       const { responseStatus } = await app.authManager.OTPVerificationForForgot(
         mail_id,
@@ -152,9 +143,6 @@ const HandleOTPVerification: RouteHandler = async (req, res, next, app) => {
     } catch (err) {
       next(err);
     }
-  } else {
-    next(new Herror("BadRequest", HerrorStatus.StatusBadRequest));
-  }
 };
 
 const HandleLogout: RouteHandler = async (req, res, next, app) => {
@@ -169,26 +157,6 @@ const HandleLogout: RouteHandler = async (req, res, next, app) => {
     });
   } catch (err) {
     next(err);
-  }
-};
-
-const HandleOTPGeneration: RouteHandler = async (req, res, next, app) => {
-  const mail_id = req.body.mail_id;
-  const valid: boolean = MailValidator(mail_id);
-  if (valid) {
-    try {
-      const { responseStatus } = await app.authManager.OTPGenerationForForgot(
-        mail_id
-      );
-      app.SendRes(res, {
-        status: responseStatus.statusCode,
-        message: responseStatus.message,
-      });
-    } catch (err) {
-      next(err);
-    }
-  } else {
-    next(new Herror("BadRequest", HerrorStatus.StatusBadRequest));
   }
 };
 
