@@ -5,9 +5,9 @@ import RouteHandler, { App, AppRouter } from "./types";
 
 export function NotificationRoutes(app: App) {
   const appRouter = new AppRouter(app, CheckAllowance);
-  appRouter.Get("/", app.InHandler(HandleGetNotification));
-  appRouter.Put("/", app.InHandler(HandleUpdateNotificationStatus));
-  appRouter.Post("/username", app.InHandler(HandleGetNotificationUsernames));
+  appRouter.Get("/", HandleGetNotification);
+  appRouter.Put("/", HandleUpdateNotificationStatus);
+  appRouter.Post("/username", HandleGetNotificationUsernames);
   return appRouter.NativeRouter();
 }
 
@@ -65,8 +65,8 @@ const HandleGetNotificationUsernames: RouteHandler = async (
 };
 
 const HandleUpdateNotificationStatus: RouteHandler = (req, res, next, app) => {
+  console.log("updating");
   const forId = Number(req.context.user_id);
-
   const _ids = req.body.ids as string[];
   const ids = _ids.map((item) => {
     return BigInt(item);
