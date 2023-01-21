@@ -338,34 +338,6 @@ export default class PostManager {
     });
   }
 
-  async GetFollowingUsername(user_id: number){
-    new Promise(async (resolve,reject)=>{
-      try{
-        const followingList = await this.store.networks.findMany({
-          where: {
-            follower_id: user_id,
-          },
-          include: {
-            following:{
-               include:{
-                Profile:{
-                  select:{
-                    username:true
-                  }
-                }
-               }
-            }
-          },
-        });
-        let finalList:string[];
-        followingList.forEach(item=>finalList.push(item.following.Profile?.username as string))
-        resolve(followingList);
-      }
-      catch(err){
-        reject(err);
-      }
-    })
-  }
 
   async GetPostsOfUsers(users: any, limit: number, offset: number) {
     return this.store.posts.findMany({

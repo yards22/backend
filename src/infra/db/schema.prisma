@@ -203,6 +203,9 @@ model Feedback {
   user_id     Int
   image_uri   String?
   content     String?
+  status      Boolean   @default(false)
+  comment     String?
+  created_at    DateTime        @default(now())
 
   @@map("feedback")
 }
