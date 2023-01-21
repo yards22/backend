@@ -1,13 +1,16 @@
 import { Herror } from "../../pkg/herror/herror";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
-import RouteHandler from "./types";
+import { CheckAllowance } from "./middleware";
+import RouteHandler, { App, AppRouter } from "./types";
 
-export const HandleLikeAndUnlike: RouteHandler = async (
-  req,
-  res,
-  next,
-  app
-) => {
+export function LikeRoutes(app: App) {
+  const appRouter = new AppRouter(app, CheckAllowance);
+  appRouter.Get("/", HandleGetLikesForPost);
+  appRouter.Put("/", HandleLikeAndUnlike);
+  return appRouter.NativeRouter();
+}
+
+const HandleLikeAndUnlike: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
   const _post_id = req.body.post_id;
   if (_post_id == "" || _post_id == undefined || _post_id == null) {
@@ -32,12 +35,7 @@ export const HandleLikeAndUnlike: RouteHandler = async (
   }
 };
 
-export const HandleGetLikesForPost: RouteHandler = async (
-  req,
-  res,
-  next,
-  app
-) => {
+const HandleGetLikesForPost: RouteHandler = async (req, res, next, app) => {
   const _post_id = req.body.post_id;
   if (_post_id == "" || _post_id == undefined || _post_id == null) {
     return next(new Herror("post id missing", HerrorStatus.StatusBadRequest));

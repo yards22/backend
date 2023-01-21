@@ -1,13 +1,21 @@
 import { Herror } from "../../pkg/herror/herror";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
-import RouteHandler from "./types";
+import { CheckAllowance } from "./middleware";
+import RouteHandler, { App, AppRouter } from "./types";
 
-export const HandleUpdateProfile: RouteHandler = async (
-  req,
-  res,
-  next,
-  app
-) => {
+export function ProfileRoutes(app: App) {
+  const appRouter = new AppRouter(app, CheckAllowance);
+  appRouter.Put("/", HandleUpdateProfile, true, {
+    multiple: false,
+    fieldName: "image",
+  });
+  appRouter.Get("/editProfile", HandleGetUserPrimaryInfo);
+  appRouter.Get("/", HandleGetUserProfileInfo);
+  appRouter.Post("/checkUsername", HandleGetCheckUsername);
+  return appRouter.NativeRouter();
+}
+
+const HandleUpdateProfile: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
   const token: string = req.context.token;
   const bio: string = req.body.bio as string;
@@ -36,12 +44,7 @@ export const HandleUpdateProfile: RouteHandler = async (
   });
 };
 
-export const HandleGetUserPrimaryInfo: RouteHandler = async (
-  req,
-  res,
-  next,
-  app
-) => {
+const HandleGetUserPrimaryInfo: RouteHandler = async (req, res, next, app) => {
   const user_id = Number(req.context.user_id);
   console.log(user_id);
   if (user_id != undefined) {
@@ -57,12 +60,7 @@ export const HandleGetUserPrimaryInfo: RouteHandler = async (
   }
 };
 
-export const HandleGetUserProfileInfo: RouteHandler = async (
-  req,
-  res,
-  next,
-  app
-) => {
+const HandleGetUserProfileInfo: RouteHandler = async (req, res, next, app) => {
   var username: string;
   username = req.query.username as string;
   const user_id = Number(req.context.user_id);
@@ -95,12 +93,7 @@ export const HandleGetUserProfileInfo: RouteHandler = async (
   }
 };
 
-export const HandleGetCheckUsername: RouteHandler = async (
-  req,
-  res,
-  next,
-  app
-) => {
+const HandleGetCheckUsername: RouteHandler = async (req, res, next, app) => {
   const username = req.body.username;
   if (validateUsername(username)) {
     try {

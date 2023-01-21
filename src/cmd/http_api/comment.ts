@@ -1,14 +1,20 @@
 import { nextTick } from "process";
 import { Herror } from "../../pkg/herror/herror";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
-import RouteHandler from "./types";
+import { CheckAllowance } from "./middleware";
+import RouteHandler, { App, AppRouter } from "./types";
 
-export const HandleCreateComment: RouteHandler = async (
-  req,
-  res,
-  next,
-  app
-) => {
+export function CommentRoutes(app: App) {
+  const appRouter = new AppRouter(app, CheckAllowance);
+  appRouter.Get("/", HandleGetComments);
+  appRouter.Post("/", HandleCreateComment);
+  appRouter.Delete("/", HandleDeleteComment);
+  appRouter.Post("/reply", HandleCommentReply);
+  appRouter.Delete("/deleteReply", HandleDeleteCommentReply);
+  return appRouter.NativeRouter();
+}
+
+const HandleCreateComment: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
   const content: string = String(req.body.content);
   const post_id: number = Number(req.body.post_id);
@@ -29,7 +35,7 @@ export const HandleCreateComment: RouteHandler = async (
   }
 };
 
-export const HandleGetComments: RouteHandler = async (req, res, next, app) => {
+const HandleGetComments: RouteHandler = async (req, res, next, app) => {
   const post_id: bigint = BigInt(req.query.post_id as string);
   if (!post_id) {
     return next(new Herror("post id missing", HerrorStatus.StatusBadRequest));
@@ -60,12 +66,7 @@ export const HandleGetComments: RouteHandler = async (req, res, next, app) => {
   }
 };
 
-export const HandleDeleteComment: RouteHandler = async (
-  req,
-  res,
-  next,
-  app
-) => {
+const HandleDeleteComment: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
   const post_id: bigint = BigInt(req.body.post_id);
   const comment_id: bigint = BigInt(req.body.comment_id);
@@ -84,7 +85,7 @@ export const HandleDeleteComment: RouteHandler = async (
   }
 };
 
-export const HandleCommentReply: RouteHandler = async (req, res, next, app) => {
+const HandleCommentReply: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
   const comment_id: bigint = BigInt(req.body.comment_id);
   const content: string = String(req.body.content);
@@ -106,12 +107,7 @@ export const HandleCommentReply: RouteHandler = async (req, res, next, app) => {
   }
 };
 
-export const HandleDeleteCommentReply: RouteHandler = async (
-  req,
-  res,
-  next,
-  app
-) => {
+const HandleDeleteCommentReply: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
   const comment_id: bigint = BigInt(req.body.comment_id);
   const parent_comment_id: bigint = BigInt(req.body.parent_comment_id);

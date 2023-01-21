@@ -1,10 +1,24 @@
 import { Herror } from "../../pkg/herror/herror";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
-import RouteHandler from "./types";
+import { CheckAllowance } from "./middleware";
+import RouteHandler, { App, AppRouter } from "./types";
 
-//TODO: Perform proper error handling.
+export function PostRoutes(app: App) {
+  const appRouter = new AppRouter(app, CheckAllowance);
+  appRouter.Post("/postMeta", HandlePostsMetaData);
+  appRouter.Post("/", HandleCreatePost, true, {
+    multiple: true,
+    fieldName: "images",
+  });
+  appRouter.Delete("/", HandleDeletePost);
+  appRouter.Get("/get-by-id", HandleGetPostById);
+  appRouter.Get("/:type", HandleGetPosts);
+  appRouter.Post("/shareToTimeline", HandleShareToTimeline);
+  appRouter.Put("/favourite", HandleAddToFav);
+  return appRouter.NativeRouter();
+}
 
-export const HandleCreatePost: RouteHandler = async (req, res, next, app) => {
+const HandleCreatePost: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
   const content: string = req.body.content;
   const images = req.files as Array<any>;
@@ -24,7 +38,7 @@ export const HandleCreatePost: RouteHandler = async (req, res, next, app) => {
   }
 };
 
-export const HandleUpdatePost: RouteHandler = async (req, res, next, app) => {
+const HandleUpdatePost: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
   const content: string = String(req.body.content);
   const post_id: bigint = BigInt(req.body.post_id);
@@ -54,7 +68,7 @@ export const HandleUpdatePost: RouteHandler = async (req, res, next, app) => {
   }
 };
 
-export const HandleDeletePost: RouteHandler = async (req, res, next, app) => {
+const HandleDeletePost: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
   const post_id: bigint = BigInt(req.body.post_id);
 
@@ -69,7 +83,7 @@ export const HandleDeletePost: RouteHandler = async (req, res, next, app) => {
   }
 };
 
-export const HandleGetPosts: RouteHandler = async (req, res, next, app) => {
+const HandleGetPosts: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
   const limit: number = Number(req.query.limit || 10);
   const offset: number = Number(req.query.offset || 0);
@@ -129,12 +143,7 @@ export const HandleGetPosts: RouteHandler = async (req, res, next, app) => {
   }
 };
 
-export const HandleShareToTimeline: RouteHandler = async (
-  req,
-  res,
-  next,
-  app
-) => {
+const HandleShareToTimeline: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
   const post_id: bigint = BigInt(req.body.post_id);
   const content: string = String(req.body.content);
@@ -148,12 +157,7 @@ export const HandleShareToTimeline: RouteHandler = async (
   }
 };
 
-export const HandleAddToFavourites: RouteHandler = async (
-  req,
-  res,
-  next,
-  app
-) => {
+const HandleAddToFav: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
   const post_id: bigint = BigInt(req.body.post_id);
   const is_fav = req.body.is_fav;
@@ -173,12 +177,7 @@ export const HandleAddToFavourites: RouteHandler = async (
   }
 };
 
-export const HandlePostsMetaData: RouteHandler = async (
-  req,
-  res,
-  next,
-  app
-) => {
+const HandlePostsMetaData: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
   const post_ids = req.body.post_ids as bigint[];
   console.log(post_ids);
@@ -195,7 +194,7 @@ export const HandlePostsMetaData: RouteHandler = async (
   }
 };
 
-export const HandleGetPostById: RouteHandler = async (req, res, next, app) => {
+const HandleGetPostById: RouteHandler = async (req, res, next, app) => {
   const post_id = req.query.post_id;
   console.log(post_id);
   if (!post_id || isNaN(Number(post_id)))

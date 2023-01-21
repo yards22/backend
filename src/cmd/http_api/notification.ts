@@ -1,8 +1,17 @@
 import { Herror } from "../../pkg/herror/herror";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
-import RouteHandler from "./types";
+import { CheckAllowance } from "./middleware";
+import RouteHandler, { App, AppRouter } from "./types";
 
-export const HandleGetNotification: RouteHandler = (req, res, next, app) => {
+export function NotificationRoutes(app: App) {
+  const appRouter = new AppRouter(app, CheckAllowance);
+  appRouter.Get("/", app.InHandler(HandleGetNotification));
+  appRouter.Put("/", app.InHandler(HandleUpdateNotificationStatus));
+  appRouter.Post("/username", app.InHandler(HandleGetNotificationUsernames));
+  return appRouter.NativeRouter();
+}
+
+const HandleGetNotification: RouteHandler = (req, res, next, app) => {
   const forId = Number(req.context.user_id);
   const id = req.query.id ? BigInt(Number(req.query.id ?? -1)) : -1;
 
@@ -38,7 +47,7 @@ export const HandleGetNotification: RouteHandler = (req, res, next, app) => {
     });
 };
 
-export const HandleGetNotificationUsernames: RouteHandler = async (
+const HandleGetNotificationUsernames: RouteHandler = async (
   req,
   res,
   next,
@@ -55,12 +64,7 @@ export const HandleGetNotificationUsernames: RouteHandler = async (
   }
 };
 
-export const HandleUpdateNotificationStatus: RouteHandler = (
-  req,
-  res,
-  next,
-  app
-) => {
+const HandleUpdateNotificationStatus: RouteHandler = (req, res, next, app) => {
   const forId = Number(req.context.user_id);
 
   const _ids = req.body.ids as string[];
