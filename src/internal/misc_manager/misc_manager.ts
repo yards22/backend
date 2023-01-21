@@ -2,9 +2,7 @@ import { Prisma, PrismaClient } from "@prisma/client";
 import { IFileStorage } from "../../pkg/file_storage/file_storage";
 import { ImageResolver } from "../../pkg/image_resolver/image_resolver_";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
-import { HandleGetPolls } from "../../cmd/http_api/misc";
 import { randomUUID } from "crypto";
-import EPoll from "../entities/poll";
 import { Herror } from "../../pkg/herror/herror";
 
 interface IResponse {
