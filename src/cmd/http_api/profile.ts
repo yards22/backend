@@ -1,13 +1,20 @@
 import { Herror } from "../../pkg/herror/herror";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
-import RouteHandler from "./types";
+import { CheckAllowance } from "./middleware";
+import RouteHandler, { App, AppRouter } from "./types";
 
-export const HandleUpdateProfile: RouteHandler = async (
-  req,
-  res,
-  next,
-  app
-) => {
+export function ProfileRoutes(app: App) {
+  const appRouter = new AppRouter(app, CheckAllowance);
+  appRouter.Put("/", HandleUpdateProfile, true, {
+    multiple: false,
+    fieldName: "image",
+  });
+  appRouter.Get("/", HandleGetUserProfileInfo);
+  appRouter.Get("/username/check-availability", HandleCheckUsername);
+  return appRouter.NativeRouter();
+}
+
+const HandleUpdateProfile: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
   const token: string = req.context.token;
   const bio: string = req.body.bio as string;
@@ -36,33 +43,7 @@ export const HandleUpdateProfile: RouteHandler = async (
   });
 };
 
-export const HandleGetUserPrimaryInfo: RouteHandler = async (
-  req,
-  res,
-  next,
-  app
-) => {
-  const user_id = Number(req.context.user_id);
-  console.log(user_id);
-  if (user_id != undefined) {
-    const userProfile = await app.profileManager.GetUserPrimaryInfoById(
-      user_id
-    );
-    app.SendRes(res, {
-      status: HerrorStatus.StatusOK,
-      data: userProfile,
-    });
-  } else {
-    next(new Herror("BadRequest", HerrorStatus.StatusBadRequest));
-  }
-};
-
-export const HandleGetUserProfileInfo: RouteHandler = async (
-  req,
-  res,
-  next,
-  app
-) => {
+const HandleGetUserProfileInfo: RouteHandler = async (req, res, next, app) => {
   var username: string;
   username = req.query.username as string;
   const user_id = Number(req.context.user_id);
@@ -95,13 +76,8 @@ export const HandleGetUserProfileInfo: RouteHandler = async (
   }
 };
 
-export const HandleGetCheckUsername: RouteHandler = async (
-  req,
-  res,
-  next,
-  app
-) => {
-  const username = req.body.username;
+const HandleCheckUsername: RouteHandler = async (req, res, next, app) => {
+  const username = req.query.username as string;
   if (validateUsername(username)) {
     try {
       const { responseStatus } = await app.profileManager.CheckUsername(

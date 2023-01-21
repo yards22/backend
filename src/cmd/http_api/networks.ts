@@ -1,8 +1,19 @@
-import RouteHandler from "./types";
+import RouteHandler, { App, AppRouter } from "./types";
 import { Herror } from "../../pkg/herror/herror";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
+import { CheckAllowance } from "./middleware";
 
-export const GetRecommendations: RouteHandler = async (req, res, next, app) => {
+export function NetworkRoutes(app: App) {
+  const appRouter = new AppRouter(app, CheckAllowance);
+  appRouter.Get("/", GetRecommendations);
+  appRouter.Post("/", HandleNewConnection);
+  appRouter.Get("/myfollowers", HandleGetFollowers);
+  appRouter.Get("/whoAmIFollowing", HandleGetFollowing);
+  appRouter.Delete("/", HandleRemoveConnection);
+  appRouter.Get("/search", HandleSearches);
+  return appRouter.NativeRouter();
+}
+const GetRecommendations: RouteHandler = async (req, res, next, app) => {
   const user_id = Number(req.context.user_id);
   const offset = Number(req.body.offset || 0);
   const limit = Number(req.body.limit || 10);
@@ -21,12 +32,7 @@ export const GetRecommendations: RouteHandler = async (req, res, next, app) => {
   }
 };
 
-export const HandleNewConnection: RouteHandler = async (
-  req,
-  res,
-  next,
-  app
-) => {
+const HandleNewConnection: RouteHandler = async (req, res, next, app) => {
   const user_id = Number(req.context.user_id);
   const following_id = Number(req.body.following_id);
   if (user_id !== undefined && following_id !== undefined) {
@@ -47,12 +53,7 @@ export const HandleNewConnection: RouteHandler = async (
   }
 };
 
-export const HandleRemoveConnection: RouteHandler = async (
-  req,
-  res,
-  next,
-  app
-) => {
+const HandleRemoveConnection: RouteHandler = async (req, res, next, app) => {
   const user_id = Number(req.context.user_id);
   const following_id = Number(req.body.following_id);
   if (following_id === undefined)
@@ -68,7 +69,7 @@ export const HandleRemoveConnection: RouteHandler = async (
   }
 };
 
-export const HandleGetFollowers: RouteHandler = async (req, res, next, app) => {
+const HandleGetFollowers: RouteHandler = async (req, res, next, app) => {
   const user_id = Number(req.context.user_id);
   const username = req.query.username;
   try {
@@ -84,7 +85,7 @@ export const HandleGetFollowers: RouteHandler = async (req, res, next, app) => {
   }
 };
 
-export const HandleGetFollowing: RouteHandler = async (req, res, next, app) => {
+const HandleGetFollowing: RouteHandler = async (req, res, next, app) => {
   const user_id = Number(req.context.user_id);
   const username = req.query.username;
   try {
@@ -100,7 +101,7 @@ export const HandleGetFollowing: RouteHandler = async (req, res, next, app) => {
   }
 };
 
-export const HandleSearches: RouteHandler = async (req, res, next, app) => {
+const HandleSearches: RouteHandler = async (req, res, next, app) => {
   const search_content = String(req.query.search);
   if (search_content !== "" && search_content !== undefined) {
     const searchResults = await app.networkManager.GetSearchedUsers(
