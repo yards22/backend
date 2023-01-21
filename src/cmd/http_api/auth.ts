@@ -1,9 +1,24 @@
-import RouteHandler from "./types";
+import RouteHandler, { App, AppRouter } from "./types";
 import { Herror } from "../../pkg/herror/herror";
 import { MailValidator } from "../../util/mail_dependencies";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
-import { Console, log } from "console";
-import multer from "multer";
+import { CheckAllowance } from "./middleware";
+
+export function AuthRoutes(app: App) {
+  const appRouter = new AppRouter(app, CheckAllowance);
+  appRouter.Get("/", HandleMe);
+  appRouter.Delete("/logout", HandleLogout);
+  appRouter.Post("/signup", HandleSignUp, false);
+  appRouter.Post("/login", HandleLogin, false);
+  appRouter.Post("/oauth", HandleGoogleOauth, false);
+  appRouter.Post("/sendOTP", HandleOTPGenerationForSignUp, false);
+  appRouter.Post("/verifyOTP", HandleOTPVerificationForSignUp, false);
+  appRouter.Post("/sendOTPforgot", HandleOTPGeneration, false);
+  appRouter.Post("/verifyOTPforgot", HandleOTPVerification, false);
+  appRouter.Post("/updPassword", HandlePasswordUpdate, false);
+  appRouter.Post("/logoutAllScreens", HandleLogoutAllScreen, false);
+  return appRouter.NativeRouter();
+}
 
 const HandleSignUp: RouteHandler = async (req, res, next, app) => {
   const mail_id = req.body.mail_id;
@@ -217,18 +232,4 @@ const HandleMe: RouteHandler = async (req, res, next, app) => {
   delete data.token;
   delete data.password;
   app.SendRes(res, { status: HerrorStatus.StatusOK, data });
-};
-
-export {
-  HandleSignUp,
-  HandleLogin,
-  HandleGoogleOauth,
-  HandleOTPGenerationForSignUp,
-  HandleOTPVerificationForSignUp,
-  HandleLogout,
-  HandleOTPGeneration,
-  HandlePasswordUpdate,
-  HandleOTPVerification,
-  HandleLogoutAllScreen,
-  HandleMe,
 };

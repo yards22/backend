@@ -6,26 +6,14 @@ import {
   HandleGetNotificationUsernames,
   HandleUpdateNotificationStatus,
 } from "./notification";
-import {
-  HandleSignUp,
-  HandleLogin,
-  HandleGoogleOauth,
-  HandleOTPGenerationForSignUp,
-  HandleOTPVerificationForSignUp,
-  HandleOTPGeneration,
-  HandleOTPVerification,
-  HandleLogout,
-  HandlePasswordUpdate,
-  HandleLogoutAllScreen,
-  HandleMe,
-} from "./auth";
+
 import {
   HandleUpdateProfile,
   HandleGetUserPrimaryInfo,
   HandleGetUserProfileInfo,
   HandleGetCheckUsername,
 } from "./profile";
-import { CheckAllowance } from "./middlewares";
+import { CheckAllowance } from "./middleware";
 import { HandleGetLikesForPost, HandleLikeAndUnlike } from "./like";
 import {
   HandleCommentReply,
@@ -63,6 +51,7 @@ import {
   HandleSearches,
 } from "./networks";
 import { HandleGetExplore } from "./explore";
+import { AuthRoutes } from "./auth";
 
 function NotificationRoutes(app: App): Router {
   const router = Router();
@@ -81,26 +70,6 @@ function NotificationRoutes(app: App): Router {
     app.InHandler(CheckAllowance),
     app.InHandler(HandleGetNotificationUsernames)
   );
-  return router;
-}
-
-function AuthRoutes(app: App): Router {
-  const router = Router();
-  router.get("/", app.InHandler(CheckAllowance), app.InHandler(HandleMe));
-  router.post("/signup", app.InHandler(HandleSignUp));
-  router.post("/login", app.InHandler(HandleLogin));
-  router.post("/oauth", app.InHandler(HandleGoogleOauth));
-  router.post("/sendOTP", app.InHandler(HandleOTPGenerationForSignUp));
-  router.post("/verifyOTP", app.InHandler(HandleOTPVerificationForSignUp));
-  router.delete(
-    "/logout",
-    app.InHandler(CheckAllowance),
-    app.InHandler(HandleLogout)
-  );
-  router.post("/sendOTPforgot", app.InHandler(HandleOTPGeneration));
-  router.post("/verifyOTPforgot", app.InHandler(HandleOTPVerification));
-  router.post("/updPassword", app.InHandler(HandlePasswordUpdate));
-  router.post("/logoutAllScreens", app.InHandler(HandleLogoutAllScreen));
   return router;
 }
 
