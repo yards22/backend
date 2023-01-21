@@ -5,16 +5,13 @@ import RouteHandler, { App, AppRouter } from "./types";
 
 export function PostRoutes(app: App) {
   const appRouter = new AppRouter(app, CheckAllowance);
-  appRouter.Post("/postMeta", HandlePostsMetaData);
   appRouter.Post("/", HandleCreatePost, true, {
     multiple: true,
     fieldName: "images",
   });
   appRouter.Delete("/", HandleDeletePost);
-  appRouter.Get("/get-by-id", HandleGetPostById);
-  appRouter.Get("/:type", HandleGetPosts);
-  appRouter.Post("/shareToTimeline", HandleShareToTimeline);
-  appRouter.Put("/favourite", HandleAddToFav);
+  appRouter.Put("/fav", HandleAddToFav);
+  appRouter.Get("/:type", HandleGetPost);
   return appRouter.NativeRouter();
 }
 
@@ -83,13 +80,32 @@ const HandleDeletePost: RouteHandler = async (req, res, next, app) => {
   }
 };
 
-const HandleGetPosts: RouteHandler = async (req, res, next, app) => {
+const HandleGetPost: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
   const limit: number = Number(req.query.limit || 10);
   const offset: number = Number(req.query.offset || 0);
   const type: string = req.params.type;
-  const username: string = req.query.username as string;
   try {
+    if (type == "id") {
+      const post_id = req.query.post_id;
+      if (!post_id || isNaN(Number(post_id)))
+        return next(
+          new Herror("invalid post_id", HerrorStatus.StatusBadRequest)
+        );
+      try {
+        const post = await app.postManager.GetPostByID(
+          BigInt(post_id as string)
+        );
+        app.SendRes(res, {
+          status: 200,
+          data: post,
+        });
+        return;
+      } catch (err) {
+        return next(err);
+      }
+    }
+
     if (type === "feed") {
       const posts = await app.postManager.GetUsersFeed(user_id, limit, offset);
       app.SendRes(res, {
@@ -174,38 +190,5 @@ const HandleAddToFav: RouteHandler = async (req, res, next, app) => {
     } catch (err) {
       next(err);
     }
-  }
-};
-
-const HandlePostsMetaData: RouteHandler = async (req, res, next, app) => {
-  const user_id: number = Number(req.context.user_id);
-  const post_ids = req.body.post_ids as bigint[];
-  console.log(post_ids);
-  try {
-    const { isLiked, isFavourite, likedUsers } =
-      await app.postManager.GetPostMetadata(post_ids, user_id);
-    app.SendRes(res, {
-      status: 200,
-      data: { isLiked, isFavourite, likedUsers },
-      message: "OK",
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
-const HandleGetPostById: RouteHandler = async (req, res, next, app) => {
-  const post_id = req.query.post_id;
-  console.log(post_id);
-  if (!post_id || isNaN(Number(post_id)))
-    return next(new Herror("invalid post id", HerrorStatus.StatusBadRequest));
-  try {
-    const post = await app.postManager.GetPostByID(BigInt(post_id as string));
-    app.SendRes(res, {
-      status: 200,
-      data: post,
-    });
-  } catch (err) {
-    next(err);
   }
 };
