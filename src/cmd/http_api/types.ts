@@ -15,6 +15,7 @@ import NetworkManager from "../../internal/network_manager/network_manager";
 import MiscManager from "../../internal/misc_manager/misc_manager";
 import ExploreManager from "../../internal/explore_manager/explore_manager";
 import Mailer from "../../pkg/mailer/mailer";
+import multer from "multer";
 interface CustomRequest extends Request {
   context: any;
 }
@@ -42,53 +43,99 @@ export class AppRouter {
     path: string,
     handler: RouteHandler,
     withAuth: boolean = true,
-    specificFn?: RouteHandler
+    withFile?: {
+      multiple: boolean;
+      fieldName: string;
+    },
+    specificAuthFn?: RouteHandler
   ) {
-    this.router.get(path, this.prepare(handler, withAuth, specificFn));
+    this.router.get(
+      path,
+      this.prepare(handler, withAuth, withFile, specificAuthFn)
+    );
   }
   Post(
     path: string,
     handler: RouteHandler,
     withAuth: boolean = true,
-    specificFn?: RouteHandler
+    withFile?: {
+      multiple: boolean;
+      fieldName: string;
+    },
+    specificAuthFn?: RouteHandler
   ) {
-    this.router.get(path, this.prepare(handler, withAuth, specificFn));
+    this.router.get(
+      path,
+      this.prepare(handler, withAuth, withFile, specificAuthFn)
+    );
   }
   Put(
     path: string,
     handler: RouteHandler,
     withAuth: boolean = true,
-    specificFn?: RouteHandler
+    withFile?: {
+      multiple: boolean;
+      fieldName: string;
+    },
+    specificAuthFn?: RouteHandler
   ) {
-    this.router.get(path, this.prepare(handler, withAuth, specificFn));
+    this.router.get(
+      path,
+      this.prepare(handler, withAuth, withFile, specificAuthFn)
+    );
   }
   Delete(
     path: string,
     handler: RouteHandler,
     withAuth: boolean = true,
-    specificFn?: RouteHandler
+    withFile?: {
+      multiple: boolean;
+      fieldName: string;
+    },
+    specificAuthFn?: RouteHandler
   ) {
-    this.router.get(path, this.prepare(handler, withAuth, specificFn));
+    this.router.get(
+      path,
+      this.prepare(handler, withAuth, withFile, specificAuthFn)
+    );
   }
   Patch(
     path: string,
     handler: RouteHandler,
     withAuth: boolean = true,
-    specificFn?: RouteHandler
+    withFile?: {
+      multiple: boolean;
+      fieldName: string;
+    },
+    specificAuthFn?: RouteHandler
   ) {
-    this.router.get(path, this.prepare(handler, withAuth, specificFn));
+    this.router.get(
+      path,
+      this.prepare(handler, withAuth, withFile, specificAuthFn)
+    );
   }
   private prepare(
     handler: RouteHandler,
     withAuth: boolean = true,
-    specificFn?: RouteHandler
+    withFile?: {
+      multiple: boolean;
+      fieldName: string;
+    },
+    specificAuthFn?: RouteHandler
   ) {
     const fns: ((req: Request, res: Response, next: NextFunction) => void)[] =
       [];
 
-    const doAuthWith = specificFn || this.authFn;
+    const doAuthWith = specificAuthFn || this.authFn;
     if (withAuth && doAuthWith) fns.push(this.app.InHandler(doAuthWith));
     fns.push(this.app.InHandler(handler));
+
+    if (withFile) {
+      const storage = multer.memoryStorage();
+      const upload = multer({ storage: storage });
+      if (withFile.multiple) fns.push(upload.array(withFile.fieldName));
+      else fns.push(upload.single(withFile.fieldName));
+    }
     return fns;
   }
 }
