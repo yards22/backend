@@ -1,9 +1,21 @@
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 import { Herror } from "../../pkg/herror/herror";
-import RouteHandler from "./types";
-import { resolve } from "path";
+import RouteHandler, { App, AppRouter } from "./types";
+import { CheckAllowance } from "./middleware";
 
-export const HandlePostFeedback: RouteHandler = async (req, res, next, app) => {
+export function MiscRoutes(app: App) {
+  const appRouter = new AppRouter(app, CheckAllowance);
+  appRouter.Post("/feedback", HandlePostFeedback, true, {
+    multiple: false,
+    fieldName: "image",
+  });
+  appRouter.Post("/poll", HandlePostPolls);
+  appRouter.Get("/poll", HandleGetPolls);
+  appRouter.Get("/leaderboard", HandleGetLeaderBoard);
+  return appRouter.NativeRouter();
+}
+
+const HandlePostFeedback: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
   const content: string = String(req.body.content);
 
@@ -25,7 +37,7 @@ export const HandlePostFeedback: RouteHandler = async (req, res, next, app) => {
   }
 };
 
-export const HandleGetPolls: RouteHandler = async (req, res, next, app) => {
+const HandleGetPolls: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
   const limit = Number(req.query.limit || 10);
   const offset = Number(req.query.offset || 0);
@@ -41,7 +53,7 @@ export const HandleGetPolls: RouteHandler = async (req, res, next, app) => {
   }
 };
 
-export const HandlePostPolls: RouteHandler = async (req, res, next, app) => {
+const HandlePostPolls: RouteHandler = async (req, res, next, app) => {
   const poll_id = req.body.poll_id;
   const user_id = req.context.user_id;
   const type = req.body.type;
@@ -55,12 +67,7 @@ export const HandlePostPolls: RouteHandler = async (req, res, next, app) => {
   }
 };
 
-export const HandleGetLeaderBoard: RouteHandler = async (
-  req,
-  res,
-  next,
-  app
-) => {
+const HandleGetLeaderBoard: RouteHandler = async (req, res, next, app) => {
   const limit = Number(req.query.limit || 10);
   const offset = Number(req.query.offset || 0);
   try {
