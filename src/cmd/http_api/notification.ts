@@ -72,11 +72,6 @@ const HandleUpdateNotificationStatus: RouteHandler = (req, res, next, app) => {
     return BigInt(item);
   });
 
-  if (ids.length == 0) {
-    next(new Herror("empty_ids", HerrorStatus.StatusBadRequest));
-    return;
-  }
-
   let status = req.query.status;
   if (!(status == "Unseen" || status == "Read" || status == "Seen")) {
     next(new Herror("invalid_status", HerrorStatus.StatusBadRequest));
