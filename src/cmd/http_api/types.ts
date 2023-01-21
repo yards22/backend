@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { NextFunction, Response, Request } from "express";
+import { NextFunction, Response, Request, Router } from "express";
 import { Express } from "express";
 import NotificationManager from "../../internal/notification_manager/notification_manager";
 import AuthManager from "../../internal/auth_manager/auth_manager";
@@ -25,6 +25,73 @@ type RouteHandler = (
   next: NextFunction,
   app: App
 ) => void;
+
+export class AppRouter {
+  private router: Router;
+  app: App;
+  authFn?: RouteHandler;
+  constructor(app: App, authFn?: RouteHandler) {
+    this.router = Router();
+    this.app = app;
+    this.authFn = authFn;
+  }
+  NativeRouter() {
+    return this.router;
+  }
+  Get(
+    path: string,
+    handler: RouteHandler,
+    withAuth: boolean = true,
+    specificFn?: RouteHandler
+  ) {
+    this.router.get(path, this.prepare(handler, withAuth, specificFn));
+  }
+  Post(
+    path: string,
+    handler: RouteHandler,
+    withAuth: boolean = true,
+    specificFn?: RouteHandler
+  ) {
+    this.router.get(path, this.prepare(handler, withAuth, specificFn));
+  }
+  Put(
+    path: string,
+    handler: RouteHandler,
+    withAuth: boolean = true,
+    specificFn?: RouteHandler
+  ) {
+    this.router.get(path, this.prepare(handler, withAuth, specificFn));
+  }
+  Delete(
+    path: string,
+    handler: RouteHandler,
+    withAuth: boolean = true,
+    specificFn?: RouteHandler
+  ) {
+    this.router.get(path, this.prepare(handler, withAuth, specificFn));
+  }
+  Patch(
+    path: string,
+    handler: RouteHandler,
+    withAuth: boolean = true,
+    specificFn?: RouteHandler
+  ) {
+    this.router.get(path, this.prepare(handler, withAuth, specificFn));
+  }
+  private prepare(
+    handler: RouteHandler,
+    withAuth: boolean = true,
+    specificFn?: RouteHandler
+  ) {
+    const fns: ((req: Request, res: Response, next: NextFunction) => void)[] =
+      [];
+
+    const doAuthWith = specificFn || this.authFn;
+    if (withAuth && doAuthWith) fns.push(this.app.InHandler(doAuthWith));
+    fns.push(this.app.InHandler(handler));
+    return fns;
+  }
+}
 
 export class App {
   srv: Express;
