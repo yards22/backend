@@ -18,7 +18,7 @@ restart_deps:
 	docker start node_redis
 
 pmu:
-	npx prisma migrate dev -n init --schema ./src/infra/db/schema.prisma
+	npx prisma migrate dev -n init --schema ./src/infra/db/schema.prisma 
 pgen:
 	npx prisma generate --schema ./src/infra/db/schema.prisma
 omg:

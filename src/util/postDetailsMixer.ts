@@ -1,10 +1,10 @@
 import {
   EFeedMeta,
-  EFeeditem,
+  EFeedItem,
   EPostFinal,
 } from "../internal/entities/feeditem";
 
-export function detailsMixers(firstPart: EFeeditem[], secondPart: EFeedMeta) {
+export function detailsMixers(firstPart: EFeedItem[], secondPart: EFeedMeta) {
   const postMap = new Map();
   firstPart.forEach((item) => {
     postMap.set(item.post_id, item);

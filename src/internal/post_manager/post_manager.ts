@@ -7,13 +7,14 @@ import { IFileStorage } from "../../pkg/file_storage/file_storage";
 import { ImageResolver } from "../../pkg/image_resolver/image_resolver_";
 import { IKVStore } from "../../pkg/kv_store/kv_store";
 import EPost from "../entities/post";
-import { ReconnectStrategyError } from "redis";
-import { HerrorStatus } from "../../pkg/herror/status_codes";
-import {EFeedMeta, EFeeditem, EPostFinal} from "../entities/feeditem";
-import {formatFavResponse, formatFeedResponse, formatFeedResponseUsername, formatTrendingFeedResponse} from "../../util/responseFormat"
+import { EFeedMeta, EFeedItem, EPostFinal } from "../entities/feeditem";
+import {
+  formatFavResponse,
+  formatFeedResponse,
+  formatFeedResponseUsername,
+  formatTrendingFeedResponse,
+} from "../../util/responseFormat";
 import { detailsMixers } from "../../util/postDetailsMixer";
-
-const prisma = new PrismaClient();
 
 const ALLOWED_IMAGES = 4;
 const MAX_WIDTH = 1080;
@@ -72,7 +73,7 @@ export default class PostManager {
   async Create(
     user_id: number,
     medias: Buffer[],
-    content?: string,
+    content?: string
   ): Promise<EPost> {
     return new Promise(async (resolve, reject) => {
       try {
@@ -162,6 +163,52 @@ export default class PostManager {
     return this.store.posts.create({
       data: { content, user_id: user_id, original_id },
     });
+  }
+
+  async GetPostByID(post_id: bigint) {
+    try {
+      const post = await this.store.posts.findUnique({
+        where: { post_id },
+        include: {
+          user: {
+            select: {
+              Profile: {
+                select: {
+                  username: true,
+                  profile_image_uri: true,
+                },
+              },
+            },
+          },
+          _count: { select: { Likes: true } },
+        },
+      });
+      if (post) {
+        const feedPost: EFeedItem = {
+          user_id: post.user_id,
+          post_id: post.post_id,
+          content: post.content,
+          media: JSON.parse(post.media || "[]"),
+          original_id: post.original_id,
+          created_at: post.created_at,
+          updated_at: post.updated_at,
+          likes: post._count.Likes,
+          username: post.user.Profile?.username || "",
+          profile_pic_ref:
+            post.user.Profile?.profile_image_uri || undefined || null,
+        };
+
+        const metadata: EFeedMeta = await this.GetPostMetadata(
+          [post.post_id],
+          feedPost.user_id
+        );
+        const finalPost: EPostFinal[] = detailsMixers([feedPost], metadata);
+        return finalPost[0];
+      }
+      return;
+    } catch (err) {
+      throw err;
+    }
   }
 
   async UpdateMediaRef(
@@ -297,13 +344,13 @@ export default class PostManager {
     });
   }
 
-  async deleteStarredPosts(user_id:number, post_id:bigint){
+  async deleteStarredPosts(user_id: number, post_id: bigint) {
     return new Promise(async (resolve, reject) => {
       try {
         const data = await this.store.favourites.deleteMany({
           where: {
-            AND: [{ user_id: user_id }, { post_id: post_id }]
-          }
+            AND: [{ user_id: user_id }, { post_id: post_id }],
+          },
         });
         resolve(data);
       } catch (err) {
@@ -327,17 +374,46 @@ export default class PostManager {
     });
   }
 
-  GetFollowing(user_id:number){
+  GetFollowing(user_id: number) {
     return this.store.networks.findMany({
-      where:{
-        follower_id:user_id
+      where: {
+        follower_id: user_id,
       },
-      select:{
-         following_id:true
-      }
+      select: {
+        following_id: true,
+      },
     });
   }
 
+  async GetFollowingUsername(user_id: number) {
+    new Promise(async (resolve, reject) => {
+      try {
+        const followingList = await this.store.networks.findMany({
+          where: {
+            follower_id: user_id,
+          },
+          include: {
+            following: {
+              include: {
+                Profile: {
+                  select: {
+                    username: true,
+                  },
+                },
+              },
+            },
+          },
+        });
+        let finalList: string[];
+        followingList.forEach((item) =>
+          finalList.push(item.following.Profile?.username as string)
+        );
+        resolve(followingList);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
 
   async GetPostsOfUsers(users: any, limit: number, offset: number) {
     return this.store.posts.findMany({
@@ -445,25 +521,33 @@ export default class PostManager {
           distinct_posts.forEach((post) => {
             filtered_posts.push(post);
           });
-  
-          // collect post_ids and send it to. 
-          let post_ids:bigint [] = []
-          filtered_posts.forEach((post:any)=>post_ids.push(BigInt(post.post_id)))
+
+          // collect post_ids and send it to.
+          let post_ids: bigint[] = [];
+          filtered_posts.forEach((post: any) =>
+            post_ids.push(BigInt(post.post_id))
+          );
           // call GetPostMetaData.
-          const Metadata: EFeedMeta = await this.GetPostMetadata(post_ids,user_id);
-          const posts_ : EFeeditem[]= formatFeedResponse(filtered_posts)
-          const finalPosts:EPostFinal[] = detailsMixers(posts_,Metadata)
+          const Metadata: EFeedMeta = await this.GetPostMetadata(
+            post_ids,
+            user_id
+          );
+          const posts_: EFeedItem[] = formatFeedResponse(filtered_posts);
+          const finalPosts: EPostFinal[] = detailsMixers(posts_, Metadata);
           resolve(finalPosts);
-          return ;
+          return;
         }
-        let post_ids:bigint [] = []
-        posts.forEach((post:any)=>post_ids.push(BigInt(post.post_id)))
+        let post_ids: bigint[] = [];
+        posts.forEach((post: any) => post_ids.push(BigInt(post.post_id)));
         // call GetPostMetaData.
-        const Metadata: EFeedMeta = await this.GetPostMetadata(post_ids,user_id);
-        const posts_ : EFeeditem[]= formatFeedResponse(posts)
-        const finalPosts:EPostFinal[] = detailsMixers(posts_,Metadata)
+        const Metadata: EFeedMeta = await this.GetPostMetadata(
+          post_ids,
+          user_id
+        );
+        const posts_: EFeedItem[] = formatFeedResponse(posts);
+        const finalPosts: EPostFinal[] = detailsMixers(posts_, Metadata);
         resolve(finalPosts);
-        return ;
+        return;
       } catch (err) {
         reject(err);
       }
@@ -529,7 +613,7 @@ export default class PostManager {
 
   async GetPostMetadata(
     post_ids: bigint[],
-    user_id :number
+    user_id: number
   ): Promise<{
     isLiked: ILikedData[];
     isFavourite: IFavouriteData[];
@@ -592,128 +676,137 @@ export default class PostManager {
     });
   }
 
-  async GetTrendingPosts_(limit:number,offset:number){
+  async GetTrendingPosts_(limit: number, offset: number) {
     return this.store.trendingPosts.findMany({
-      take:limit,
-      skip:offset,
-      include:{
-        post:{
-          include:{
-            user:{
-              select:{
-                Profile:{
-                  select:{
-                    username:true,
-                    profile_image_uri:true,
-                  }
-                }
-              }
+      distinct: ["post_id"],
+      take: limit,
+      skip: offset,
+      include: {
+        post: {
+          include: {
+            user: {
+              select: {
+                Profile: {
+                  select: {
+                    username: true,
+                    profile_image_uri: true,
+                  },
+                },
+              },
             },
             _count: { select: { Likes: true } },
           },
-        }
-      }
-    })
-}
-
-async GetTrendingPosts(user_id:number,limit:number,offset:number){
-   return new Promise(async(resolve,reject)=>{
-    try{
-       const res = await this.GetTrendingPosts_(limit,offset);
-       //extract post_ids ...
-       let post_ids:bigint [] = []
-       res.forEach((post:any)=>post_ids.push(BigInt(post.post_id)));
-       const Metadata: EFeedMeta = await this.GetPostMetadata(post_ids,user_id);
-       const posts : EFeeditem[] = formatTrendingFeedResponse(res);
-       const finalPosts:EPostFinal[] = detailsMixers(posts,Metadata);
-       resolve(finalPosts);
-    }
-    catch(err){
-      reject(err);
-    }
-   })
-}
-
-GetUserPostsById_(user_id: number, limit: number, offset: number) {
-  return this.store.posts.findMany({
-    where: {
-      user_id,
-    },
-    include: { 
-      user:{
-        select:{
-          Profile:{
-            select:{
-              username:true,
-              profile_image_uri:true
-            }
-          }
-        }
+        },
       },
-      _count: { select: { Likes: true } }
-     },
-  });
-}
+    });
+  }
 
-async GetUserPostsById(user_id_:number,user_id:number,limit:number,offset:number){
-  return new Promise(async(resolve,reject)=>{
-   try{
-      const res = await this.GetUserPostsById_(user_id_,limit,offset);
-      let post_ids:bigint [] = []
-      res.forEach((post:any)=>post_ids.push(BigInt(post.post_id)));
-      const Metadata: EFeedMeta = await this.GetPostMetadata(post_ids,user_id);
-      const posts : EFeeditem[] = formatFeedResponse(res);
-      const finalPosts:EPostFinal[] = detailsMixers(posts,Metadata)
-      resolve(finalPosts);
-   }
-   catch(err){
-     reject(err);
-   }
-  })
-}
-
-GetStarredPostsById_(user_id: number, limit: number, offset: number) {
-  return this.store.favourites.findMany({
-    where: {
-      user_id
-    },
-    include:{
-      post:{
-        include: { 
-          user:{
-            select:{
-              Profile:{
-                select:{
-                  username:true,
-                  profile_image_uri:true
-                }
-              }
-            }
-          },
-          _count: { select: { Likes: true } }
-         },
+  async GetTrendingPosts(user_id: number, limit: number, offset: number) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const res = await this.GetTrendingPosts_(limit, offset);
+        //extract post_ids ...
+        let post_ids: bigint[] = [];
+        res.forEach((post: any) => post_ids.push(BigInt(post.post_id)));
+        const Metadata: EFeedMeta = await this.GetPostMetadata(
+          post_ids,
+          user_id
+        );
+        const posts: EFeedItem[] = formatTrendingFeedResponse(res);
+        const finalPosts: EPostFinal[] = detailsMixers(posts, Metadata);
+        resolve(finalPosts);
+      } catch (err) {
+        reject(err);
       }
-    }
-    
-  });
-}
+    });
+  }
 
-async GetStarredPostsById(user_id:number,limit:number,offset:number){
-  return new Promise(async(resolve,reject)=>{
-   try{
-      const res = await this.GetStarredPostsById_(user_id,limit,offset);
-      let post_ids:bigint [] = []
-      res.forEach((post:any)=>post_ids.push(BigInt(post.post_id)));
-      const Metadata: EFeedMeta = await this.GetPostMetadata(post_ids,user_id);
-      const posts : EFeeditem[] = formatFavResponse(res);
-      const finalPosts:EPostFinal[] = detailsMixers(posts,Metadata)
-      resolve(finalPosts);
-   }
-   catch(err){
-     reject(err);
-   }
-  })
-}
+  GetUserPostsById_(user_id: number, limit: number, offset: number) {
+    return this.store.posts.findMany({
+      where: {
+        user_id,
+      },
+      include: {
+        user: {
+          select: {
+            Profile: {
+              select: {
+                username: true,
+                profile_image_uri: true,
+              },
+            },
+          },
+        },
+        _count: { select: { Likes: true } },
+      },
+    });
+  }
 
+  async GetUserPostsById(
+    user_id_: number,
+    user_id: number,
+    limit: number,
+    offset: number
+  ) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const res = await this.GetUserPostsById_(user_id_, limit, offset);
+        let post_ids: bigint[] = [];
+        res.forEach((post: any) => post_ids.push(BigInt(post.post_id)));
+        const Metadata: EFeedMeta = await this.GetPostMetadata(
+          post_ids,
+          user_id
+        );
+        const posts: EFeedItem[] = formatFeedResponse(res);
+        const finalPosts: EPostFinal[] = detailsMixers(posts, Metadata);
+        resolve(finalPosts);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
 
+  GetStarredPostsById_(user_id: number, limit: number, offset: number) {
+    return this.store.favourites.findMany({
+      where: {
+        user_id,
+      },
+      include: {
+        post: {
+          include: {
+            user: {
+              select: {
+                Profile: {
+                  select: {
+                    username: true,
+                    profile_image_uri: true,
+                  },
+                },
+              },
+            },
+            _count: { select: { Likes: true } },
+          },
+        },
+      },
+    });
+  }
+
+  async GetStarredPostsById(user_id: number, limit: number, offset: number) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const res = await this.GetStarredPostsById_(user_id, limit, offset);
+        let post_ids: bigint[] = [];
+        res.forEach((post: any) => post_ids.push(BigInt(post.post_id)));
+        const Metadata: EFeedMeta = await this.GetPostMetadata(
+          post_ids,
+          user_id
+        );
+        const posts: EFeedItem[] = formatFavResponse(res);
+        const finalPosts: EPostFinal[] = detailsMixers(posts, Metadata);
+        resolve(finalPosts);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
 }
