@@ -82,7 +82,7 @@ const HandleDeletePost: RouteHandler = async (req, res, next, app) => {
 
 const HandleGetPost: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
-  const limit: number = Number(req.query.limit || 10);
+  const limit: number = Number(req.query.limit || 200);
   const offset: number = Number(req.query.offset || 0);
   const type: string = req.params.type;
   try {

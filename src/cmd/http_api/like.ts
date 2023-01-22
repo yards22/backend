@@ -55,7 +55,7 @@ const HandleGetLikesForPost: RouteHandler = async (req, res, next, app) => {
   }
 
   // send detailed data
-  const limit = Number(req.query.limit || 100);
+  const limit = Number(req.query.limit || 10000);
   const offset = Number(req.query.offset || 0);
   try {
     const likes = await app.likeManager.GetLikesForPost(

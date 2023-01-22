@@ -16,7 +16,7 @@ export function NetworkRoutes(app: App) {
 const GetRecommendations: RouteHandler = async (req, res, next, app) => {
   const user_id = Number(req.context.user_id);
   const offset = Number(req.body.offset || 0);
-  const limit = Number(req.body.limit || 10);
+  const limit = Number(req.body.limit || 10000);
   try {
     const recommended = await app.networkManager.GetRecommendations(
       user_id,

@@ -9,6 +9,7 @@ import { RedisClientType } from "@redis/client";
 import { createClient } from "redis";
 import { S3FileStorage } from "../../pkg/file_storage/s3_file_storage";
 import Mailer from "../../pkg/mailer/mailer";
+import morgan from "morgan";
 
 // server init
 export function ServerInit(): Express {
@@ -23,7 +24,7 @@ export function ServerInit(): Express {
   );
 
   console.log(origins);
-
+  srv.use(morgan("dev"));
   const corsOptions = {
     origin: function (origin: any, callback: any) {
       if (origins.indexOf(origin) !== -1 || !origin) {

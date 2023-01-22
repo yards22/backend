@@ -17,8 +17,8 @@ const HandleGetNotification: RouteHandler = (req, res, next, app) => {
 
   // looking for many notifications
   if (id == -1) {
-    const limit = Number(req.query.limit ?? 10);
-    const offset = Number(req.query.offset ?? 0);
+    const limit = Number(req.query.limit || 10000);
+    const offset = Number(req.query.offset || 0);
     let status = req.query.status;
     if (!(status == "Unseen" || status == "Read" || status == "Seen")) {
       status = "All";
@@ -65,7 +65,6 @@ const HandleGetNotificationUsernames: RouteHandler = async (
 };
 
 const HandleUpdateNotificationStatus: RouteHandler = (req, res, next, app) => {
-  console.log("updating");
   const forId = Number(req.context.user_id);
   const _ids = req.body.ids as string[];
   const ids = _ids.map((item) => {
