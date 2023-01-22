@@ -33,25 +33,25 @@ async function Init() {
   const mailer = MailerInit();
   // managers
   const notificationManager = new NotificationManager(db);
-  const authManager = new AuthManager(db, redis, mailer);
   const profileManager = new ProfileManager(
     db,
     imageResolver,
     remoteFileStorage,
     redis
-  );
-  const postManager = new PostManager(
-    db,
-    imageResolver,
-    remoteFileStorage,
-    redis
-  );
-  const likeManager = new LikeManager(db, redis, notificationManager);
-  const commentManager = new CommentManager(db, redis, notificationManager);
-  const networkManager = new NetworkManager(db, notificationManager);
-  const miscManager = new MiscManager(db, imageResolver, remoteFileStorage);
-  const exploreManager = new ExploreManager(
-    db,
+    );
+    const postManager = new PostManager(
+      db,
+      imageResolver,
+      remoteFileStorage,
+      redis
+      );
+      const likeManager = new LikeManager(db, redis, notificationManager);
+      const commentManager = new CommentManager(db, redis, notificationManager);
+      const networkManager = new NetworkManager(db, notificationManager);
+      const authManager = new AuthManager(db, redis, mailer, networkManager);
+      const miscManager = new MiscManager(db, imageResolver, remoteFileStorage);
+      const exploreManager = new ExploreManager(
+        db,
     imageResolver,
     remoteFileStorage
   );

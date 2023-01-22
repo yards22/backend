@@ -11,7 +11,7 @@ export function ExploreRoutes(app: App) {
 
 const HandleGetStories: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
-  const limit = Number(req.body.limit);
+  const limit = Number(req.body.limit||10000);
   const offset = Number(req.body.offset);
   if (user_id != undefined) {
     const stories = await app.exploreManager.GetStories(limit, offset);

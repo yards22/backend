@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 import EAuth from "../entities/auth";
 import bcrypt from "bcrypt";
 import { GenerateOTP, RandomNumber, RandomString } from "../../util/random";
@@ -8,6 +8,9 @@ import { HerrorStatus } from "../../pkg/herror/status_codes";
 import { nextTick } from "process";
 import { Herror } from "../../pkg/herror/herror";
 import Mailer from "../../pkg/mailer/mailer";
+import { App } from "../../cmd/http_api/types";
+import NetworkManager from "../network_manager/network_manager";
+const prisma = new PrismaClient();
 
 const SEC_IN_YEAR = 31536000;
 const Token_Length = 64;
@@ -21,10 +24,12 @@ export default class AuthManager {
   private store;
   private cache: IKVStore;
   private mailer: Mailer;
-  constructor(store: PrismaClient, cache: IKVStore, mailer: Mailer) {
+  private newtorkManager : NetworkManager;
+  constructor(store: PrismaClient, cache: IKVStore, mailer: Mailer, nm :NetworkManager) {
     this.store = store;
     this.cache = cache;
     this.mailer = mailer;
+    this.newtorkManager = nm
   }
 
   CreateUser(
@@ -131,6 +136,9 @@ export default class AuthManager {
               enc_password
             );
             const accessToken = await this.CreateSession(Token_Length, user);
+            const user_id:number = user.user_id
+            if (user_id !== 1)
+            this.newtorkManager.CreateNewConnection(user_id,1)
             const oneYearFromNow = new Date();
             oneYearFromNow.setMonth(oneYearFromNow.getMonth() + 1);
             await this.CreateScreen(user.user_id, accessToken, oneYearFromNow);
@@ -180,6 +188,9 @@ export default class AuthManager {
           Token_Length,
           user
         );
+        const user_id  = user.user_id
+        if (user_id !== 1)
+        this.newtorkManager.CreateNewConnection(user_id,1)
         const oneYearFromNow = new Date();
         oneYearFromNow.setMonth(oneYearFromNow.getMonth() + 1);
         await this.CreateScreen(user.user_id, accessToken, oneYearFromNow);
@@ -601,5 +612,6 @@ function GenerateUsername(mail_id: string): string {
 }
 
 function SendOTP(mailer: Mailer, to: string, otp: string) {
-  return mailer.Send(to, "22Yardz OTP", "Your OTP is " + otp);
+  return mailer.Send(to, "Login OTP from 22Yardz" , "Hi,"+"\n"+"\n" + `${otp} is your 22Yardz verification OTP. Please do not share it with anyone.`
+  + "\n"+"\n"+"Team 22Yardz.");
 }
