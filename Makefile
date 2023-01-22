@@ -32,6 +32,3 @@ rdi:
 create_docker_network:
 	docker network create 22yardsnetwork
 .PHONY: postgres createdb dropdb migrateup migratedown sqlc test migratecreate seed genprivatekey genpublickey err test_fail
-
-
-# -v ${PWD}/../dbdata:/var/lib/mysql
