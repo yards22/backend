@@ -51,7 +51,7 @@ const HandleGetComments: RouteHandler = async (req, res, next, app) => {
       next(err);
     }
   } else {
-    const limit = Number(req.query.limit || 10);
+    const limit = Number(req.query.limit || 10000);
     const offset = Number(req.query.offset || 0);
     try {
       const comments = await app.commentManager.GetCommentsForPost(

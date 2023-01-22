@@ -47,7 +47,7 @@ const HandleGetUserProfileInfo: RouteHandler = async (req, res, next, app) => {
   var username: string;
   username = req.query.username as string;
   const user_id = Number(req.context.user_id);
-  const limit = Number(req.query.limit || 10);
+  const limit = Number(req.query.limit || 1000);
   const offset = Number(req.query.offset || 0);
   if (user_id != undefined) {
     if (username === undefined) {
