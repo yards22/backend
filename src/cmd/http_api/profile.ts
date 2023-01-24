@@ -17,7 +17,8 @@ export function ProfileRoutes(app: App) {
 const HandleUpdateProfile: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
   const token: string = req.context.token;
-  const bio: string = req.body.bio as string;
+  const bio: string = req.body.bio;
+  const name: string = req.body.name;
   let profile_buffer: Buffer | undefined = undefined;
   if (req.file && req.file.buffer) profile_buffer = req.file.buffer;
 
@@ -33,6 +34,7 @@ const HandleUpdateProfile: RouteHandler = async (req, res, next, app) => {
       token,
       profile_buffer,
       bio,
+      name,
       username,
       interests
     );

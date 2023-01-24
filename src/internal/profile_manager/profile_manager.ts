@@ -165,6 +165,7 @@ export default class ProfileManager {
     token: string,
     rawImage?: Buffer,
     bio?: string,
+    name?: string,
     username?: string,
     interests?: string
   ): Promise<{
@@ -199,6 +200,7 @@ export default class ProfileManager {
             username: username,
             profile_image_uri: filePath,
             bio: bio,
+            name: name,
             interests,
           },
         });
@@ -286,25 +288,24 @@ export default class ProfileManager {
       where: {
         username,
       },
-      select:{
-        username:true,
-        profile_image_uri:true,
-         user:{
-          select:{
-             Post:{
-              include:{
-                _count:{
-                  select:{
-                    Likes:true,
-                    ParentComments:true
-                  }
-                }
-              }
-              
-             }
-          }
-         }
-      }
+      select: {
+        username: true,
+        profile_image_uri: true,
+        user: {
+          select: {
+            Post: {
+              include: {
+                _count: {
+                  select: {
+                    Likes: true,
+                    ParentComments: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
   }
 
