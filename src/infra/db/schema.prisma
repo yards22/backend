@@ -26,7 +26,7 @@ model Users {
   Favourites              Favourites[]
   PostRecommendations     PostRecommendations?
   Following               Networks[]           @relation("following")
-  Followers               Networks[]           @relation("followers")          
+  Followers               Networks[]           @relation("followers")
   Recommendations         UserRecommendations?
   Feedback                Feedback[]
   PollsReaction           PollsReaction[]
@@ -64,6 +64,7 @@ model Profile {
   username          String   @unique
   email_id          String
   profile_image_uri String?
+  name              String?
   bio               String?
   cric_index        Int      @default(0)
   updated_at        DateTime @updatedAt
@@ -102,7 +103,7 @@ model Posts {
   user           Users            @relation(fields: [user_id], references: [user_id])
   user_id        Int
   post_id        BigInt           @id @default(autoincrement()) @db.BigInt
-  content        String?
+  content        String?          @db.VarChar(240)
   media          String?
   is_private     Boolean          @default(false)
   original       Posts?           @relation("SharedRelation", fields: [original_id], references: [post_id], onDelete: Cascade)
@@ -208,14 +209,14 @@ model UserRecommendations {
 }
 
 model Feedback {
-  feedback_id BigInt  @id @default(autoincrement()) @db.BigInt
-  user        Users   @relation(fields: [user_id], references: [user_id])
+  feedback_id BigInt   @id @default(autoincrement()) @db.BigInt
+  user        Users    @relation(fields: [user_id], references: [user_id])
   user_id     Int
   image_uri   String?
   content     String?
-  status      Boolean   @default(false)
+  status      Boolean  @default(false)
   comment     String?
-  created_at    DateTime        @default(now())
+  created_at  DateTime @default(now())
 
   @@map("feedback")
 }
