@@ -489,7 +489,7 @@ export default class PostManager {
           following_.forEach((item) => {
             following.push(item.following_id);
           });
-          following.push(user_id)
+          following.push(user_id);
         }
 
         // get posts of these users.
