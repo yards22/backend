@@ -70,7 +70,7 @@ model Profile {
   updated_at        DateTime @updatedAt
   following         Int      @default(0)
   followers         Int      @default(0)
-  interests         String?
+  interests         String?  @db.VarChar(1500)
 
   @@map("profiles")
 }
