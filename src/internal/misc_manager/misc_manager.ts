@@ -127,7 +127,7 @@ export default class MiscManager {
       const reactionMap = new Map<number, number>();
       item.PollsReaction.forEach((pr) => {
         if (pr.user_id === user_id) temp.hasPolled = true;
-        reactionMap.set(pr.type, reactionMap.get(pr.type) || 0 + 1);
+        reactionMap.set(pr.type, (reactionMap.get(pr.type) || 0) + 1);
       });
       reactionMap.forEach((v, k) => {
         temp.reaction.push({ type: k, count: v });
