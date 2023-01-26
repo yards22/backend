@@ -165,7 +165,7 @@ export default class PostManager {
     });
   }
 
-  async GetPostByID(post_id: bigint) {
+  async GetPostByID(post_id: bigint, user_id: number) {
     try {
       const post = await this.store.posts.findUnique({
         where: { post_id },
@@ -200,7 +200,7 @@ export default class PostManager {
 
         const metadata: EFeedMeta = await this.GetPostMetadata(
           [post.post_id],
-          feedPost.user_id
+          user_id
         );
         const finalPost: EPostFinal[] = detailsMixers([feedPost], metadata);
         return finalPost[0];

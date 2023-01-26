@@ -94,7 +94,8 @@ const HandleGetPost: RouteHandler = async (req, res, next, app) => {
         );
       try {
         const post = await app.postManager.GetPostByID(
-          BigInt(post_id as string)
+          BigInt(post_id as string),
+          user_id
         );
         app.SendRes(res, {
           status: 200,
