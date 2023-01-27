@@ -66,6 +66,7 @@ export default class CommentManager {
         profile_image_uri: string | null;
         content: string;
         replies: {
+          reply_id: bigint,
           created_at: Date;
           username: string;
           content: string;
@@ -86,6 +87,7 @@ export default class CommentManager {
             content: item.content,
             replies: item.ChildComments.map((repItem, repIndex) => {
               return {
+                reply_id: repItem.comment_id,
                 content: repItem.content,
                 created_at: repItem.created_at,
                 username: repItem.user.Profile?.username || "",
