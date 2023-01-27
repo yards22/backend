@@ -80,24 +80,34 @@ const HandleGetUserProfileInfo: RouteHandler = async (req, res, next, app) => {
 
 const HandleCheckUsername: RouteHandler = async (req, res, next, app) => {
   const username = req.query.username as string;
-  if (validateUsername(username)) {
-    try {
-      const { responseStatus } = await app.profileManager.CheckUsername(
-        username
-      );
-      app.SendRes(res, {
-        status: responseStatus.statusCode,
-        message: responseStatus.message,
-      });
-    } catch (err) {
-      next(err);
-    }
-  } else {
-    next(new Herror("BadRequest", HerrorStatus.StatusBadRequest));
+  const ve = validateUsername(username);
+  if (ve) return next(new Herror(ve.message, HerrorStatus.StatusConflict));
+  try {
+    const { responseStatus } = await app.profileManager.CheckUsername(username);
+    app.SendRes(res, {
+      status: responseStatus.statusCode,
+      message: responseStatus.message,
+    });
+  } catch (err) {
+    next(err);
   }
 };
 
-function validateUsername(username: string | undefined | null): boolean {
-  if (!username) return false;
-  return new RegExp("^[A-Za-z][A-Za-z0-9_]{7,29}$").test(username);
+export function validateUsername(username: string) {
+  if (username.length < 6 || username.length > 18)
+    return new Error("Username length should be between 6 and 18.");
+
+  if (username.includes(" "))
+    return new Error("Username cannot contain spaces.");
+
+  if (!isAlpha(username[0]))
+    return new Error(
+      "Username cannot start with a number, special character or spaces."
+    );
+
+  return null;
 }
+
+var isAlpha = function (ch: string) {
+  return typeof ch === "string" && ch.length === 1 && /[A-Za-z]/.test(ch);
+};
