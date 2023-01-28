@@ -68,9 +68,8 @@ const HandleUpdatePost: RouteHandler = async (req, res, next, app) => {
 const HandleDeletePost: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
   const post_id: bigint = BigInt(req.body.post_id);
-
   try {
-    await app.postManager.Delete(user_id, post_id);
+    await app.postManager.DeleteEntirePost(user_id, post_id);
     app.SendRes(res, {
       status: 200,
       message: "post_deleted",
