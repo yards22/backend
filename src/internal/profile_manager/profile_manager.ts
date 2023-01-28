@@ -263,7 +263,7 @@ export default class ProfileManager {
         } else {
           resolve({
             responseStatus: {
-              statusCode: HerrorStatus.StatusUnauthorized,
+              statusCode: HerrorStatus.StatusConflict,
               message: "username_already_taken",
             },
           });

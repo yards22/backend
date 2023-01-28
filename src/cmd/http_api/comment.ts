@@ -6,36 +6,20 @@ import RouteHandler, { App, AppRouter } from "./types";
 
 export function CommentRoutes(app: App) {
   const appRouter = new AppRouter(app, CheckAllowance);
-  appRouter.Get("/", HandleGetComments);
+  appRouter.Get("/", HandleGetCommentsWithReplies);
   appRouter.Post("/", HandleCreateComment);
   appRouter.Delete("/", HandleDeleteComment);
-  appRouter.Post("/reply", HandleCommentReply);
-  appRouter.Delete("/deleteReply", HandleDeleteCommentReply);
+  appRouter.Post("/reply", HandleCreateReply);
+  appRouter.Delete("/reply", HandleDeleteReply);
   return appRouter.NativeRouter();
 }
 
-const HandleCreateComment: RouteHandler = async (req, res, next, app) => {
-  const user_id: number = Number(req.context.user_id);
-  const content: string = String(req.body.content);
-  const post_id: number = Number(req.body.post_id);
-
-  if (post_id == undefined || post_id == null) {
-    return next(new Herror("post id missing", HerrorStatus.StatusBadRequest));
-  }
-
-  try {
-    const comment = await app.commentManager.Comment(
-      BigInt(post_id),
-      user_id,
-      content
-    );
-    app.SendRes(res, { status: HerrorStatus.StatusOK, data: comment });
-  } catch (err) {
-    next(err);
-  }
-};
-
-const HandleGetComments: RouteHandler = async (req, res, next, app) => {
+const HandleGetCommentsWithReplies: RouteHandler = async (
+  req,
+  res,
+  next,
+  app
+) => {
   const post_id: bigint = BigInt(req.query.post_id as string);
   if (!post_id) {
     return next(new Herror("post id missing", HerrorStatus.StatusBadRequest));
@@ -66,26 +50,28 @@ const HandleGetComments: RouteHandler = async (req, res, next, app) => {
   }
 };
 
-const HandleDeleteComment: RouteHandler = async (req, res, next, app) => {
+const HandleCreateComment: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
-  const post_id: bigint = BigInt(req.body.post_id);
-  const comment_id: bigint = BigInt(req.body.comment_id);
+  const content: string = String(req.body.content);
+  const post_id: number = Number(req.body.post_id);
 
   if (post_id == undefined || post_id == null) {
     return next(new Herror("post id missing", HerrorStatus.StatusBadRequest));
   }
+
   try {
-    await app.commentManager.DeleteComment(post_id, user_id, comment_id);
-    app.SendRes(res, {
-      status: HerrorStatus.StatusOK,
-      message: "comment_deleted_succesfully",
-    });
+    const comment = await app.commentManager.Comment(
+      BigInt(post_id),
+      user_id,
+      content
+    );
+    app.SendRes(res, { status: HerrorStatus.StatusOK, data: comment });
   } catch (err) {
     next(err);
   }
 };
 
-const HandleCommentReply: RouteHandler = async (req, res, next, app) => {
+const HandleCreateReply: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
   const comment_id: bigint = BigInt(req.body.comment_id);
   const content: string = String(req.body.content);
@@ -107,24 +93,38 @@ const HandleCommentReply: RouteHandler = async (req, res, next, app) => {
   }
 };
 
-const HandleDeleteCommentReply: RouteHandler = async (req, res, next, app) => {
+const HandleDeleteComment: RouteHandler = async (req, res, next, app) => {
+  const user_id: number = Number(req.context.user_id);
+  const post_id: bigint = BigInt(req.body.post_id);
+  const comment_id: bigint = BigInt(req.body.comment_id);
+
+  if (!post_id)
+    return next(new Herror("post id missing", HerrorStatus.StatusBadRequest));
+
+  try {
+    await app.commentManager.DeleteComment(post_id, user_id, comment_id);
+    app.SendRes(res, {
+      status: HerrorStatus.StatusOK,
+      message: "comment_deleted_successfully",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const HandleDeleteReply: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
   const comment_id: bigint = BigInt(req.body.comment_id);
   const parent_comment_id: bigint = BigInt(req.body.parent_comment_id);
 
-  if (
-    comment_id == undefined ||
-    comment_id == null ||
-    parent_comment_id == undefined ||
-    parent_comment_id == null
-  ) {
+  if (!comment_id || !parent_comment_id)
     return next(
       new Herror(
         "comment_id | parent_comment_id missing",
         HerrorStatus.StatusBadRequest
       )
     );
-  }
+
   try {
     await app.commentManager.DeleteReply(
       parent_comment_id,
@@ -133,7 +133,7 @@ const HandleDeleteCommentReply: RouteHandler = async (req, res, next, app) => {
     );
     app.SendRes(res, {
       status: HerrorStatus.StatusOK,
-      message: "reply_deleted_succesfully",
+      message: "reply_deleted_successfully",
     });
   } catch (err) {
     next(err);

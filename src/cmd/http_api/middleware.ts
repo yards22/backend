@@ -5,7 +5,6 @@ import multer from "multer";
 
 export const CheckAllowance: RouteHandler = async (req, res, next, app) => {
   const accessToken = req.headers.authorization?.replace("Bearer ", "");
-  console.log("AccessToken ", accessToken);
   if (accessToken == "" || accessToken == undefined) {
     return next(new Herror("unauthorized", HerrorStatus.StatusUnauthorized));
   }
