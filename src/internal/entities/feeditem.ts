@@ -9,6 +9,7 @@ export interface EFeedItem {
   username: string;
   profile_pic_ref: string | null;
   likes: number;
+  comment_count ?: number;
   created_at: Date;
   updated_at: Date;
 }

@@ -33,6 +33,7 @@ export function formatFeedResponse(allPosts: any): EFeedItem[] {
       created_at: x.created_at,
       updated_at: x.updated_at,
       likes: x._count.Likes,
+      comment_count : x._count.ParentComments,
       username: x.user.Profile.username,
       profile_pic_ref: x.user.Profile.profile_image_uri,
     };

@@ -498,7 +498,7 @@ export default class PostManager {
             },
           },
         },
-        _count: { select: { Likes: true } },
+        _count: { select: { Likes: true, ParentComments:true } },
       },
     });
   }
@@ -532,7 +532,7 @@ export default class PostManager {
             },
           },
         },
-        _count: { select: { Likes: true } },
+        _count: { select: { Likes: true, ParentComments:true } },
       },
     });
   }
@@ -557,6 +557,7 @@ export default class PostManager {
         // get posts of these users.
 
         posts = await this.GetPostsOfUsers(following, limit, offset);
+        console.log("posts",posts)
         let recommended_posts: any = [];
 
         // recommendation of posts by lcm service..
