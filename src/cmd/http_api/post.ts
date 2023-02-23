@@ -10,6 +10,7 @@ export function PostRoutes(app: App) {
     fieldName: "images",
   });
   appRouter.Delete("/", HandleDeletePost);
+  appRouter.Put("/",HandleUpdatePost)
   appRouter.Put("/fav", HandleAddToFav);
   appRouter.Get("/:type", HandleGetPost);
   return appRouter.NativeRouter();
@@ -39,8 +40,6 @@ const HandleUpdatePost: RouteHandler = async (req, res, next, app) => {
   const user_id: number = Number(req.context.user_id);
   const content: string = String(req.body.content);
   const post_id: bigint = BigInt(req.body.post_id);
-  const removed_images: string = String(req.body.removed_images);
-  const edits: number = Number(req.body.edits);
   const images = req.files as Array<any>;
   let image_buffer: Buffer[] = [];
   for (let i = 0; i < images?.length; i++) {
@@ -51,9 +50,7 @@ const HandleUpdatePost: RouteHandler = async (req, res, next, app) => {
     const updated_post = await app.postManager.Update(
       user_id,
       post_id,
-      removed_images,
       image_buffer,
-      edits,
       content
     );
     app.SendRes(res, {
