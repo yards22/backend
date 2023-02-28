@@ -44,6 +44,50 @@ class Redis implements IKVStore {
         });
     });
   }
+  LPush(key: string,value:string) : Promise<void>{
+    return new Promise((resolve,reject)=>{
+      this.store.lPush(key,value)
+         .then(()=>{
+            return resolve();
+         })
+         .catch((err)=>{
+          return reject(err);
+         })
+    })
+  }
+  RPush(key: string,value:string) : Promise<void>{
+    return new Promise((resolve,reject)=>{
+      this.store.rPush(key,value)
+         .then(()=>{
+            return resolve();
+         })
+         .catch((err)=>{
+          return reject(err);
+         })
+    })
+  }
+  LPop(key:string) : Promise<string|null>{
+    return new Promise((resolve,reject)=>{
+      this.store.lPop(key)
+         .then((value)=>{
+            return resolve(value);
+         })
+         .catch((err)=>{
+          return reject(err);
+         })
+    })
+  }
+  RPop(key:string) : Promise<string|null>{
+    return new Promise((resolve,reject)=>{
+      this.store.lPop(key)
+         .then((value)=>{
+            return resolve(value);
+         })
+         .catch((err)=>{
+          return reject(err);
+         })
+    })
+  }
   Truncate(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.store
