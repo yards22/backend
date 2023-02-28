@@ -4,6 +4,7 @@ import ProfileManager from "../../internal/profile_manager/profile_manager";
 import HandleRoutesFor from "./handler";
 import {
   DBInit,
+  DynamoInit,
   MailerInit,
   RedisInit,
   RemoteFileStorageInit,
@@ -21,12 +22,14 @@ import NetworkManager from "../../internal/network_manager/network_manager";
 import MiscManager from "../../internal/misc_manager/misc_manager";
 import ExploreManager from "../../internal/explore_manager/explore_manager";
 import Mailer from "../../pkg/mailer/mailer";
+import ScoreManager from "../../internal/score_manager/score_manager";
 
 async function Init() {
   const srv = ServerInit();
   const db = await DBInit();
   const r = (await RedisInit()) as any;
   const redis = new Redis(r);
+  const dynamoDB = await DynamoInit();
   const imageResolver = new ImageResolver({ h: 400, w: 400 }, "jpg");
   const localFileStorage = new LocalFileStorage();
   const remoteFileStorage = RemoteFileStorageInit();
@@ -55,6 +58,7 @@ async function Init() {
     imageResolver,
     remoteFileStorage
   );
+  const scoreManager = new ScoreManager(redis,dynamoDB)
 
   const app = new App(
     srv,
@@ -67,6 +71,7 @@ async function Init() {
     networkManager,
     miscManager,
     exploreManager,
+    scoreManager,
     redis,
     db,
     imageResolver,

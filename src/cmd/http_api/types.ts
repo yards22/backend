@@ -16,6 +16,7 @@ import MiscManager from "../../internal/misc_manager/misc_manager";
 import ExploreManager from "../../internal/explore_manager/explore_manager";
 import Mailer from "../../pkg/mailer/mailer";
 import multer from "multer";
+import ScoreManager from "../../internal/score_manager/score_manager";
 interface CustomRequest extends Request {
   context: any;
 }
@@ -150,6 +151,7 @@ export class App {
   networkManager: NetworkManager;
   miscManager: MiscManager;
   exploreManager: ExploreManager;
+  scoreManager:ScoreManager;
   db: PrismaClient;
   kvStore: IKVStore;
   imageResolver: ImageResolver;
@@ -167,6 +169,7 @@ export class App {
     networkManager: NetworkManager,
     miscManager: MiscManager,
     exploreManager: ExploreManager,
+    scoreManager:ScoreManager,
     kvStore: IKVStore,
     db: any,
     imageResolver: ImageResolver,
@@ -184,6 +187,7 @@ export class App {
     this.networkManager = networkManager;
     this.miscManager = miscManager;
     this.exploreManager = exploreManager;
+    this.scoreManager=scoreManager;
     this.db = db;
     this.kvStore = kvStore;
     this.imageResolver = imageResolver;

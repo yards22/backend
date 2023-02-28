@@ -10,6 +10,8 @@ import { createClient } from "redis";
 import { S3FileStorage } from "../../pkg/file_storage/s3_file_storage";
 import Mailer from "../../pkg/mailer/mailer";
 import morgan from "morgan";
+import AWS, { Credentials } from "aws-sdk";
+import { env } from "process";
 
 // server init
 export function ServerInit(): Express {
@@ -65,6 +67,28 @@ export async function RedisInit() {
     return store;
   } catch (err) {
     throw err;
+  }
+}
+
+export async function DynamoInit(){
+  try{
+    const dynamoDB = new AWS.DynamoDB({
+      credentials: new Credentials({
+        accessKeyId: (process.env as any).ACCESS_KEY_ID,
+        secretAccessKey: (process.env as any).ACCESS_KEY_SECRET ,
+      }),
+      region:(process.env as any).Dynamo_Region
+    })
+    dynamoDB.listTables((err,data)=>{
+      if(err){
+        throw err;
+      }
+      console.log("connected to dynamoDB")
+    })
+    return dynamoDB
+  }
+  catch(err){
+    throw err
   }
 }
 
