@@ -8,6 +8,7 @@ import { ProfileRoutes } from "./profile";
 import { PostRoutes } from "./post";
 import { NotificationRoutes } from "./notification";
 import { NetworkRoutes } from "./networks";
+import { ScoreRoutes } from "./score";
 
 function HandleRoutesFor(app: App) {
   app.srv.use("/notification", NotificationRoutes(app));
@@ -19,6 +20,7 @@ function HandleRoutesFor(app: App) {
   app.srv.use("/network", NetworkRoutes(app));
   app.srv.use("/explore", ExploreRoutes(app));
   app.srv.use("/misc", MiscRoutes(app));
+  app.srv.use("/score",ScoreRoutes(app));
 }
 
 export default HandleRoutesFor;
