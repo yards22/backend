@@ -5,13 +5,12 @@ import { PrismaClient } from "@prisma/client";
 import { HerrorStatus } from "../../pkg/herror/status_codes";
 import { Herror } from "../../pkg/herror/herror";
 import cors from "cors";
-import { RedisClientType } from "@redis/client";
 import { createClient } from "redis";
 import { S3FileStorage } from "../../pkg/file_storage/s3_file_storage";
 import Mailer from "../../pkg/mailer/mailer";
 import morgan from "morgan";
 import AWS, { Credentials } from "aws-sdk";
-import { env } from "process";
+import client, { Connection} from 'amqplib'
 
 // server init
 export function ServerInit(): Express {
@@ -72,23 +71,28 @@ export async function RedisInit() {
 
 export async function DynamoInit(){
   try{
-    const dynamoDB = new AWS.DynamoDB({
+    const dynamoDB = new AWS.DynamoDB.DocumentClient({
       credentials: new Credentials({
         accessKeyId: (process.env as any).ACCESS_KEY_ID,
         secretAccessKey: (process.env as any).ACCESS_KEY_SECRET ,
       }),
       region:(process.env as any).Dynamo_Region
-    })
-    dynamoDB.listTables((err,data)=>{
-      if(err){
-        throw err;
-      }
-      console.log("connected to dynamoDB")
-    })
+    });
+
     return dynamoDB
   }
   catch(err){
     throw err
+  }
+}
+
+export async function MQ(){
+  try{
+    const connection: Connection = await client.connect((process.env as any).MQ_URI);
+      return connection
+  }
+  catch(err){
+    throw(err);
   }
 }
 
