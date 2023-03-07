@@ -6,6 +6,7 @@ import {
   DBInit,
   DynamoInit,
   MailerInit,
+  MQ,
   RedisInit,
   RemoteFileStorageInit,
   ServerInit,
@@ -27,6 +28,7 @@ import ScoreManager from "../../internal/score_manager/score_manager";
 async function Init() {
   const srv = ServerInit();
   const db = await DBInit();
+  const mq = await MQ();
   const r = (await RedisInit()) as any;
   const redis = new Redis(r);
   const dynamoDB = await DynamoInit();
@@ -58,7 +60,7 @@ async function Init() {
     imageResolver,
     remoteFileStorage
   );
-  const scoreManager = new ScoreManager(redis,dynamoDB)
+  const scoreManager = new ScoreManager(mq,dynamoDB)
 
   const app = new App(
     srv,
