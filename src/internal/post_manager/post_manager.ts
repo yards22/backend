@@ -15,6 +15,7 @@ import {
   formatTrendingFeedResponse,
 } from "../../util/responseFormat";
 import { detailsMixers } from "../../util/postDetailsMixer";
+import { Herror } from "../../pkg/herror/herror";
 
 const ALLOWED_IMAGES = 4;
 const MAX_WIDTH = 1080;
@@ -89,6 +90,7 @@ export default class PostManager {
         try {
           // uploading media
           const removed_images: string = "";
+          console.log("iam here")
           await this.UploadMedias(
             user_id,
             post.post_id,
@@ -156,6 +158,65 @@ export default class PostManager {
     await this.store.posts.deleteMany({
       where: { AND: { user_id, post_id } },
     });
+  }
+
+  async DeleteMedia(medias:String[]){
+    const mediaRef = medias.map((uri, _) => {
+      return `${uri}`;
+    });
+
+    for (let i = 0; i < Math.min(ALLOWED_IMAGES, medias.length); i++) {
+      try {
+
+        try {
+          // uploading image
+          console.log(mediaRef[i]);
+          await this.imageStorage.Delete(
+            mediaRef[i],
+          );
+        } catch (err) {
+          console.log(err)
+          // media upload failed
+          throw err;
+        }
+      } catch (err) {
+        console.log(err);
+      }
+
+      // considering max width check
+    }
+
+  }
+
+  async DeleteEntirePost(user_id:number,post_id:bigint){
+    try{
+       // pick the post
+        const post  = await this.store.posts.findUnique({
+          where:{
+            post_id
+          }
+        });
+        if (user_id === post?.user_id){
+           // if media is present
+          if(post?.media !== null && post?.media!== undefined){
+            const media = JSON.parse(post?.media)
+            await this.DeleteMedia(
+              media
+            );
+          }
+          await this.store.posts.deleteMany({
+              where: { AND: { user_id, post_id } },
+          })
+        }
+        else{
+          throw(new Herror("unauthorised to delete",404))
+          // unauthorised for this action
+        }
+
+     }
+     catch(err){
+        throw(new Herror("unauthorised to delete",404))
+     }
   }
 
   // TODO: what if the post which is shared contains of images as well.
@@ -280,7 +341,7 @@ export default class PostManager {
 
         try {
           // uploading image
-
+         console.log("here at uploading")
           await this.imageStorage.Put(
             mediaRef[i],
 
@@ -288,6 +349,7 @@ export default class PostManager {
             await this.imageResolver.Convert(medias[i], { w: imageWidth })
           );
         } catch (err) {
+          console.log(err)
           // media upload failed
           throw err;
         }
