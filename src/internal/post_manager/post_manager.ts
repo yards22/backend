@@ -196,6 +196,7 @@ export default class PostManager {
             post_id
           }
         });
+        console.log(user_id,post)
         if (user_id === post?.user_id){
            // if media is present
           if(post?.media !== null && post?.media!== undefined){
