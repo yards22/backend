@@ -1,3 +1,24 @@
+export interface BBatsman{
+    name:string,
+    runs:number,
+    balls:number,
+    fours:number,
+    sixes:number,
+    striker:boolean,
+    non_striker:boolean
+    strike_rate:number
+}
+
+export interface BBowler{
+    name :string,
+    overs:number,
+    balls:number,
+    maiden:number,
+    runs:number,
+    wickets:number,
+    economy:number,
+}
+
 export interface ScoreItem{
     match_id: string,
     owner_id:number,
@@ -9,9 +30,9 @@ export interface ScoreItem{
         bowling_team:string,
       },
       players_in_action:{
-        bowler:string,
-        striker_batsman:string,
-        non_striker_batsman:string, 
+        bowler:BBowler,
+        striker_batsman:BBatsman,
+        non_striker_batsman:BBatsman, 
       },
       extra_details:{
         is_extra:boolean,
@@ -31,8 +52,8 @@ export interface ScoreItem{
         wicket_by?:string,
         is_fielder?:boolean,
         fielded_by?:string,
-      }
-
+      },
+      undo:boolean,
 }
 
 export interface MatchSetupDetails{
