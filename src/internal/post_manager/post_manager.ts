@@ -199,12 +199,16 @@ export default class PostManager {
         console.log(user_id,post)
         if (user_id === post?.user_id){
            // if media is present
+           console.log("media",post.media)
           if(post?.media !== null && post?.media!== undefined){
+            console.log("delete in media")
             const media = JSON.parse(post?.media)
+            console.log(media)
             await this.DeleteMedia(
               media
             );
           }
+          console.log("after media")
           await this.store.posts.deleteMany({
               where: { AND: { user_id, post_id } },
           })
