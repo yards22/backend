@@ -366,8 +366,10 @@ export default class AuthManager {
     return new Promise(async (resolve, reject) => {
       try {
         const user = await this.GetUserByMail(mail_id);
+        console.log(user);
         if (!user) {
           const valid_otp: string = await this.CheckForOTPSession(mail_id);
+          console.log(valid_otp)
           if (valid_otp == otp)
             resolve({
               responseStatus: {

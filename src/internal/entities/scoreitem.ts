@@ -19,15 +19,23 @@ export interface BBowler{
     economy:number,
 }
 
+export interface IInnings{
+    score : number,
+    wickets : number,
+    run_rate : number,
+    overs : number,
+    balls : number,
+}
+
 export interface ScoreItem{
     match_id: string,
     owner_id:number,
     innings_details:{
         innings_id:number,
-        overs:number,
-        balls:number,
         batting_team:string,
         bowling_team:string,
+        innings_1?:IInnings,
+        inningd_2?:IInnings,
       },
       players_in_action:{
         bowler:BBowler,

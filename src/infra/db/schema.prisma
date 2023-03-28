@@ -249,7 +249,7 @@ model Stories {
   story_id   Int      @id @default(autoincrement()) @db.Int
   user       Users    @relation(fields: [user_id], references: [user_id])
   user_id    Int
-  content    String
+  content    String   @db.VarChar(20000)
   media      String
   created_at DateTime @default(now())
 

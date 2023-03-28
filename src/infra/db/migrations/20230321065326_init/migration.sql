@@ -32,12 +32,13 @@ CREATE TABLE `profiles` (
     `username` VARCHAR(191) NOT NULL,
     `email_id` VARCHAR(191) NOT NULL,
     `profile_image_uri` VARCHAR(191) NULL,
+    `name` VARCHAR(191) NULL,
     `bio` VARCHAR(191) NULL,
     `cric_index` INTEGER NOT NULL DEFAULT 0,
     `updated_at` DATETIME(3) NOT NULL,
     `following` INTEGER NOT NULL DEFAULT 0,
     `followers` INTEGER NOT NULL DEFAULT 0,
-    `interests` VARCHAR(191) NULL,
+    `interests` VARCHAR(1500) NULL,
 
     UNIQUE INDEX `profiles_user_id_key`(`user_id`),
     UNIQUE INDEX `profiles_username_key`(`username`)
@@ -70,7 +71,7 @@ CREATE TABLE `token` (
 CREATE TABLE `posts` (
     `user_id` INTEGER NOT NULL,
     `post_id` BIGINT NOT NULL AUTO_INCREMENT,
-    `content` VARCHAR(191) NULL,
+    `content` VARCHAR(240) NULL,
     `media` VARCHAR(191) NULL,
     `is_private` BOOLEAN NOT NULL DEFAULT false,
     `original_id` BIGINT NULL,
@@ -237,7 +238,7 @@ ALTER TABLE `posts` ADD CONSTRAINT `posts_original_id_fkey` FOREIGN KEY (`origin
 ALTER TABLE `likes` ADD CONSTRAINT `likes_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `likes` ADD CONSTRAINT `likes_post_id_fkey` FOREIGN KEY (`post_id`) REFERENCES `posts`(`post_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `likes` ADD CONSTRAINT `likes_post_id_fkey` FOREIGN KEY (`post_id`) REFERENCES `posts`(`post_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `parent_comments` ADD CONSTRAINT `parent_comments_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -255,7 +256,7 @@ ALTER TABLE `child_comments` ADD CONSTRAINT `child_comments_parent_comment_id_fk
 ALTER TABLE `favourites` ADD CONSTRAINT `favourites_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `favourites` ADD CONSTRAINT `favourites_post_id_fkey` FOREIGN KEY (`post_id`) REFERENCES `posts`(`post_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `favourites` ADD CONSTRAINT `favourites_post_id_fkey` FOREIGN KEY (`post_id`) REFERENCES `posts`(`post_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `postRecommendations` ADD CONSTRAINT `postRecommendations_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -264,7 +265,7 @@ ALTER TABLE `postRecommendations` ADD CONSTRAINT `postRecommendations_user_id_fk
 ALTER TABLE `trending_users` ADD CONSTRAINT `trending_users_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `trending_posts` ADD CONSTRAINT `trending_posts_post_id_fkey` FOREIGN KEY (`post_id`) REFERENCES `posts`(`post_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `trending_posts` ADD CONSTRAINT `trending_posts_post_id_fkey` FOREIGN KEY (`post_id`) REFERENCES `posts`(`post_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `user_recommendations` ADD CONSTRAINT `user_recommendations_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE RESTRICT ON UPDATE CASCADE;
