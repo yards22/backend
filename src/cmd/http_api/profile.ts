@@ -23,7 +23,7 @@ const HandleUpdateProfile: RouteHandler = async (req, res, next, app) => {
   if (req.file && req.file.buffer) profile_buffer = req.file.buffer;
 
   const username: string = req.body.username;
-  if (!validateUsername(username)) {
+  if (validateUsername(username) !== null) {
     return next(new Herror("invalid username", HerrorStatus.StatusBadRequest));
   }
 
@@ -94,6 +94,7 @@ const HandleCheckUsername: RouteHandler = async (req, res, next, app) => {
 };
 
 export function validateUsername(username: string) {
+  console.log(username)
   if (username.length < 6 || username.length > 18)
     return new Error("Username length should be between 6 and 18.");
 

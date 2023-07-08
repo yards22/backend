@@ -118,39 +118,57 @@ export default class PostManager {
   async Update(
     user_id: number,
     post_id: bigint,
-    removed_images: string,
     medias: Buffer[],
-    edits: number,
     content?: string
   ) {
     return new Promise(async (resolve, reject) => {
       try {
-        const images = await this.UploadMedias(
-          user_id,
-          post_id,
-          medias as Buffer[],
-          edits + 1,
-          removed_images,
-          false // is_new
-        );
-        try {
-          const data = await this.store.posts.update({
-            where: { user_id_post_id: { post_id: post_id, user_id: user_id } },
-            data: {
-              content,
-              media: images,
-              edits: {
-                increment: 1,
+
+        const post  = await this.store.posts.findUnique({
+          where:{
+            post_id
+          }
+        });
+
+        if(post?.user_id === user_id){
+          const removed_images = post.media || ""
+          const edits = post.edits
+          const images = await this.UploadMedias(
+            user_id,
+            post_id,
+            medias as Buffer[],
+            edits + 1,
+            removed_images,
+            false // is_new
+          );
+          try {
+            const data = await this.store.posts.update({
+              where: { user_id_post_id: { post_id: post_id, user_id: user_id } },
+              data: {
+                content,
+                media: images,
+                edits: {
+                  increment: 1,
+                },
               },
-            },
-          });
-          resolve(data);
-        } catch (err) {
-          reject(err);
+            });
+            resolve(data);
+          } catch (err) {
+            reject(err);
+          }
         }
-      } catch (err) {
+        else{
+           throw(new Herror("unauthorizd user",404))
+        }
+      }
+      catch(err){
         resolve("unable_to_upload_media");
       }
+
+ 
+      //  catch (err) {
+        
+      // }
     });
   }
 
@@ -333,7 +351,7 @@ export default class PostManager {
   ) {
     const mediaRef = medias.map((_, index) => {
       console.log(edits, index);
-      return `media_${post_id}_${edits * 3 + index}.${
+      return `media_${post_id}_${edits * 4 + index}.${
         this.imageResolver.defaultFormat
       }`;
     });
