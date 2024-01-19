@@ -1,6 +1,6 @@
 #!/bin/sh
 # This is a comment!
-echo Local Setup ....
+echo Local Setup 
 docker rm -f node_mysql
 docker run --name node_mysql -p 3456:3306 -e MYSQL_ROOT_PASSWORD=mypassword -d mysql:8  
 docker rm -f node_redis	
