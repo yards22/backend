@@ -18,37 +18,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: "npm"
-      - run: npm install -g typescript
-      - run: npm install
-      - run: mkdir -p dist
-      - run: npx prisma
-      - run: npx prisma generate --schema ./src/infra/db/schema.prisma
-      - run: npm run build
-      - run: rm -rf node_modules .git
-      - name: SCP and Copy code
-        env:
-          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY  }}
-          HOSTNAME: ${{ secrets.HOSTNAME  }}
-          USER_NAME: ${{ secrets.USER_NAME  }}
-        run: |
-          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          scp -o StrictHostKeyChecking=no -i private_key -r ./* ${USER_NAME}@${HOSTNAME}:/home/ubuntu/backend
-      - name: SSH and resolve
-        env:
-          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY  }}
-          HOSTNAME: ${{ secrets.HOSTNAME  }}
-          USER_NAME: ${{ secrets.USER_NAME  }}
-        run: |
-          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
-            
-            #Now we have got the access of EC2 and we will start the deploy .
-            export NVM_DIR="/home/ubuntu/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-            make deploy
-          '
+      - name: Docker build image
+        run:  |
+          docker build -t api-server .
