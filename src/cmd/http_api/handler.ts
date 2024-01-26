@@ -8,8 +8,10 @@ import { ProfileRoutes } from "./profile";
 import { PostRoutes } from "./post";
 import { NotificationRoutes } from "./notification";
 import { NetworkRoutes } from "./networks";
+import { HealthRoutes } from "./health";
 
 function HandleRoutesFor(app: App) {
+  app.srv.use("/health", HealthRoutes(app));
   app.srv.use("/notification", NotificationRoutes(app));
   app.srv.use("/profile", ProfileRoutes(app));
   app.srv.use("/auth", AuthRoutes(app));
