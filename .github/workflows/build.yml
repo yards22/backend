@@ -18,6 +18,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - name: Docker build image
-        run:  |
-          docker build -t api-server .
+      # download from s3 and place it in the current folder under .env file.
+      - name: current Dir
+        run: ls
+      # - name: Docker build image
+      #   run:  |
+      #     docker build -t api-server .
