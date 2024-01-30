@@ -19,8 +19,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       # download from s3 and place it in the current folder under .env file.
-      - name: current Dir
-        run: ls
-      # - name: Docker build image
-      #   run:  |
-      #     docker build -t api-server .
+      - name: Download secrets and place it in .env file.
+        run: curl https://22yards-image-bucket.s3.ap-south-1.amazonaws.com/manualUpload_2024-01-31T00%3A00%3A35%2B05%3A30 -o .env
+      - name: Docker build image
+        run:  |
+          docker build -t api-server .
