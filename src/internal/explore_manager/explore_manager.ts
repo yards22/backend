@@ -3,7 +3,6 @@ import {
   PrismaClient,
   TrendingUsers,
   UserRecommendations,
-  prisma,
 } from "@prisma/client";
 import { Network } from "aws-sdk/clients/securityhub";
 import { bool } from "aws-sdk/clients/signer";
