@@ -24,7 +24,7 @@ jobs:
 
       - name: Obtain tag
         id: tag
-        run: echo "::set-output name =commit_id::$(git rev-parse --short HEAD)"
+        run: echo "::set-output name=commit_id::$(git rev-parse --short HEAD)"
 
       - name: Docker build image
         run:  |
