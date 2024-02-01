@@ -38,4 +38,5 @@ jobs:
 
       - name: push to dockerhub.
         run: |
-          docker tag api-server rithvik89/api-server:${{ steps.tag.outputs.commit_id }}
+          docker tag api-server rithvik89/22yardz-api-server:${{ steps.tag.outputs.commit_id }}
+          docker push rithvik89/22yardz-api-server:${{ steps.tag.outputs.commit_id }}
