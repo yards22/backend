@@ -21,6 +21,21 @@ jobs:
       # download from s3 and place it in the current folder under .env file.
       - name: Download secrets and place it in .env file.
         run: curl https://22yards-image-bucket.s3.ap-south-1.amazonaws.com/manualUpload_2024-01-31T00%3A00%3A35%2B05%3A30 -o .env
+
+      - name: Obtain tag
+        id: tag
+        run: echo "::set-output name =commit_id::$(git rev-parse --short HEAD)"
+
       - name: Docker build image
         run:  |
           docker build -t api-server .
+
+      - name: login to docker hub.
+        uses: docker/login-action@v2
+        with: 
+          username: ${{secrets.DOCKER_HUB_USERNAME}}
+          password: ${{secrets.DOCKER_HUB_PASSWORD}}
+
+      - name: push to dockerhub.
+        run: |
+          docker tag api-server rithvik89/api-server:${{ steps.tag.outputs.commit_id }}
