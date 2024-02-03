@@ -59,10 +59,5 @@ jobs:
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
-          sudo su -
-          sleep 5
-          docker pull rithvik89/22yardz-api-server:${{ steps.tag.outputs.commit_id }}
+          sudo docker pull rithvik89/22yardz-api-server:${{ steps.tag.outputs.commit_id }}
           '
-
-
-          # pull the image and restart the service with necessary changes. Declare tag as env variable for docker pull within the nodes.
