@@ -31,4 +31,8 @@ rdi:
 	docker run --network="22yardsnetwork" -d -it -p 4000:4000 --name=22_yards_nodejs_app_container 22_yards_nodejs_app
 create_docker_network:
 	docker network create 22yardsnetwork
+
+restart_svc:
+	
+
 .PHONY: postgres createdb dropdb migrateup migratedown sqlc test migratecreate seed genprivatekey genpublickey err test_fail

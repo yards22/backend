@@ -40,3 +40,27 @@ jobs:
         run: |
           docker tag api-server rithvik89/22yardz-api-server:${{ steps.tag.outputs.commit_id }}
           docker push rithvik89/22yardz-api-server:${{ steps.tag.outputs.commit_id }}
+
+
+      - name: SCP and Copy startup script.
+        env: 
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY  }}
+          HOSTNAME: ${{ secrets.HOSTNAME  }}
+          USER_NAME: ${{ secrets.USER_NAME  }}
+        run: |
+          echo "${PRIVATE_KEY}" > private_key && chmod 600 private_key
+          scp -o StrictHostKeyChecking=no -i private_key -r ./makefile ${USER_NAME}@{HOSTNAME}:/home/ubuntu/
+      - name: ssh into node
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY  }}
+          HOSTNAME: ${{ secrets.HOSTNAME  }}
+          USER_NAME: ${{ secrets.USER_NAME  }}
+        run: |
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@{HOSTNAME} '
+             
+          
+          '
+
+
+          # pull the image and restart the service with necessary changes. Declare tag as env variable for docker pull within the nodes.

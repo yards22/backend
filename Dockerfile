@@ -6,10 +6,9 @@ COPY package*.json ./
 COPY tsconfig.json ./
 COPY src/infra/db/schema.prisma ./prisma/
 RUN npm install 
-RUN npm install
 COPY . .
-RUN npx prisma
-RUN npx prisma generate
+# RUN npx prisma
+# RUN npx prisma generate
 RUN npm run build
 RUN npm prune --production
 COPY .env ./
