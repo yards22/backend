@@ -4,11 +4,11 @@ FROM node:17-slim AS Builder
 WORKDIR /app
 COPY package*.json ./
 COPY tsconfig.json ./
-COPY src/infra/db/schema.prisma ./prisma/
-RUN npm install 
+COPY src/infra/db/schema.prisma ./schema.prisma
+RUN npm install --no-cache
 COPY . .
-# RUN npx prisma
-# RUN npx prisma generate
+RUN npx prisma
+RUN npx prisma generate 
 RUN npm run build
 RUN npm prune --production
 COPY .env ./

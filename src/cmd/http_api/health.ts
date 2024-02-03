@@ -4,7 +4,7 @@ import RouteHandler, { App, AppRouter } from "./types";
 export function HealthRoutes(app: App){
      const appRouter = new AppRouter(app,CheckAllowance)
      appRouter.Get("/",HandleHealth,false)
-     return appRouter.NativeRouter
+     return appRouter.NativeRouter()
 }
 
 

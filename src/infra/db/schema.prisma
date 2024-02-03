@@ -263,8 +263,13 @@ model AdminUsers {
   open_to String
 
   @@map("admin_users")
-  
 
+}
+
+model Dummy {
+  dummy_id Int @id
+  Health String 
+  @@map("dummy")
 }
 
 enum NotificationStatus {

@@ -19,6 +19,8 @@ restart_deps:
 
 pmu:
 	npx prisma migrate dev -n init --schema ./src/infra/db/schema.prisma 
+pmu-prod:
+	npx prisma migrate dev -n init
 pgen:
 	npx prisma generate --schema ./src/infra/db/schema.prisma
 omg:
@@ -33,6 +35,7 @@ create_docker_network:
 	docker network create 22yardsnetwork
 
 restart_svc:
+	
 	
 
 .PHONY: postgres createdb dropdb migrateup migratedown sqlc test migratecreate seed genprivatekey genpublickey err test_fail
