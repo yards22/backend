@@ -60,6 +60,6 @@ jobs:
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
           ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
           sudo docker pull rithvik89/22yardz-api-server:${{ steps.tag.outputs.commit_id }}
-          echo ${{ steps.tag.outputs.commit_id }}
-          export SERVER_IMAGE_ID=${{ steps.tag.outputs.commit_id }}
+          echo "export SERVER_IMAGE_ID=${{ steps.tag.outputs.commit_id }}" >> ~/.bashrc
+          cat ~/.bashrc
           '
