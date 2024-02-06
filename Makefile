@@ -35,6 +35,7 @@ create_docker_network:
 	docker network create 22yardsnetwork
 
 restart_svc:
+	docker run --name api-server --network mynetwork -p 4000:4000 rithvik89/22yardz-api-server:${SERVER_IMAGE_ID}
 	
 	
 
