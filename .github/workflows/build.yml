@@ -50,7 +50,7 @@ jobs:
       - name: Apply Prisma Migrations
         run: make pmu
         env:
-          DATABASE_URL: mysql://root:mypassword@ubuntu@ec2-43-205-238-166.ap-south-1.compute.amazonaws.com:3456/node_mysql
+          DATABASE_URL: mysql://root:mypassword@ubuntu@ec2-43-205-238-166.ap-south-1.compute.amazonaws.com:3456/node_app_db
 
 
       - name: SCP and Copy startup script.
