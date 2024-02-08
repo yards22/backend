@@ -40,6 +40,17 @@ jobs:
         run: |
           docker tag api-server rithvik89/22yardz-api-server:${{ steps.tag.outputs.commit_id }}
           docker push rithvik89/22yardz-api-server:${{ steps.tag.outputs.commit_id }}
+      # make neccessary changes for schema migration.
+      - name: setup node
+        uses: actions/setup-node@v3
+        with: 
+          node-version: '16'
+      - name: Install Prisma CLI
+        run: npm install prisma -g
+      - name: Apply Prisma Migrations
+        run: make pmu
+        env:
+          DATABASE_URL: mysql://root:mypassword@ubuntu@ec2-43-205-238-166.ap-south-1.compute.amazonaws.com:3456/node_mysql
 
 
       - name: SCP and Copy startup script.
