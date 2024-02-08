@@ -266,11 +266,6 @@ model AdminUsers {
 
 }
 
-model Dummy {
-  dummy_id Int @id
-  Health String 
-  @@map("dummy")
-}
 
 enum NotificationStatus {
   Unseen

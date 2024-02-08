@@ -40,18 +40,8 @@ jobs:
         run: |
           docker tag api-server rithvik89/22yardz-api-server:${{ steps.tag.outputs.commit_id }}
           docker push rithvik89/22yardz-api-server:${{ steps.tag.outputs.commit_id }}
-      # make neccessary changes for schema migration.
-      - name: setup node
-        uses: actions/setup-node@v3
-        with: 
-          node-version: '16'
-      - name: Install Prisma CLI
-        run: npm install prisma -g
-      - name: Apply Prisma Migrations
-        run: make pmu
-        env:
-          DATABASE_URL: mysql://root:mypassword@ubuntu@ec2-43-205-238-166.ap-south-1.compute.amazonaws.com:3456/node_app_db
 
+      # As of now db schema migration is happening within the node
 
       - name: SCP and Copy startup script.
         env: 
@@ -73,7 +63,9 @@ jobs:
           sudo docker pull rithvik89/22yardz-api-server:${{ steps.tag.outputs.commit_id }}
           export var=$image_id
           echo "Checking" $var
-          echo export image_id=${{ steps.tag.outputs.commit_id }}>>~/.bashrc
-          echo export prev_image_id=$var >>~/.bashrc  
+          sed -i "s/^export image_id=.*/export image_id=${{ steps.tag.outputs.commit_id }}/" ~/.bashrc
+          sed -i "s/^export prev_image_id=.*/export prev_image_id=$var/" ~/.bashrc
           source ~/.bashrc
+          make apply_schema
+          make restart_svc
           '
