@@ -29,7 +29,6 @@ jobs:
       - name: Docker build image
         run:  |
           docker build -t api-server .
-
       - name: login to docker hub.
         uses: docker/login-action@v2
         with: 
@@ -40,7 +39,6 @@ jobs:
         run: |
           docker tag api-server rithvik89/22yardz-api-server:${{ steps.tag.outputs.commit_id }}
           docker push rithvik89/22yardz-api-server:${{ steps.tag.outputs.commit_id }}
-
       # As of now db schema migration is happening within the node
 
       - name: SCP and Copy startup script.
@@ -51,7 +49,6 @@ jobs:
         run: |
           echo "${PRIVATE_KEY}" > private_key && chmod 600 private_key
           scp -o StrictHostKeyChecking=no -i private_key -r ./Makefile ./src/infra/db/schema.prisma ${USER_NAME}@${HOSTNAME}:/home/ubuntu/
-
       - name: ssh into node
         env:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY  }}
@@ -59,7 +56,7 @@ jobs:
           USER_NAME: ${{ secrets.USER_NAME  }}
         run: |
           echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME}'
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
           sudo docker pull rithvik89/22yardz-api-server:${{ steps.tag.outputs.commit_id }}
           export var=$image_id
           echo "Checking" $var
