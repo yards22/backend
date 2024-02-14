@@ -19,22 +19,25 @@ export function ServerInit(): Express {
     next();
   });
   srv.enable("trust proxy");
-  const origins = (process.env.REACT_ORIGIN || "http://localhost:3000").split(
-    ","
-  );
-
-  console.log(origins);
-  srv.use(morgan("dev"));
-  const corsOptions = {
-    origin: function (origin: any, callback: any) {
-      if (origins.indexOf(origin) !== -1 || !origin) {
-        callback(null, true);
-      } else {
-        callback(new Herror("CORS blocked", HerrorStatus.StatusNotAcceptable));
-      }
-    },
+  // const origins = (process.env.REACT_ORIGIN || "http://localhost:3000").split(
+  //   ","
+  // );
+  const options = {
+    origin: ['https://stage.d1hobf8elf804j.amplifyapp.com', "http://localhost:3000"]
   };
-  srv.use(cors(corsOptions));
+
+  console.log(options);
+  srv.use(morgan("dev"));
+  // const corsOptions = {
+  //   origin: function (origin: any, callback: any) {
+  //     if (origins.indexOf(origin) !== -1 || !origin) {
+  //       callback(null, true);
+  //     } else {
+  //       callback(new Herror("CORS blocked", HerrorStatus.StatusNotAcceptable));
+  //     }
+  //   },
+  // };
+  srv.use(cors(options));
 
   srv.use(express.json());
   srv.use(express.urlencoded({ extended: true }));
